@@ -31,7 +31,7 @@ Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost End Point
 Route::get('readpost', [PostController::class, 'readpost']);
 //Read Single BlogPost End Point
-Route::get('readspecificpost/{id}', [PostController::class, 'readspecificpost']);
+Route::get('readspecificpost/{post_title}', [PostController::class, 'readspecificpost']);
 //Read FeedPost End Point
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
 //Read Comment End Point

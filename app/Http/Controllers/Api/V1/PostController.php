@@ -360,17 +360,17 @@ class PostController extends Controller
             ]);
         }
 
-        public function readspecificpost($id) 
+        public function readspecificpost($post_title) 
         {
-            // Retrieve the post with the given ID
-            $post = Post::find($id);
+            // Retrieve the post with the given post_title
+            $post = Post::where('post_title', $post_title)->first();
 
             // Check if post exists
             if (!$post) {
-               return response()->json([
-                'status' => false,
-                'message' => 'Post Not Found',
-            ]);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Post Not Found',
+                ]);
             }
 
             return response()->json([
@@ -378,8 +378,6 @@ class PostController extends Controller
                 'message' => 'Post data',
                 'data' => $post,
             ]);
-
         }
-
 
 }
