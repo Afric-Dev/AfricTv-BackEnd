@@ -323,16 +323,28 @@ class PostController extends Controller
     }
 
 
-       public function deleteposts(Request $request)
+        public function deleteposts(Request $request)
         {
+            // Validate the request
             $request->validate([
                 'id' => 'required|integer'
             ]);
 
+            // Get the post that has this id
             $postId = $request->input('id');
             $post = Post::find($postId);
 
-            if ($post) {
+            // Check if the post exists
+            if (!$post) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Post not found"
+                ]);
+            }
+
+            // Check if the authenticated user is the owner of the post
+            if (Auth::user()->id === $post->user_id) {
+                // Delete the post
                 $post->delete();
 
                 return response()->json([
@@ -342,10 +354,11 @@ class PostController extends Controller
             } else {
                 return response()->json([
                     "status" => false,
-                    "message" => "Post not found"
+                    "message" => "You are not permitted to delete this post"
                 ]);
             }
         }
+
 
         public function readpost()
         {
