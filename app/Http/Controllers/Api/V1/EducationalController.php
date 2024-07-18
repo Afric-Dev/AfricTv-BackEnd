@@ -30,7 +30,7 @@ class EducationalController extends Controller
                     // Ensure the file is a valid upload
                     if ($file->isValid()) {
                         // Store the temporary file path
-                        $tempPath = $file->getPathname();
+                        $tempPath = $file->getPathname(); 
 
                         // Create an FFProbe instance
                         $ffprobe = FFProbe::create();
@@ -82,4 +82,73 @@ class EducationalController extends Controller
                 ]);
             }
 
+
+             public function deleteedupost(Request $request)
+            {
+                // Validate the request
+                $request->validate([
+                    'id' => 'required|integer'
+                ]);
+
+                // Get the edu that has this id
+                $eduId = $request->input('id');
+                $edu = Educational::find($eduId);
+
+                // Check if the educational exists
+                if (!$edu) {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Oops! Not found"
+                    ]);
+                }
+
+                // Check if the authenticated user is the owner of the edu post
+                if (Auth::user()->id === $edu->user_id) {
+                    // Delete the edu post
+                    $edu->delete();
+
+                    return response()->json([
+                        "status" => true,
+                        "message" => "Deleted successfully"
+                    ]);
+                } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "You are not permitted to delete this educational post"
+                    ]);
+                }
+            }
+
+            public function readspecificedupost($title) 
+            {
+                // Retrieve the edu with the given title
+                $edu = Educational::where('title', $title)->first();
+
+                // Check if post exists
+                if (!$edu) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Edu Not Found',
+                    ]);
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Edu data',
+                    'data' => $edu,
+                ]);
+            }
+
+            public function readedu()
+            {
+                $edus = Educational::inRandomOrder()->get();
+                $eduCount = $edus->count();
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Educational data',
+                    'data' => $edus,
+                    'count' => $eduCount,
+                ]);
+            }
 } 

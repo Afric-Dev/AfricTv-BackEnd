@@ -38,7 +38,9 @@ Route::get('readspecificpost/{post_title}', [PostController::class, 'readspecifi
 Route::get('readcomment', [CommentsController::class, 'readcomment']);
 //Read Like End Point
 Route::get('readlikes', [LikeController::class, 'readlikes']);
-//Trending End Point
+//Read Edu post 
+Route::get("readedu", [EducationalController::class, "readedu"]);
+Route::get('readspecificedupost/{title}', [EducationalController::class, 'readspecificedupost']);
 
 
  
@@ -69,11 +71,12 @@ Route::group([
     //This is the Comment EndPoint
     Route::post("comments", [CommentsController::class, "comments"]);
     Route::put("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
-    Route::put("deletecomment/{id}", [CommentsController::class, "deletecomment"]);
+    Route::delete("deletecomment/{id}", [CommentsController::class, "deletecomment"]);
     //This is the Like EndPoint
     Route::post("like", [LikeController::class, "like"]);
     Route::put("unlike/{id}", [LikeController::class, "unlike"]); 
 
     //This is for educational end point
     Route::post("educational", [EducationalController::class, "educational"]);
+    Route::delete("deleteedupost", [EducationalController::class, "deleteedupost"]);
 });
