@@ -51,7 +51,7 @@ Route::group([
     //THis is the Auth User Actions End point
     Route::get("profile", [ApiController::class, "profile"]);
     Route::post("logout", [ApiController::class, "logout"]);
-    Route::put("updateprofile/{id}", [ApiController::class, "updateprofile"]);
+    Route::put("updateprofile", [ApiController::class, "updateprofile"]);
     //THis is the Payments Endpoint
     Route::post("payment", [ApiController::class, "payment"]);
     Route::post("carddetails", [UserCardDetails::class, "carddetails"]);

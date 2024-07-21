@@ -19,20 +19,17 @@ use Illuminate\Validation\Rule;
 use Intervention\Image\Facades\Image;
 use App\Models\Post;
 use App\Models\Feedposts;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\LoginUserRequest;
+use App\Http\Requests\UpdateUserRequest;
     
 class ApiController extends Controller
 {
         // Register Api(POST)
-        public function register(Request $request)
+        public function register(StoreUserRequest $request)
         {
             // Data Validation
-            $request->validate([
-                "avatar" => "image|max:2048",
-                "name" => "required",
-                "email" => "required|email|unique:users",
-                "phone_number" => "required",
-                "password" => "required|confirmed"
-            ]);
+            $request->validated($request->all());
 
             // Handle avatar upload and resizing
             if ($request->hasFile('avatar')) {
@@ -90,20 +87,22 @@ class ApiController extends Controller
         }
 
         //Update Profile (PUT)
-        public function updateprofile(Request $request, $id)
+        public function updateprofile(UpdateUserRequest $request)
         {   
 
             //Get the id of the Authenticated User
             $userId = Auth::id();
-            $request->validate([
-                "avatar" => "image|max:2048",
-                "name" => "required",
-                "email" => "required|email|unique:users,email," . $id,
-                "phone_number" => "required",
-                "password" => "required|confirmed"
-            ]);
+            $request->validated($request->all());
 
             $user = User::find($userId);
+
+
+            // if (Auth::user()->id !== $id) {
+            //     return response()->json([
+            //         "status" => false,
+            //         "message" => "Invalid Attempt"
+            //     ]);
+            // }
 
             if ($user) {
                 // Update user properties
@@ -138,38 +137,35 @@ class ApiController extends Controller
                     "message" => "User Not Found"
                 ]);
             }
+
         }
 
 
-      // Login Api(POST)
-      public function login(Request $request)
-          {
-        // Data validation
-        $request->validate([
-            "email" => "required|email",
-            "password" => "required"
-        ]);
+          // Login Api(POST)
+          public function login(LoginUserRequest $request)
+        {
+            // Data validation
+            $request->validated($request->all());
+            // Attempt authentication
+            if (Auth::attempt([
+                "email" => $request->email,
+                "password" => $request->password
+            ])) {
+                $user = Auth::user();
 
-        // Attempt authentication
-        if (Auth::attempt([
-            "email" => $request->email,
-            "password" => $request->password
-        ])) {
-            $user = Auth::user();
+                // Create a new token for the user
+                $accessToken = $user->createToken('myToken')->plainTextToken;
 
-            // Create a new token for the user
-            $accessToken = $user->createToken('myToken')->plainTextToken;
+                //To send email after user login in successfully
+                // Mail::to($user->email)->send(new LoginMail($user));
 
-            //To send email after user login in successfully
-            // Mail::to($user->email)->send(new LoginMail($user));
-
-            return response()->json([
-                "status" => true,
-                "message" => "Login successful",
-                'access_token' => $accessToken,
-                 "user" => $user
-            ]);
-        }
+                return response()->json([
+                    "status" => true,
+                    "message" => "Login successful",
+                    'access_token' => $accessToken,
+                     "user" => $user
+                ]);
+            }
 
         return response()->json([
             "status" => false,
@@ -177,82 +173,81 @@ class ApiController extends Controller
         ]);
     }
 
-    // Define the mapping logic directly in the controller
-    private function mapPaymentTypeToSubscriptionStatus($paymentType) {
-    // Example mapping logic, replace this with your actual logic
-        switch ($paymentType)
-    {
-            case '1':
-                return '1';
-            case '2':
-                return '2';
-            default:
-                return '0';
-    }
-    }
+    //Not in use for now
+    // private function mapPaymentTypeToSubscriptionStatus($paymentType) {
+    //     switch ($paymentType)
+    // {
+    //         case '1':
+    //             return '1';
+    //         case '2':
+    //             return '2';
+    //         default:
+    //             return '0';
+    // }
+    // }
 
-    //Profile Api(POST);
-    public function payment(Request $request)
-    {
-            // Data Validation
-            $request->validate([
-                "user_id" => "required",
-                "user_name" => "required",
-                "user_email" => "required|email",
-                "amount" => "required",
-                "payment_type" => "required",
-                "payment_status" => "required",
-                "payment_method" => "required",
-                "currency" => "required",
-            ]);
+    // //Profile Api(POST);
+    // public function payment(Request $request)
+    // {
+    //         // Data Validation
+    //         $request->validate([
+    //             "user_id" => "required",
+    //             "user_name" => "required",
+    //             "user_email" => "required|email",
+    //             "amount" => "required",
+    //             "payment_type" => "required",
+    //             "payment_status" => "required",
+    //             "payment_method" => "required",
+    //             "currency" => "required",
+    //         ]);
 
-           // Storing payment data
-            $payment = Payment::create([
-                "user_id" => $request->user_id,
-                "user_name" => $request->user_name,
-                "user_email" => $request->user_email,
-                "amount" => $request->amount,
-                "payment_type" => $request->payment_type,
-                "payment_status" => $request->payment_status,
-                "payment_method" => $request->payment_method,
-                "currency" => $request->currency,
-            ]);   
+    //        // Storing payment data
+    //         $payment = Payment::create([
+    //             "user_id" => $request->user_id,
+    //             "user_name" => $request->user_name,
+    //             "user_email" => $request->user_email,
+    //             "amount" => $request->amount,
+    //             "payment_type" => $request->payment_type,
+    //             "payment_status" => $request->payment_status,
+    //             "payment_method" => $request->payment_method,
+    //             "currency" => $request->currency,
+    //         ]);   
 
-            // Updating user subscription status based on payment type
-           $user = User::find($request->user_id);
+    //         // Updating user subscription status based on payment type
+    //        $user = User::find($request->user_id);
 
-            if ($user) {
-                // Mapping payment type to subscription status
-                $subscriptionStatus = $this->mapPaymentTypeToSubscriptionStatus($request->payment_type);
+    //         if ($user) {
+    //             // Mapping payment type to subscription status
+    //             $subscriptionStatus = $this->mapPaymentTypeToSubscriptionStatus($request->payment_type);
                 
-                // Update subscription status
-                $user->subscribtion_status = $subscriptionStatus;
-                $user->save();
-            } else {
-                return response()->json([
-                    "status" => false,
-                    "message" => "User was not found"
-                ]);
-            }
+    //             // Update subscription status
+    //             $user->subscribtion_status = $subscriptionStatus;
+    //             $user->save();
+    //         } else {
+    //             return response()->json([
+    //                 "status" => false,
+    //                 "message" => "User was not found"
+    //             ]);
+    //         }
 
-            if ($request->payment_type == 1) {
-                Mail::to($payment->user_email)->send(new MeduimPaymentMail($payment));
-            } elseif ($request->payment_type == 2) {
-               Mail::to($payment->user_email)->send(new PremuimPaymentMail($payment));
-            }
+    //         if ($request->payment_type == 1) {
+    //             Mail::to($payment->user_email)->send(new MeduimPaymentMail($payment));
+    //         } elseif ($request->payment_type == 2) {
+    //            Mail::to($payment->user_email)->send(new PremuimPaymentMail($payment));
+    //         }
 
-            return response()->json([
-                "status" => true,
-                "message" => "Payment Made Successfully"
-            ]);
+    //         return response()->json([
+    //             "status" => true,
+    //             "message" => "Payment Made Successfully"
+    //         ]);
 
-        }
+    //     }
 
 
-         public function posts()
-        {
-            return $this->hasMany(Post::class);
-        }
+        //  public function posts()
+        // {
+        //     return $this->hasMany(Post::class);
+        // }
 
         // Profile API (GET)
         public function profile()
