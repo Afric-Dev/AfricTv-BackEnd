@@ -22,6 +22,7 @@ use App\Models\Feedposts;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
     
 class ApiController extends Controller
 {
@@ -33,30 +34,25 @@ class ApiController extends Controller
 
             // Handle avatar upload and resizing
             if ($request->hasFile('avatar')) {
-                    $avatarFile = $request->file('avatar');
-                    $avatarSize = $avatarFile->getSize();
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('avatar')->getRealPath(),
+                    [
+                        'folder' => 'africtv/avatars',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
+                $imageUrl = $uploadCloudinary->getSecurePath();
+                $imageId = $uploadCloudinary->getPublicId();
+            } else {
+                $imageUrl = Null;
+                $imageId = Null;
+            }
 
-                    // Check if the avatar exceeds 2MB
-                    if ($avatarSize > 2048000) { // 2MB in bytes (1 MB = 1024 KB = 1024 * 1024 bytes)
-                        // Resize the image to reduce file size
-                        $image = Image::make($avatarFile)->resize(500, null, function ($constraint) {
-                            $constraint->aspectRatio();
-                            $constraint->upsize();
-                        });
-
-                        // Store the resized avatar
-                         $avatarPath = $request->file('avatar')->store('public/avatars');
-                         $avatarPath = str_replace('public/', '', $avatarPath);
-                    } else {
-                        // Avatar is within 2MB size limit, store it as usual
-                        $avatarPath = $request->file('avatar')->store('public/avatars');
-                        $avatarPath = str_replace('public/', '', $avatarPath);
-                    }
-             } else {
-                $avatarPath = null;
-             }
-
-             //Generating unique_id
+            //Generating unique_id
             // Extract the first word from the name
             $firstWord = strtok($request->name, ' ');
             // Generate a random four-digit number
@@ -69,7 +65,7 @@ class ApiController extends Controller
 
             // Create User
             $user = User::create([
-                "avatar" => $avatarPath,
+                "avatar" => $imageUrl,
                 "name" => $request->name,
                 "unique_id" => $unique_id,
                 "email" => $request->email,
