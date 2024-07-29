@@ -108,9 +108,18 @@ class ApiController extends Controller
                 $user->password = Hash::make($request->password);
 
                 //Handle avatar upload if provided
-                if ($request->hasFile('avatar')) {
-                    $avatarPath = $request->file('avatar')->store('avatars');
-                    $user->avatar = $avatarPath;
+               if ($request->hasFile('avatar')) {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('avatar')->getRealPath(),
+                    [
+                        'folder' => 'africtv/avatars',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
                 } else {
                     return response()->json([
                         "status" => false,
@@ -118,6 +127,8 @@ class ApiController extends Controller
                     ]);
                 }
 
+                $imageUrl = $uploadCloudinary->getSecurePath();
+                $user->avatar = $imageUrl;
                 // Save the updated user
                 $user->save();
                 //Send mail if it was successful

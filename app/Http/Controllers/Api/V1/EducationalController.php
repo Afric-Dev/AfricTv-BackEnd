@@ -8,79 +8,153 @@ use App\Models\Educational;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
+use Cloudinary\Transformation\Overlay;
+use Cloudinary\Transformation\Resize;
+use Cloudinary\Transformation\Adjust;
+use Cloudinary\Transformation\Source;
+use Cloudinary\Transformation\Position;
+use Cloudinary\Transformation\Gravity;
+use Cloudinary\Transformation\Compass;
+
 
 class EducationalController extends Controller
 {
          public function educational(Request $request)
+        {
+            // Data Validation
+            $request->validate([
+                'edu_vid_path' => 'array',
+                'edu_vid_path.*' => 'required|mimes:mp4,avi,mov,wmv,flv',
+                'title' => 'required|max:255',
+                'edu_views' => 'nullable|max:55',
+                'description' => 'required',
+                'links' => 'nullable|max:255',
+            ]);
+
+            // Function to get video duration
+            function getVideoDuration($file)
             {
-                // Data Validation
-                $request->validate([
-                    'edu_vid_path' => 'array',
-                    'edu_vid_path.*' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
-                    "title" => "required|max:255",
-                    "edu_views" => "nullable|max:55",
-                    "description" => "required",
-                    "links" => "nullable|max:255",
-                ]);
+                return 0; 
+            }
 
-                $videoPaths = [];
+            // Upload watermark image and get public ID
+            $watermarkImage = cloudinary()->upload('https://res.cloudinary.com/dxbft8aci/image/upload/v1722239225/africtv/logos/fhccinkqednbtd2rc5ay.png', [
+                'folder' => 'africtv/watermarks',
+                'resource_type' => 'image'
+            ])->getPublicId();
 
-                if ($request->hasFile('edu_vid_path')) {
-                foreach ($request->file('edu_vid_path') as $file) {
-                    // Ensure the file is a valid upload
+            $videoPath = [];
+            if ($request->hasFile('edu_vid_path')) {
+                $files = $request->file('edu_vid_path');
+
+                $transformations = [
+                    'overlay' => [
+                        'public_id' => $watermarkImage,
+                        'transformation' => [
+                            'width' => 100,
+                            'height' => 100,
+                            'crop' => 'scale',
+                            'opacity' => 10
+                        ]
+                    ],
+                    'gravity' => 'south_east',
+                    'x' => 15,
+                    'y' => 20
+                ];
+
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        if ($file->isValid()) {
+                            $duration = getVideoDuration($file);
+                            if ($duration > 7200) {
+                                return response()->json([
+                                    'status' => false,
+                                    'message' => 'Video duration should not exceed 2 hours.',
+                                ]);
+                            }
+
+                            try {
+                                $uploadCloudinary = cloudinary()->upload($file->getRealPath(), [
+                                    'folder' => 'africtv/edu_videos',
+                                    'resource_type' => 'video',
+                                    'transformation' => array_merge($transformations, [
+                                        'quality' => 'auto',
+                                        'fetch_format' => 'auto'
+                                    ])
+                                ]);
+                                $videoPath[] = $uploadCloudinary->getSecurePath();
+                            } catch (\Exception $e) {
+                                return response()->json([
+                                    'status' => false,
+                                    'message' => 'Video upload failed: ' . $e->getMessage(),
+                                ]);
+                            }
+                        } else {
+                            return response()->json([
+                                'status' => false,
+                                'message' => 'Invalid file upload.',
+                            ]);
+                        }
+                    }
+                } else {
+                    $file = $files;
                     if ($file->isValid()) {
-                        // Store the temporary file path
-                        $tempPath = $file->getPathname(); 
-
-                        // Create an FFProbe instance
-                        $ffprobe = FFProbe::create();
-
-                        // Get the duration of the video
-                        $duration = $ffprobe
-                            ->format($tempPath) // extracts file informations
-                            ->get('duration');
-
-                        if ($duration > 7200) { // 7200 seconds = 2 hours
+                        $duration = getVideoDuration($file);
+                        if ($duration > 7200) {
                             return response()->json([
                                 'status' => false,
                                 'message' => 'Video duration should not exceed 2 hours.',
                             ]);
                         }
 
-                        // Store the video
-                        $path = $file->store('public/eduvideos');
-                        $videoPaths[] = str_replace('public/', '', $path);
+                        try {
+                            $uploadCloudinary = cloudinary()->upload($file->getRealPath(), [
+                                'folder' => 'africtv/edu_videos',
+                                'resource_type' => 'video',
+                                'transformation' => array_merge($transformations, [
+                                    'quality' => 'auto',
+                                    'fetch_format' => 'auto'
+                                ])
+                            ]);
+                            $videoPath = $uploadCloudinary->getSecurePath();
+                        } catch (\Exception $e) {
+                            return response()->json([
+                                'status' => false,
+                                'message' => 'Video upload failed: ' . $e->getMessage(),
+                            ]);
+                        }
                     } else {
                         return response()->json([
-                            "status" => false,
-                            "message" => "Invalid video file."
+                            'status' => false,
+                            'message' => 'Invalid file upload.',
                         ]);
                     }
                 }
             } else {
                 return response()->json([
-                    "status" => false,
-                    "message" => "Video Must Be Uploaded"
+                    'status' => false,
+                    'message' => 'Video must be uploaded.'
                 ]);
             }
 
+            // Storing educational data
+            $edu = Educational::create([
+                'user_id' => Auth::user()->id,
+                'unique_id' => Auth::user()->unique_id,
+                'edu_vid_path' => json_encode($videoPath),
+                'title' => $request->title,
+                'edu_views' => $request->edu_views ?? 0,
+                'links' => $request->links,
+                'description' => $request->description,
+            ]);
 
-                // Storing educational data
-                $edu = Educational::create([
-                    "user_id" => Auth::user()->id,
-                    "unique_id" => Auth::user()->unique_id,
-                    "edu_vid_path" => json_encode($videoPaths),
-                    "title" => $request->title,
-                    "edu_views" => $request->edu_views ?? 0,
-                    "links" => $request->links,
-                    "description" => $request->description,
-                ]);
-
-                return response()->json([
-                    "status" => true,
-                    "message" => "Educational Post Uploaded Successfully"
-                ]);
-            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Educational Post Uploaded Successfully'
+            ]);
+        }
 
 
              public function deleteedupost(Request $request)

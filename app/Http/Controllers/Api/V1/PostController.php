@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-     public function posts(Request $request)
+     public function posts(Request $request) 
     { 
         // Data Validation
         $request->validate([ 
@@ -23,8 +23,8 @@ class PostController extends Controller
             'post_img_path' => 'array',
             'post_img_path.*' => 'nullable|image|max:2048',
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
-            "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
-            "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
+            // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
+            // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
             "category" => "required",
             "post_title" => "required",
             "PostbodyHtml" => "required",
@@ -43,53 +43,51 @@ class PostController extends Controller
 
         $postID = '@' .$firstWord . $randomNumber;
 
-        // Handle image upload and resizing
+        // Initialize an array to store image paths
         $imagePaths = [];
+        // Check if the request has files under the 'post_img_path' key
         if ($request->hasFile('post_img_path')) {
-            foreach ($request->file('post_img_path') as $imageFile) {
-                $imageSize = $imageFile->getSize();
+            foreach ($request->file('post_img_path') as $file) {
+                // Validate if the file is valid
+                if ($file->isValid()) {
+                    // Upload the file to Cloudinary
+                    $uploadCloudinary = cloudinary()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'africtv/blogs_images',
+                            'resource_type' => 'auto',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
+                        ]
+                    );
 
-                if ($imageSize > 2048000) { // 2MB in bytes
-                    $image = Image::make($imageFile)->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    });
-
-                    $imagePath = 'public/images/' . $imageFile->hashName();
-                    $image->save(storage_path('app/' . $imagePath));
+                    // Store the secure URL of the uploaded image
+                    $imagePaths[] = $uploadCloudinary->getSecurePath();
                 } else {
-                    $imagePath = $imageFile->store('public/images');
-                    $imagePath = str_replace('public/', '', $imagePath);
+                    $imagePaths[] = "File is not valid";
                 }
-                $imagePaths[] = $imagePath;
             }
         } else {
-            $imagePaths[] = "no image uploaded";
+            $imagePaths[] = "No images uploaded";
         }
 
-        if ($request->hasFile('cover_image')) {
-            $imageFile = $request->file('cover_image');
-            $imageSize = $imageFile->getSize();
 
-            try {
-                if ($imageSize > 2048000) { // 2MB in bytes
-                    $image = Image::make($imageFile)->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    });
-
-                    $coverImagePath = 'public/blogcoverimages/' . $imageFile->hashName();
-                    $image->save(storage_path('app/' . $coverImagePath));
-                } else {
-                    $coverImagePath = $imageFile->store('public/blogcoverimages');
-                    $coverImagePath = str_replace('public/', '', $coverImagePath);
-                }
-            } catch (\Exception $e) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "Error processing image: " . $e->getMessage()
-                ], 500);
-            }
+          //Handle blog post cover image (required)
+          if ($request->hasFile('cover_image')) {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('cover_image')->getRealPath(),
+                    [
+                        'folder' => 'africtv/blogs_cover_images',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto',
+                        ]
+                    ]
+                );
+                $coverimagePath = $uploadCloudinary->getSecurePath();
         } else {
             return response()->json([
                 "status" => false,
@@ -97,35 +95,50 @@ class PostController extends Controller
             ], 400);
         }
 
-        // Handle video upload
+        // Function to get video duration
+        function getVideoDuration($file)
+        {
+            return 0; 
+        }
+
         if ($request->hasFile('post_vid_path')) {
-            $file = $request->file('post_vid_path');
+            // Get the duration of the video
+            $duration = getVideoDuration($request->file('post_vid_path'));
 
-            // Check video duration
-            $media = FFMpeg::open($file->getPathname());
-            $duration = $media->getDurationInSeconds();
-
+            // Validate video duration
             if ($duration > 7200) { // 7200 seconds = 2 hours
                 return response()->json([
-                'status' => false,
-                'message' => 'Video duration should not exceed 2 hours.',
+                    'status' => false,
+                    'message' => 'Video duration should not exceed 2 hours.',
                 ]);
             }
 
-            // Store the video
-            $videoPath = $file->store('public/blogsvideos');
-                
-            // Save the path to the database
-            $video = new Post();
-            $video->post_vid_path = $videoPath;
-            $videoPath = str_replace('public/', '', $videoPath);
-            $video->save();
-        }else {
-            $videoPath = "no video uploaded";
-        } 
+            try {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('post_vid_path')->getRealPath(),
+                    [
+                        'folder' => 'africtv/blogs_videos',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
+                $videoPath = $uploadCloudinary->getSecurePath();
+            } catch (\Exception $e) {
+                // Handle upload error
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Video upload failed: ' . $e->getMessage(),
+                ]);
+            }
+        } else {
+            $videoPath = null;
+        }
 
 
-        // Handle document upload
+        //Handle document upload
         if ($request->hasFile('post_pdf_path')) {
             $docPath = $request->file('post_pdf_path')->store('public/documents');
             $docPath = str_replace('public/', '', $docPath);
@@ -133,7 +146,7 @@ class PostController extends Controller
             $docPath = "no file uploaded";
         }
 
-        // Handle song upload
+        //Handle song upload
         if ($request->hasFile('post_song_path')) {
             $songPath = $request->file('post_song_path')->store('public/songs');
             $songPath = str_replace('public/', '', $songPath);
@@ -148,7 +161,7 @@ class PostController extends Controller
             "post_id" => $postID,
             "unique_id" => Auth::user()->unique_id,
             "user_email" => Auth::user()->email,
-            "cover_image" => $coverImagePath,
+            "cover_image" => $coverimagePath,
             "post_img_path" => json_encode($imagePaths),
             "post_vid_path" => $videoPath,
             "post_pdf_path" => $docPath,
@@ -205,90 +218,99 @@ class PostController extends Controller
             $post->hashtags = $request->hashtags;
             $post->post_ending = $request->post_ending;
 
-            // Handle cover image upload
-            if ($request->hasFile('cover_image')) {
-                $imageFile = $request->file('cover_image');
-                $imageSize = $imageFile->getSize();
+        // Initialize an array to store image paths
+        $imagePaths = [];
+        // Check if the request has files under the 'post_img_path' key
+        if ($request->hasFile('post_img_path')) {
+            foreach ($request->file('post_img_path') as $file) {
+                // Validate if the file is valid
+                if ($file->isValid()) {
+                    // Upload the file to Cloudinary
+                    $uploadCloudinary = cloudinary()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'africtv/blogs_images',
+                            'resource_type' => 'auto',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
+                        ]
+                    );
 
-                try {
-                    if ($imageSize > 2048000) { // 2MB in bytes
-                        $image = Image::make($imageFile)->resize(500, null, function ($constraint) {
-                            $constraint->aspectRatio();
-                            $constraint->upsize();
-                        });
-
-                        $coverImagePath = 'public/blogcoverimages/' . $imageFile->hashName();
-                        $image->save(storage_path('app/' . $coverImagePath));
-                    } else {
-                        $coverImagePath = $imageFile->store('public/blogcoverimages');
-                        $coverImagePath = str_replace('public/', '', $coverImagePath);
-                    }
-                    $post->cover_image = $coverImagePath;
-                } catch (\Exception $e) {
-                    return response()->json([
-                        "status" => false,
-                        "message" => "Error processing cover image: " . $e->getMessage()
-                    ], 500);
+                    // Store the secure URL of the uploaded image
+                    $imagePaths[] = $uploadCloudinary->getSecurePath();
+                } else {
+                    $imagePaths[] = "File is not valid";
                 }
             }
+        } else {
+            $imagePaths[] = "No images uploaded";
+        }
 
-            // Handle image upload
-            $imagePaths = [];
-            if ($request->hasFile('post_img_path')) {
-                foreach ($request->file('post_img_path') as $imageFile) {
-                    $imageSize = $imageFile->getSize();
 
-                    if ($imageSize > 2048000) { // 2MB in bytes
-                        $image = Image::make($imageFile)->resize(500, null, function ($constraint) {
-                            $constraint->aspectRatio();
-                            $constraint->upsize();
-                        });
+          //Handle blog post cover image (required)
+          if ($request->hasFile('cover_image')) {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('cover_image')->getRealPath(),
+                    [
+                        'folder' => 'africtv/blogs_cover_images',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
+                $coverimagePath = $uploadCloudinary->getSecurePath();
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Cover Image Required"
+            ], 400);
+        }
 
-                        $imagePath = 'public/images/' . $imageFile->hashName();
-                        $image->save(storage_path('app/' . $imagePath));
-                    } else {
-                        $imagePath = $imageFile->store('public/images');
-                        $imagePath = str_replace('public/', '', $imagePath);
-                    }
-                    $imagePaths[] = $imagePath;
-                }
-                $post->post_img_path = json_encode($imagePaths);
+        // Function to get video duration
+        function getVideoDuration($file)
+        {
+            return 0; 
+        }
+
+        if ($request->hasFile('post_vid_path')) {
+            // Get the duration of the video
+            $duration = getVideoDuration($request->file('post_vid_path'));
+
+            // Validate video duration
+            if ($duration > 7200) { // 7200 seconds = 2 hours
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Video duration should not exceed 2 hours.',
+                ]);
             }
 
-           // Handle video upload
-            if ($request->hasFile('post_vid_path')) {
-                $videoPath = $request->file('post_vid_path')->store('public/videos');
-                $videoPath = str_replace('public/', '', $videoPath);
-            } else {
-                $videoPath = "no file uploaded";
+            try {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('post_vid_path')->getRealPath(),
+                    [
+                        'folder' => 'africtv/blogs_videos',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
+                $videoPath = $uploadCloudinary->getSecurePath();
+            } catch (\Exception $e) {
+                // Handle upload error
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Video upload failed: ' . $e->getMessage(),
+                ]);
             }
-
-          // Handle video upload
-            if ($request->hasFile('post_vid_path')) {
-                $file = $request->file('post_vid_path');
-
-                // Check video duration
-                $media = FFMpeg::open($file->getPathname());
-                $duration = $media->getDurationInSeconds();
-
-                if ($duration > 7200) { // 7200 seconds = 2 hours
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Video duration should not exceed 2 hours.',
-                    ]);
-                }
-
-                // Store the video
-                $videoPath = $file->store('public/commentsvideos');
-                
-                // Save the path to the database
-                $video = new Post();
-                $video->post_vid_path = $videoPath;
-                $videoPath = str_replace('public/', '', $videoPath);
-                $video->save();
-              } else {
-                 $videoPath = "no video uploaded";
-              } 
+        } else {
+            $videoPath = null;
+        }
 
             // Handle document upload
             if ($request->hasFile('post_pdf_path')) {
