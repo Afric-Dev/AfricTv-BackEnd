@@ -19,7 +19,8 @@ class PostController extends Controller
             // "user_name" => "required",
             // "unique_id" => "required", 
             // "user_email" => "required|email",
-            "cover_image" => 'required|image|max:2048',
+            "cover_image" => 'array',
+            'cover_image.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'post_img_path' => 'array',
             'post_img_path.*' => 'nullable|image|max:2048',
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
@@ -73,27 +74,38 @@ class PostController extends Controller
             $imagePaths[] = "No images uploaded";
         }
 
-
-          //Handle blog post cover image (required)
-          if ($request->hasFile('cover_image')) {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('cover_image')->getRealPath(),
-                    [
-                        'folder' => 'africtv/blogs_cover_images',
-                        'resource_type' => 'auto',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto',
+        $coverimagePath = [];
+        // Check if the request has files under the 'post_img_path' key
+        if ($request->hasFile('cover_image')) {
+            foreach ($request->file('cover_image') as $file) {
+                // Validate if the file is valid
+                if ($file->isValid()) {
+                    // Upload the file to Cloudinary
+                    $uploadCloudinary = cloudinary()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'africtv/blogs_cover_images',
+                            'resource_type' => 'auto',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
                         ]
-                    ]
-                );
-                $coverimagePath = $uploadCloudinary->getSecurePath();
+                    );
+
+                    // Store the secure URL of the uploaded image
+                    $coverimagePath[] = $uploadCloudinary->getSecurePath();
+                } else {
+                    $coverimagePath[] = "File is not valid";
+                }
+            }
         } else {
             return response()->json([
                 "status" => false,
                 "message" => "Cover Image Required"
             ], 400);
         }
+
 
         // Function to get video duration
         function getVideoDuration($file)
@@ -134,7 +146,7 @@ class PostController extends Controller
                 ]);
             }
         } else {
-            $videoPath = null;
+            $videoPath = "No Video Uploaded";
         }
 
 
@@ -161,7 +173,7 @@ class PostController extends Controller
             "post_id" => $postID,
             "unique_id" => Auth::user()->unique_id,
             "user_email" => Auth::user()->email,
-            "cover_image" => $coverimagePath,
+            "cover_image" => json_encode($coverimagePath),
             "post_img_path" => json_encode($imagePaths),
             "post_vid_path" => $videoPath,
             "post_pdf_path" => $docPath,
@@ -396,10 +408,12 @@ class PostController extends Controller
             ]);
         }
 
-        public function readspecificpost($post_title) 
+      public function readspecificpost($uniqid, $post_title)
         {
-            // Retrieve the post with the given post_title
-            $post = Post::where('post_title', $post_title)->first();
+            // Retrieve the post with the given post_title and unique_id
+            $post = Post::where('post_title', $post_title)
+                        ->where('unique_id', $uniqid)
+                        ->first();
 
             // Check if post exists
             if (!$post) {
@@ -415,5 +429,6 @@ class PostController extends Controller
                 'data' => $post,
             ]);
         }
+
 
 }

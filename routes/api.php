@@ -31,7 +31,7 @@ Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost End Point
 Route::get('readpost', [PostController::class, 'readpost']);
 //Read Single BlogPost End Point
-Route::get('readspecificpost/{post_title}', [PostController::class, 'readspecificpost']);
+Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
 //Read FeedPost End Point
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
 //Read Comment End Point
@@ -40,7 +40,7 @@ Route::get('readcomment', [CommentsController::class, 'readcomment']);
 Route::get('readlikes', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
-Route::get('readspecificedupost/{title}', [EducationalController::class, 'readspecificedupost']);
+Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
 
 
  

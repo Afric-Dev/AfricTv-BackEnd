@@ -9,14 +9,8 @@ use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
-use Cloudinary\Transformation\Overlay;
-use Cloudinary\Transformation\Resize;
-use Cloudinary\Transformation\Adjust;
-use Cloudinary\Transformation\Source;
-use Cloudinary\Transformation\Position;
-use Cloudinary\Transformation\Gravity;
-use Cloudinary\Transformation\Compass;
+use Cloudinary\Transformation\Video;
+use Cloudinary\Transformation\Image;
 
 
 class EducationalController extends Controller
@@ -40,7 +34,7 @@ class EducationalController extends Controller
             }
 
             // Upload watermark image and get public ID
-            $watermarkImage = cloudinary()->upload('https://res.cloudinary.com/dxbft8aci/image/upload/v1722239225/africtv/logos/fhccinkqednbtd2rc5ay.png', [
+            $watermarkImage = cloudinary()->upload('https://res.cloudinary.com/dxbft8aci/image/upload/v1723021830/a_resize_bmujeu.png', [
                 'folder' => 'africtv/watermarks',
                 'resource_type' => 'image'
             ])->getPublicId();
@@ -49,20 +43,20 @@ class EducationalController extends Controller
             if ($request->hasFile('edu_vid_path')) {
                 $files = $request->file('edu_vid_path');
 
-                $transformations = [
-                    'overlay' => [
-                        'public_id' => $watermarkImage,
-                        'transformation' => [
-                            'width' => 100,
-                            'height' => 100,
-                            'crop' => 'scale',
-                            'opacity' => 10
-                        ]
-                    ],
-                    'gravity' => 'south_east',
-                    'x' => 15,
-                    'y' => 20
-                ];
+            $transformations = [
+                'overlay' => [
+                    'public_id' => $watermarkImage,
+                    'transformation' => [
+                        'width' => 100,
+                        'height' => 100,
+                        'crop' => 'fit', // Updated crop mode
+                        'opacity' => 30
+                    ]
+                ],
+               'gravity' => 'north_west',
+                'x' => 0.07,
+                'y' => 0.01
+            ];
 
                 if (is_array($files)) {
                     foreach ($files as $file) {
@@ -193,10 +187,13 @@ class EducationalController extends Controller
                 }
             }
 
-            public function readspecificedupost($title) 
+            public function readspecificedupost($uniqid, $title) 
             {
-                // Retrieve the edu with the given title
-                $edu = Educational::where('title', $title)->first();
+                // Retrieve the edu with the given user uniqid and title 
+                $edu = Educational::where('title', $title)
+                        ->where('unique_id', $uniqid)
+                        ->first();
+
 
                 // Check if post exists
                 if (!$edu) {
@@ -205,7 +202,7 @@ class EducationalController extends Controller
                         'message' => 'Edu Not Found',
                     ]);
                 }
-
+ 
                 return response()->json([
                     'status' => true,
                     'message' => 'Edu data',
