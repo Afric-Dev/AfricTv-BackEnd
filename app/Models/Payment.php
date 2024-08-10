@@ -19,6 +19,7 @@ class Payment extends Model
         'payment_status',
         'payment_method',
         'currency',
+        'status'
     ];
 
 

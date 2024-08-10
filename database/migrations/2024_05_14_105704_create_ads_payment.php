@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('currency');
             $table->string('clicks');
+            $table->enum('taken', ['YES', 'NO']);
+            $table->string('ads_id');
             $table->timestamps();
         });
     }

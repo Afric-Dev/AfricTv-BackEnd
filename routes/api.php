@@ -6,8 +6,8 @@ use App\Http\Controllers\Api\V1\ApiController;
 use App\Http\Controllers\Api\V1\NewPasswordController;
 use App\Http\Controllers\Api\V1\UserCardDetails;
 use App\Http\Controllers\Api\V1\FeedbackController;
-use App\Http\Controllers\Api\V1\AdsPayment;
 use App\Http\Controllers\Api\V1\AdsPaymentController;
+use App\Http\Controllers\Api\V1\AdsController;
 use App\Http\Controllers\Api\V1\PostController;
 //use App\Http\Controllers\Api\V1\FeedPostController; 
 use App\Http\Controllers\Api\V1\SubscribtionController;
@@ -41,6 +41,7 @@ Route::get('readlikes', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
 Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
+Route::get("ads", [AdsController::class, "ads"]);
 
 
  
@@ -56,8 +57,12 @@ Route::group([
     Route::post("payment", [ApiController::class, "payment"]);
     Route::post("carddetails", [UserCardDetails::class, "carddetails"]);
     Route::post("adsPayment", [AdsPaymentController::class, "adsPayment"]);
+    //Ads Endpoint
+    Route::post("adActive", [AdsController::class, "adActive"]);
+    Route::put("adInactive", [AdsController::class, "adInactive"]);
+    Route::delete("deleteads", [AdsController::class, "deleteads"]);
     //THis is the BlogPost End Point
-    Route::post("posts", [PostController::class, "posts"]);
+    Route::post("uploadpost", [PostController::class, "uploadpost"]);
     Route::put("updateposts/{id}", [PostController::class, "updateposts"]);
     Route::delete("deleteposts/{id}", [PostController::class, "deleteposts"]);
     //THis is the Subscribtion Endpint

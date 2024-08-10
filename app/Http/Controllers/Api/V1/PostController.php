@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-     public function posts(Request $request) 
+     public function uploadpost(Request $request) 
     { 
         // Data Validation
         $request->validate([ 
@@ -26,16 +26,16 @@ class PostController extends Controller
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
             // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
             // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
-            "category" => "required",
-            "post_title" => "required",
+            "category" => "required|string|max:255",
+            "post_title" => "required|string|max:255",
             "PostbodyHtml" => "required",
-            "postbodyJson" => "required",
+            //"postbodyJson" => "nullable",
             "postBodytext" => "required",
             "post_views" => "nullable",
             "link" => "nullable",
-            "hashtags" => "nullable",
-            "post_ending" => "nullable",
-            "date" => "nullable|date",
+            //"hashtags" => "nullable|max:255",
+            //"post_ending" => "nullable",
+            //"date" => "nullable|date",
         ]);
 
         $firstWord = strtok($request->user_name, ' ');
@@ -181,13 +181,13 @@ class PostController extends Controller
             "category" => $request->category,
             "post_title" => $request->post_title,
             "PostbodyHtml" => $request->PostbodyHtml,
-            "postbodyJson" => $request->postbodyJson,
+            //"postbodyJson" => $request->postbodyJson,
             "postBodytext" => $request->postBodytext,
             "post_views" => $request->post_views ?? 0,
             "link" => $request->link,
-            "hashtags" => $request->hashtags,
-            "post_ending" => $request->post_ending,
-            "date" => $request->date,
+            //"hashtags" => $request->hashtags,
+            //"post_ending" => $request->post_ending,
+            //"date" => $request->date,
         ]);
 
         return response()->json([

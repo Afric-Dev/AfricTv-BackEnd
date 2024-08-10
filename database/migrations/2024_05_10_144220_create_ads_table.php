@@ -14,16 +14,18 @@ class CreateAdsTable extends Migration
     {
         Schema::create('ads', function (Blueprint $table) {
             $table->id();
+            $table->string('ads_id');
+            $table->string('user_id'); 
             $table->string('user_email'); 
-            $table->string('img_vid_path');
+            $table->string('img_path')->nullable();
+            $table->string('vid_path')->nullable();
             $table->string('title');
             $table->string('description');
             $table->string('link')->nullable(); 
             $table->datetime('start_date');
-            $table->datetime('end_date'); 
-            $table->string('status');
-            $table->unsignedBigInteger('post_id'); 
-
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->nullable();
+            $table->string('clicks');
+            $table->string('ads_type');
             $table->timestamps();
 
             // Foreign key definition

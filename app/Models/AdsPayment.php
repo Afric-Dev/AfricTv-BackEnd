@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdsPayment extends Model
 {
+
+   protected static function boot()
+   {
+       parent::boot();
+
+       static::creating(function (Model $model) {
+           $model->ads_id = strval(rand(0, 100000));
+       });
+   }
+
+
     use HasFactory;
      protected $fillable = [
         "user_id",
@@ -20,5 +31,7 @@ class AdsPayment extends Model
         "ads_type",
         "duration",
         "clicks",
+        'taken'
     ];
+
 }
