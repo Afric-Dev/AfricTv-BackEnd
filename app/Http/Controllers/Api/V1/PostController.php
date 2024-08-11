@@ -33,7 +33,7 @@ class PostController extends Controller
             "postBodytext" => "required",
             "post_views" => "nullable",
             "link" => "nullable",
-            //"hashtags" => "nullable|max:255",
+            "hashtags" => "nullable|max:255",
             //"post_ending" => "nullable",
             //"date" => "nullable|date",
         ]);
@@ -185,7 +185,7 @@ class PostController extends Controller
             "postBodytext" => $request->postBodytext,
             "post_views" => $request->post_views ?? 0,
             "link" => $request->link,
-            //"hashtags" => $request->hashtags,
+            "hashtags" => $request->hashtags,
             //"post_ending" => $request->post_ending,
             //"date" => $request->date,
         ]);
