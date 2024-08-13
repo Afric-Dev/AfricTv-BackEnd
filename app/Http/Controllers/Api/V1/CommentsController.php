@@ -8,9 +8,10 @@ use App\Models\Comments;
 use Intervention\Image\Facades\Image;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class CommentsController extends Controller
-{
+{ 
     public function comments(Request $request) {
         $request->validate([
             "post_id" => "required",
@@ -18,7 +19,7 @@ class CommentsController extends Controller
             // "user_id" => "required",
             // "user_email" => "required|email",
             // "user_name" => "required",
-            "unique_id" => "required",
+            //"unique_id" => "required",
             "comments" => "required",
             "comments_vid_path" => "nullable|mimes:mp4,avi,mov,wmv,flv",
             'comments_img_path' => 'array',
@@ -26,53 +27,78 @@ class CommentsController extends Controller
             "comments_link" => "nullable", 
         ]);
 
+       // Initialize an array to store image paths
         $imagePaths = [];
+        // Check if the request has files under the 'comments_img_path' key
         if ($request->hasFile('comments_img_path')) {
-            foreach ($request->file('comments_img_path') as $imageFile) {
-                $imageSize = $imageFile->getSize();
+            foreach ($request->file('comments_img_path') as $file) {
+                // Validate if the file is valid
+                if ($file->isValid()) {
+                    // Upload the file to Cloudinary
+                    $uploadCloudinary = cloudinary()->upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'africtv/comment_images',
+                            'resource_type' => 'auto',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
+                        ]
+                    );
 
-                if ($imageSize > 2048000) { // 2MB in bytes
-                    $image = Image::make($imageFile)->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    });
-
-                    $imagePath = 'public/commentsimages/' . $imageFile->hashName();
-                    $image->save(storage_path('app/' . $imagePath));
+                    // Store the secure URL of the uploaded image
+                    $imagePaths[] = $uploadCloudinary->getSecurePath();
                 } else {
-                    $imagePath = $imageFile->store('public/commentsimages');
-                    $imagePath = str_replace('public/', '', $imagePath);
+                    $imagePaths[] = "File is not valid";
                 }
-                $imagePaths[] = $imagePath;
             }
+        } else {
+            $imagePaths[] = "No images uploaded";
         }
 
-        // Handle video upload
+        // Function to get video duration
+        function getVideoDuration($file)
+        {
+            return 0; 
+        }
+
         if ($request->hasFile('comments_vid_path')) {
-            $file = $request->file('comments_vid_path');
+            // Get the duration of the video
+            $duration = getVideoDuration($request->file('comments_vid_path'));
 
-            // Check video duration
-            $media = FFMpeg::open($file->getPathname());
-            $duration = $media->getDurationInSeconds();
-
+            // Validate video duration
             if ($duration > 7200) { // 7200 seconds = 2 hours
                 return response()->json([
                     'status' => false,
-                    'message' => 'Video duration should not exceed 2 hours.'
+                    'message' => 'Video duration should not exceed 2 hours.',
                 ]);
             }
 
-            // Store the video
-            $videoPath = $file->store('public/commentsvideos');
-            
-            // Save the path to the database
-            $comment = new Comments();
-            $comment->comments_vid_path = $videoPath;
-            $videoPath = str_replace('public/', '', $videoPath);
-            $comment->save();
-          } else {
-            $videoPath = "no video uploaded";
-        } 
+            try {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('comments_vid_path')->getRealPath(),
+                    [
+                        'folder' => 'africtv/comment_videos',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
+                        ]
+                    ]
+                );
+                $videoPath = $uploadCloudinary->getSecurePath();
+            } catch (\Exception $e) {
+                // Handle upload error
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Video upload failed: ' . $e->getMessage(),
+                ]);
+            }
+        } else {
+            $videoPath = "No Video Uploaded";
+        }
+
 
         $comments = Comments::create([
             "post_id" => $request->post_id,
@@ -80,7 +106,7 @@ class CommentsController extends Controller
             "user_id" => Auth::user()->id
             "user_email" => Auth::user()->email,
             "user_name" => Auth::user()->name,
-            "unique_id" => $request->unique_id,
+            "unique_id" => Auth::user()->unique_id,
             "comments" => $request->comments,
             "comments_vid_path" => $videoPath,
             "comments_img_path" => json_encode($imagePaths),
@@ -98,12 +124,7 @@ class CommentsController extends Controller
         {
             $request->validate([
                 "comment_id" => "required",
-                "post_id" => "required",
-                "post_email" => "required",
-                "user_id" => "required",
-                "user_email" => "required|email",
-                "user_name" => "required",
-                "unique_id" => "required",
+                "post_id" => "required",        
                 "comments" => "required",
                 "comments_vid_path" => "nullable|mimes:mp4,avi,mov,wmv,flv",
                 'comments_img_path' => 'array',
@@ -122,56 +143,80 @@ class CommentsController extends Controller
                 // Handle image upload
                 $imagePaths = [];
 
+               // Initialize an array to store image paths
+                $imagePaths = [];
+                // Check if the request has files under the 'comments_img_path' key
                 if ($request->hasFile('comments_img_path')) {
-                    foreach ($request->file('comments_img_path') as $imageFile) {
-                        $imageSize = $imageFile->getSize();
+                    foreach ($request->file('comments_img_path') as $file) {
+                        // Validate if the file is valid
+                        if ($file->isValid()) {
+                            // Upload the file to Cloudinary
+                            $uploadCloudinary = cloudinary()->upload(
+                                $file->getRealPath(),
+                                [
+                                    'folder' => 'africtv/comment_images',
+                                    'resource_type' => 'auto',
+                                    'transformation' => [
+                                        'quality' => 'auto',
+                                        'fetch_format' => 'auto'
+                                    ]
+                                ]
+                            );
 
-                        if ($imageSize > 2048000) { // 2MB in bytes
-                            $image = Image::make($imageFile)->resize(500, null, function ($constraint) {
-                                $constraint->aspectRatio();
-                                $constraint->upsize();
-                            });
-
-                            $imagePath = 'public/commentsimages/' . $imageFile->hashName();
-                            $image->save(storage_path('app/' . $imagePath));
+                            // Store the secure URL of the uploaded image
+                            $imagePaths[] = $uploadCloudinary->getSecurePath();
                         } else {
-                            $imagePath = $imageFile->store('public/commentsimages');
-                            $imagePath = str_replace('public/', '', $imagePath);
+                            $imagePaths[] = "File is not valid";
                         }
-                        $imagePaths[] = $imagePath;
                     }
                 } else {
-                    $imagePaths[] = "no image uploaded";
+                    $imagePaths[] = "No images uploaded";
                 }
 
 
 
-                // Handle video upload
-                if ($request->hasFile('comments_vid_path')) {
-                    $file = $request->file('comments_vid_path');
 
-                    // Check video duration
-                    $media = FFMpeg::open($file->getPathname());
-                    $duration = $media->getDurationInSeconds();
+            // Function to get video duration
+            function getVideoDuration($file)
+            {
+                return 0; 
+            }
 
-                    if ($duration > 7200) { // 7200 seconds = 2 hours
-                        return response()->json([
-                            'status' => false,
-                            'message' => 'Video duration should not exceed 2 hours.',
-                        ]);
-                    }
+            if ($request->hasFile('comments_vid_path')) {
+                // Get the duration of the video
+                $duration = getVideoDuration($request->file('comments_vid_path'));
 
-                    // Store the video
-                    $videoPath = $file->store('public/commentsvideos');
-                    
-                    // Save the path to the database
-                    $comment = new Comments();
-                    $comment->comments_vid_path = $videoPath;
-                    $videoPath = str_replace('public/', '', $videoPath);
-                    $comment->save();
-                  } else {
-                        $videoPath = "no video uploaded";
-                    } 
+                // Validate video duration
+                if ($duration > 7200) { // 7200 seconds = 2 hours
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Video duration should not exceed 2 hours.',
+                    ]);
+                }
+
+                try {
+                    $uploadCloudinary = cloudinary()->upload(
+                        $request->file('comments_vid_path')->getRealPath(),
+                        [
+                            'folder' => 'africtv/comment_videos',
+                            'resource_type' => 'auto',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
+                        ]
+                    );
+                    $videoPath = $uploadCloudinary->getSecurePath();
+                } catch (\Exception $e) {
+                    // Handle upload error
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Video upload failed: ' . $e->getMessage(),
+                    ]);
+                }
+            } else {
+                $videoPath = "No Video Uploaded";
+            }
 
                 // Handle document upload
                 // if ($request->hasFile('post_pdf_path')) {
@@ -205,24 +250,36 @@ class CommentsController extends Controller
 
          public function deletecomment(Request $request)
         {
+           // Validate the request
             $request->validate([
                 'comment_id' => 'required|integer'
             ]);
 
+            // Get the comment that has this comment_id
             $commentId = $request->input('comment_id');
-            $comments = Comments::find($commentId);
+            $comment = Comments::find($commentId);
 
-            if ($comments) {
-                $comments->delete();
+            // Check if the comment exists
+            if (!$comment) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "comment not found"
+                ]);
+            }
+
+            // Check if the authenticated user is the owner of the comment
+            if (Auth::user()->id === $comment->user_id) {
+                // Delete the comment
+                $comment->delete();
 
                 return response()->json([
                     "status" => true,
-                    "message" => "Comment deleted successfully"
+                    "message" => "comment deleted successfully"
                 ]);
             } else {
                 return response()->json([
                     "status" => false,
-                    "message" => "Comment not found"
+                    "message" => "You are not permitted to delete this comment"
                 ]);
             }
         }
@@ -233,10 +290,12 @@ class CommentsController extends Controller
                 'post_id' => 'required|string',
             ]);
 
-            $postId = $validated['post_id'];
+            $commentId = $validated['post_id'];
 
-            // Find all comments associated with the post ID
-            $comments = Comments::where('post_id', $postId)->get();
+            // Find all comments associated with the post ID and include user data
+            $comments = Comments::with('user') 
+                                ->where('post_id', $commentId)
+                                ->get();
 
             // Return the comments in a JSON response
             return response()->json([

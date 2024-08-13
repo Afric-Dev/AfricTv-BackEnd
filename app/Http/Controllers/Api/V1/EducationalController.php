@@ -22,7 +22,7 @@ class EducationalController extends Controller
                 'edu_vid_path' => 'array',
                 'edu_vid_path.*' => 'required|mimes:mp4,avi,mov,wmv,flv',
                 'title' => 'required|max:255',
-                'edu_views' => 'nullable|max:55',
+                'edu_views' => 'nullable',
                 'description' => 'required',
                 'links' => 'nullable|max:255',
             ]);
@@ -187,10 +187,35 @@ class EducationalController extends Controller
                 }
             }
 
+                public function ViewEdu($id)
+                {
+                    // Retrieve the edu
+                    $edu = Educational::find($id);
+
+                    if (!$edu) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'edu Not Found',
+                        ]);
+                    }
+
+                    // Increment the view count
+                    $edu->edu_views += 1;
+                    $edu->save();
+
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'View Updated successfully',
+                        'edu' => $edu
+                    ]);
+                }
+
+
             public function readspecificedupost($uniqid, $title) 
             {
                 // Retrieve the edu with the given user uniqid and title 
-                $edu = Educational::where('title', $title)
+                $edu = Educational::with('user')
+                        ->where('title', $title)
                         ->where('unique_id', $uniqid)
                         ->first();
 
@@ -207,12 +232,14 @@ class EducationalController extends Controller
                     'status' => true,
                     'message' => 'Edu data',
                     'data' => $edu,
+                    'user' => $edu->user,
                 ]);
             }
 
             public function readedu()
             {
-                $edus = Educational::inRandomOrder()->get();
+                // Retrieve educational records with user data
+                $edus = Educational::with('user')->inRandomOrder()->get();
                 $eduCount = $edus->count();
 
                 return response()->json([

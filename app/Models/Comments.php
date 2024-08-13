@@ -22,4 +22,8 @@ class Comments extends Model
         "comments_link",
         "date",
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

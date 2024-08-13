@@ -22,7 +22,7 @@ class PostController extends Controller
             "cover_image" => 'array',
             'cover_image.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'post_img_path' => 'array',
-            'post_img_path.*' => 'nullable|image|max:2048',
+            'post_img_path.*' => 'required|image|max:2048',
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
             // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
             // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
@@ -358,6 +358,30 @@ class PostController extends Controller
     }
 
 
+    public function ViewBlog($id)
+    {
+        // Retrieve the post
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Post Not Found',
+            ]);
+        }
+
+        // Increment the view count
+        $post->post_views += 1;
+        $post->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'View Updated successfully',
+            'post' => $post
+        ]);
+    }
+
+
         public function deleteposts(Request $request)
         {
             // Validate the request
@@ -408,10 +432,11 @@ class PostController extends Controller
             ]);
         }
 
-      public function readspecificpost($uniqid, $post_title)
+        public function readspecificpost($uniqid, $post_title)
         {
-            // Retrieve the post with the given post_title and unique_id
-            $post = Post::where('post_title', $post_title)
+            // Retrieve the post with the given post_title and unique_id along with the user data
+            $post = Post::with('user')
+                        ->where('post_title', $post_title)
                         ->where('unique_id', $uniqid)
                         ->first();
 
@@ -427,6 +452,7 @@ class PostController extends Controller
                 'status' => true,
                 'message' => 'Post data',
                 'data' => $post,
+                'user' => $post->user,
             ]);
         }
 

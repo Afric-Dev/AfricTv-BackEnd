@@ -181,6 +181,38 @@ class AdsController extends Controller
         }
     }
 
+
+    public function AdsPerClicks(Request $request)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'clicked' => 'required|boolean', //clicked is a boolean flag
+            'ads_id' => 'required|integer|exists:ads,id' 
+        ]);
+
+        // Get the ad based on the validated ads_id
+        $ad = Ads::find($validatedData['ads_id']);
+        
+        // Check if the ad exists
+        if (!$ad) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ad Not Found',
+            ]);
+        }
+
+        // If clicked is true, decrement the clicks
+        if ($validatedData['clicked']) {
+            $ad->clicks -= 1;
+            $ad->save();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Ad clicks updated successfully',
+            'ad' => $ad
+        ]);
+    }
     public function ads(Request $request)
     {
          $ads = Ads::inRandomOrder()
@@ -191,7 +223,7 @@ class AdsController extends Controller
             if (!$ads) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Ads Not Found',
+                    'message' => 'Ad Not Found',
                 ]);
             }
 

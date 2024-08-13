@@ -20,4 +20,9 @@ class Educational extends Model
             "edu_vid_path",
             "edu_views",
     ];
+    
+    public function user()
+   {
+       return $this->belongsTo(User::class, 'user_id');
+   }
 }
