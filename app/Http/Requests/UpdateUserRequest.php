@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\User;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -22,11 +23,11 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-                "avatar" => "image|max:2048",
+                "avatar" => "nullable|image|max:2048",
                 "name" => "required",
                 "email" => "required|email",
                 "phone_number" => "required",
-                "password" => "required|confirmed"
+                "password" => "nullable|confirmed"
         ];
     }
 }

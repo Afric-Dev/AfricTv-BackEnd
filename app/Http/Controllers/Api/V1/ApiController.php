@@ -83,55 +83,47 @@ class ApiController extends Controller
         }
 
         //Update Profile (PUT)
-        public function updateprofile(UpdateUserRequest $request)
-        {   
-
-            //Get the id of the Authenticated User
+       public function updateprofile(UpdateUserRequest $request)
+        {
+            // Get the id of the Authenticated User
             $userId = Auth::id();
             $request->validated($request->all());
 
             $user = User::find($userId);
 
-
-            // if (Auth::user()->id !== $id) {
-            //     return response()->json([
-            //         "status" => false,
-            //         "message" => "Invalid Attempt"
-            //     ]);
-            // }
-
             if ($user) {
-                // Update user properties
-                $user->name = $request->name;
-                $user->email = $request->email;
-                $user->phone_number = $request->phone_number;
-                $user->password = Hash::make($request->password);
+                // Update user properties only if the input is provided, otherwise retain the current data
+                $user->name = $request->input('name') ?: $user->name;
+                $user->email = $user->email;
+                $user->phone_number = $request->input('phone_number') ?: $user->phone_number;
 
-                //Handle avatar upload if provided
-               if ($request->hasFile('avatar')) {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('avatar')->getRealPath(),
-                    [
-                        'folder' => 'africtv/avatars',
-                        'resource_type' => 'auto',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto'
-                        ]
-                    ]
-                );
-                } else {
-                    return response()->json([
-                        "status" => false,
-                        "message" => "No Profile Picture Was Uploaded"
-                    ]);
+                // Handle password update only if it's provided
+                if ($request->filled('password')) {
+                    $user->password = Hash::make($request->password);
                 }
 
-                $imageUrl = $uploadCloudinary->getSecurePath();
-                $user->avatar = $imageUrl;
+                // Handle avatar upload if provided
+                if ($request->hasFile('avatar')) {
+                    $uploadCloudinary = cloudinary()->upload(
+                        $request->file('avatar')->getRealPath(),
+                        [
+                            'folder' => 'africtv/avatars',
+                            'resource_type' => 'auto',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
+                        ]
+                    );
+                    $imageUrl = $uploadCloudinary->getSecurePath();
+                    $imageId = $uploadCloudinary->getPublicId();
+                    $user->avatar = $imageUrl;
+                }
+
                 // Save the updated user
                 $user->save();
-                //Send mail if it was successful
+
+                // Send mail if the update was successful
                 Mail::to($user->email)->send(new ProfileUpdateMail($user));
 
                 return response()->json([
@@ -144,9 +136,7 @@ class ApiController extends Controller
                     "message" => "User Not Found"
                 ]);
             }
-
         }
-
 
           // Login Api(POST)
           public function login(LoginUserRequest $request)

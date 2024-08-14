@@ -37,7 +37,7 @@ class SubscribtionController extends Controller
             ]);
 
             // Find the user by ID
-            $user = User::find($request->user_id); 
+            $user = User::find($request->subscriber_id); 
 
             // If the user exists, increment the subscribers_number
             if ($user) {
