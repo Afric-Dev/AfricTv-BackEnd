@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('post_id');
             $table->string('post_email');
             $table->string('reaction_type')->nullable();
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

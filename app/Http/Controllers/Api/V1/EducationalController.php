@@ -232,7 +232,6 @@ class EducationalController extends Controller
                     'status' => true,
                     'message' => 'Edu data',
                     'data' => $edu,
-                    'user' => $edu->user,
                 ]);
             }
 

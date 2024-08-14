@@ -452,7 +452,6 @@ class PostController extends Controller
                 'status' => true,
                 'message' => 'Post data',
                 'data' => $post,
-                'user' => $post->user,
             ]);
         }
 

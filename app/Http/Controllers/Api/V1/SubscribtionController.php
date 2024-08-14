@@ -63,13 +63,18 @@ class SubscribtionController extends Controller
         public function viewsubscribtion()
         {
             $user = auth()->user();
-            $subscribtion = Subscribtion::where('user_id', $user->id)->get();
+
+            // Find all subscriptions associated with the authenticated user and include user data
+            $subscribtion = Subscribtion::with('user') 
+                                        ->where('user_id', $user->id)
+                                        ->get();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Subscription data',
                 'Subscription' => $subscribtion,
-
-        ]);
-      }
+            ]);
+        }
 
 }
+ 

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('links')->nullable();
             $table->string('edu_vid_path');
             $table->string('edu_views');
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

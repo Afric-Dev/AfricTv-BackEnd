@@ -17,4 +17,10 @@ class Subscribtion extends Model
         'subscriber_email',
         'unsubscribe',
     ];
+
+    public function user()
+   {
+       return $this->belongsTo(User::class, 'user_id');
+   }
+
 }

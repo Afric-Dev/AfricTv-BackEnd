@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('comments_link')->nullable();
             $table->date('date');
             $table->timestamps();
-
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             // Foreign key definition
             // $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
         });
