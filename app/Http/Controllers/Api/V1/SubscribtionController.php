@@ -18,7 +18,7 @@ class SubscribtionController extends Controller
         {
             // Validate the request
             $request->validate([
-                "subscriber_id" => "required|exists:users,id", // Ensure subscriber_id exists in users table
+                "subscriber_id" => "required|exists:users,id", 
                 "subscriber_email" => "required|email",
             ]);
 
@@ -65,6 +65,51 @@ class SubscribtionController extends Controller
             ]);
         }
 
+        public function unsubscribe(Request $request)
+        {
+            // Validate the request
+            $request->validate([
+                "subscriber_id" => "required|exists:users,id", 
+                "subscriber_email" => "required|email",
+            ]);
+
+            // Check if the user has already subscribed
+            $existingSubscription = Subscribtion::where('user_id', Auth::user()->id)
+                                                ->where('subscriber_id', $request->subscriber_id)
+                                                ->first();
+
+            if (!$existingSubscription) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "You did not subscribe to this user before",
+                ]);
+            }
+
+            // Create a new subscription record
+            $deleteSubscription = Subscribtion::where('user_id', Auth::user()->id)
+                                                ->where('subscriber_id', $request->subscriber_id)
+                                                ->delete();
+
+            // Find the user by subscriber_id
+            $user = User::find($request->subscriber_id);
+
+            if ($user) {
+                $user->subscribers_number -= 1;
+                $user->save();
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Unknown Error",
+                ]);
+            }
+
+            // Return a JSON response
+            return response()->json([
+                "status" => true,
+                "message" => "Unsubscribed Successfully",
+            ]);
+
+        }
 
         public function viewsubscribers(Request $request)
         {

@@ -60,33 +60,33 @@ Route::group([
     //THis is the Auth User Actions End point
     Route::get("profile", [ApiController::class, "profile"]);
     Route::post("logout", [ApiController::class, "logout"]);
-    Route::put("updateprofile", [ApiController::class, "updateprofile"]);
+    Route::post("updateprofile", [ApiController::class, "updateprofile"]);
     //THis is the Payments Endpoint
     Route::post("payment", [ApiController::class, "payment"]);
     Route::post("carddetails", [UserCardDetails::class, "carddetails"]);
     Route::post("adsPayment", [AdsPaymentController::class, "adsPayment"]);
     //Ads Endpoint
     Route::post("adActive", [AdsController::class, "adActive"]);
-    Route::put("adInactive", [AdsController::class, "adInactive"]);
+    Route::post("adInactive", [AdsController::class, "adInactive"]);
     Route::delete("deleteads", [AdsController::class, "deleteads"]);
     //THis is the BlogPost End Point
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
-    Route::put("updateposts/{id}", [PostController::class, "updateposts"]);
+    Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
     Route::delete("deleteposts/{id}", [PostController::class, "deleteposts"]);
     //THis is the Subscribtion Endpint
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
-    Route::put("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
+    Route::post("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
     //THis is the FeedPost EndPoint
     // Route::post("feedposts", [FeedPostController::class, "feedposts"]);
-    // Route::put("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);
+    // Route::post("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);
     // Route::delete("deletefeedposts/{id}", [FeedPostController::class, "deletefeedposts"]);
     //This is the Comment EndPoint
     Route::post("comments", [CommentsController::class, "comments"]);
-    Route::put("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
+    Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
     Route::delete("deletecomment/{id}", [CommentsController::class, "deletecomment"]);
     //This is the Like EndPoint
     Route::post("like", [LikeController::class, "like"]);
-    Route::put("unlike/{id}", [LikeController::class, "unlike"]); 
+    Route::post("unlike/{id}", [LikeController::class, "unlike"]); 
 
     //This is for educational end point
     Route::post("educational", [EducationalController::class, "educational"]);
