@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('subscribtion_status')->nullable();
             $table->string('verification_status')->nullable();
             $table->string('subscribers_number');
+            $table->string('bio')->nullable();
+            $table->string('link')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

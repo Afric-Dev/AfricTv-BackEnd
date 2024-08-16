@@ -25,9 +25,9 @@ return new class extends Migration
             $table->string('category');
             $table->string('post_intro')->nullable();
             $table->string('post_title'); 
-            $table->string('PostbodyHtml');
-            $table->string('postbodyJson');
-            $table->string('postBodytext');
+            $table->text('PostbodyHtml');
+            $table->text('postbodyJson');
+            $table->text('postBodytext');
             $table->string('link')->nullable();
             $table->string('hashtags')->nullable();
             $table->string('post_ending')->nullable();

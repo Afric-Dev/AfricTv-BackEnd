@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('user_id');
             $table->string('unique_id');
             $table->string('title');
-            $table->string('description');
+            $table->text('description');
             $table->string('links')->nullable();
             $table->string('edu_vid_path');
             $table->string('edu_views');

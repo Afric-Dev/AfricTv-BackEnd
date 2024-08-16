@@ -71,6 +71,8 @@ class ApiController extends Controller
                 "email" => $request->email,
                 "phone_number" => $request->phone_number,
                 "subscribers_number" => $subscribers_number,
+                "bio" => $request->bio,
+                "link" => $request->link,
                 "password" => Hash::make($request->password)
             ]);
 
@@ -96,7 +98,8 @@ class ApiController extends Controller
                 $user->name = $request->input('name') ?: $user->name;
                 $user->email = $user->email;
                 $user->phone_number = $request->input('phone_number') ?: $user->phone_number;
-
+                $user->bio = $request->input('bio') ?: $user->bio;
+                $user->link = $request->input('link') ?: $user->link;
                 // Handle password update only if it's provided
                 if ($request->filled('password')) {
                     $user->password = Hash::make($request->password);
