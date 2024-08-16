@@ -280,4 +280,24 @@ class ApiController extends Controller
             ]);
         }
 
+        public function IndividualProfile($uniqid)
+        {
+            $user = User::where('unique_id', $uniqid)
+                        ->first();
+            // Check if user exists
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User Not Found',
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User data',
+                'data' => $user,
+            ]);
+        }
+
 }
+

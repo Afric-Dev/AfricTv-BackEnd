@@ -14,67 +14,77 @@ use Illuminate\Support\Facades\Auth;
  
 class SubscribtionController extends Controller
 {
-        public function subscribtion(Request $request)
+        public function subscribe(Request $request)
         {
             // Validate the request
             $request->validate([
-                // "user_id" => "required",
-                // "user_email" => "required",
-                "subscriber_id" => "required",
-                "subscriber_unique_id" => "required",
-                "subscriber_email" => "required|unique:subscribtions",
+                "subscriber_id" => "required|exists:users,id", // Ensure subscriber_id exists in users table
+                "subscriber_email" => "required|email",
             ]);
 
-            $unsubscribe = "0";
+            // Check if the user has already subscribed
+            $existingSubscription = Subscribtion::where('user_id', Auth::user()->id)
+                                                ->where('subscriber_id', $request->subscriber_id)
+                                                ->first();
+
+            if ($existingSubscription) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "You have subscribed before",
+                ]);
+            }
+
             // Create a new subscription record
             $subscribtion = Subscribtion::create([
                 "user_id" => Auth::user()->id,
-                "user_email" => $Auth::user()->email,
+                "user_email" => Auth::user()->email,
                 "subscriber_id" => $request->subscriber_id,
-                "subscriber_unique_id" => $request->subscriber_unique_id,
                 "subscriber_email" => $request->subscriber_email,
-                "unsubscribe" => $unsubscribe,
             ]);
 
-            // Find the user by ID
-            $user = User::find($request->subscriber_id); 
+            // Find the user by subscriber_id
+            $user = User::find($request->subscriber_id);
 
-            // If the user exists, increment the subscribers_number
             if ($user) {
                 $user->subscribers_number += 1;
                 $user->save();
             } else {
                 return response()->json([
                     "status" => false,
-                    "message" => "Unknown Error"
+                    "message" => "Unknown Error",
                 ]);
-            } 
+            }
 
             // Send an email to the user
-            Mail::to($subscribtion->user_email)->send(new SubscribtionMail($subscribtion));
+            Mail::to($subscribtion->subscriber_email)->send(new SubscribtionMail($subscribtion));
 
             // Return a JSON response
             return response()->json([
                 "status" => true,
-                "message" => "Subscribed Successfully"
+                "message" => "Subscribed Successfully",
             ]);
         }
 
-        public function viewsubscribtion()
-        {
-            $user = auth()->user();
 
-            // Find all subscriptions associated with the authenticated user and include user data
-            $subscribtion = Subscribtion::with('user') 
-                                        ->where('user_id', $user->id)
-                                        ->get();
+        public function viewsubscribers(Request $request)
+        {
+            // Validate that user_id is provided in the request
+            $request->validate([
+                "subscriber_id" => "required|integer",
+            ]);
+
+            // Fetch subscriptions where user_id matches the provided subscriber_id
+            $subscriptions = Subscribtion::with('user')
+                                         ->where('subscriber_id', $request->subscriber_id)
+                                         ->get();
 
             return response()->json([
                 'status' => true,
                 'message' => 'Subscription data',
-                'Subscription' => $subscribtion,
+                'subscriptions' => $subscriptions,
             ]);
         }
+
 
 }
  

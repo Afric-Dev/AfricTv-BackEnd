@@ -13,9 +13,7 @@ class Subscribtion extends Model
         'user_id',
         'user_email',
         'subscriber_id',
-        'subscriber_unique_id',
         'subscriber_email',
-        'unsubscribe',
     ];
 
     public function user()

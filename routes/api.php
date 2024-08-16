@@ -11,7 +11,6 @@ use App\Http\Controllers\Api\V1\AdsController;
 use App\Http\Controllers\Api\V1\PostController;
 //use App\Http\Controllers\Api\V1\FeedPostController; 
 use App\Http\Controllers\Api\V1\SubscribtionController;
-use App\Http\Controllers\Api\V1\UnsubscribeController;
 use App\Http\Controllers\Api\V1\CommentsController; 
 use App\Http\Controllers\Api\V1\LikeController;
 use App\Http\Controllers\Api\V1\EducationalController;
@@ -24,12 +23,14 @@ use App\Http\Controllers\Api\V1\EducationalController;
 //Auth Endpoint
 Route::post('register', [ApiController::class, 'register']);
 Route::post("login", [ApiController::class, "login"]);
+Route::get("IndividualProfile/{uniqid}", [ApiController::class, "IndividualProfile"]);
 Route::post('forgot_password', [NewPasswordController::class, 'forgotPassword']);
 Route::post('reset_password', [NewPasswordController::class, 'resetPassword']);
 //Feed back Endpoint
 Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost End Point
 Route::get('readpost', [PostController::class, 'readpost']);
+Route::get('postviews', [PostController::class, 'postviews']);
 //Read Single BlogPost End Point
 Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
 //Blog Post view 
@@ -42,12 +43,14 @@ Route::get('readcomment', [CommentsController::class, 'readcomment']);
 Route::get('readlikes', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
+Route::get("eduviews", [EducationalController::class, "eduviews"]);
 Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
 Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
-
+//Subscribers
+Route::get("viewsubscribers", [SubscribtionController::class, "viewsubscribers"]);
 
  
 //Protected Route  
@@ -71,9 +74,8 @@ Route::group([
     Route::put("updateposts/{id}", [PostController::class, "updateposts"]);
     Route::delete("deleteposts/{id}", [PostController::class, "deleteposts"]);
     //THis is the Subscribtion Endpint
-    Route::post("subscribtion", [SubscribtionController::class, "subscribtion"]);
-    Route::get("viewsubscribtion", [SubscribtionController::class, "viewsubscribtion"]);
-    Route::put("unsubscribe", [UnsubscribeController::class, "unsubscribe"]);
+    Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
+    Route::put("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
     //THis is the FeedPost EndPoint
     // Route::post("feedposts", [FeedPostController::class, "feedposts"]);
     // Route::put("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);

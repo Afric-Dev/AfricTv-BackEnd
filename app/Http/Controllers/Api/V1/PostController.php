@@ -418,10 +418,45 @@ class PostController extends Controller
             }
         }
 
+        public function postviews(Request $request)
+        {
+            // Validate the incoming request
+            $validatedData = $request->validate([
+                'post_viewed' => 'required|boolean', //clicked is a boolean flag
+                'post_id' => 'required|integer|exists:posts,id' 
+            ]);
+
+            // Get the post based on the validated post_id
+            $post = Post::find($validatedData['post_id']);
+            
+            // Check if the post exists
+            if (!$post) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Post Not Found',
+                ]);
+            }
+
+            // If view is true, Increment the clicks
+            if ($validatedData['post_viewed']) {
+                $post->post_views += 1;
+                $post->save();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Post view updated successfully',
+                'post' => $post
+            ]);
+        }
 
         public function readpost()
         {
-            $posts = Post::inRandomOrder()->get();
+            // Retrieve posts and order by recency and popularity
+            $posts = Post::orderBy('created_at', 'desc')
+                         ->orderBy('post_views', 'desc')
+                         ->get();
+
             $postCount = $posts->count();
 
             return response()->json([

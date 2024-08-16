@@ -235,10 +235,45 @@ class EducationalController extends Controller
                 ]);
             }
 
+            public function eduviews(Request $request)
+            {
+                // Validate the incoming request
+                $validatedData = $request->validate([
+                    'edu_viewed' => 'required|boolean', //clicked is a boolean flag
+                    'edu_id' => 'required|integer|exists:educationals,id' 
+                ]);
+
+                // Get the edu based on the validated edu_id
+                $edu = Educational::find($validatedData['edu_id']);
+                
+                // Check if the edu exists
+                if (!$edu) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'edu Not Found',
+                    ]);
+                }
+
+                // If view is true, Increment the clicks
+                if ($validatedData['edu_viewed']) {
+                    $edu->edu_views += 1;
+                    $edu->save();
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'edu view updated successfully',
+                    'edu' => $edu
+                ]);
+            }
+
             public function readedu()
             {
                 // Retrieve educational records with user data
-                $edus = Educational::with('user')->inRandomOrder()->get();
+                $edus = Educational::with('user')
+                    ->orderBy('created_at', 'desc')  
+                    ->orderBy('edu_views', 'desc')       
+                    ->get();
                 $eduCount = $edus->count();
 
                 return response()->json([
