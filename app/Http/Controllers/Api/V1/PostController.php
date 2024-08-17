@@ -74,37 +74,27 @@ class PostController extends Controller
             $imagePaths[] = "No images uploaded";
         }
 
-        $coverimagePath = [];
-        // Check if the request has files under the 'post_img_path' key
-        if ($request->hasFile('cover_image')) {
-            foreach ($request->file('cover_image') as $file) {
-                // Validate if the file is valid
-                if ($file->isValid()) {
-                    // Upload the file to Cloudinary
-                    $uploadCloudinary = cloudinary()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder' => 'africtv/blogs_cover_images',
-                            'resource_type' => 'auto',
-                            'transformation' => [
-                                'quality' => 'auto',
-                                'fetch_format' => 'auto'
-                            ]
+            // Handle cover_image upload and resizing
+            if ($request->hasFile('cover_image')) {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('cover_image')->getRealPath(),
+                    [
+                        'folder' => 'africtv/blogs_cover_images',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto'
                         ]
-                    );
-
-                    // Store the secure URL of the uploaded image
-                    $coverimagePath[] = $uploadCloudinary->getSecurePath();
-                } else {
-                    $coverimagePath[] = "File is not valid";
+                    ]
+                );
+                $coverimagePath = $uploadCloudinary->getSecurePath();
+                $imageId = $uploadCloudinary->getPublicId();
+             } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Cover Image Required"
+                    ], 400);
                 }
-            }
-        } else {
-            return response()->json([
-                "status" => false,
-                "message" => "Cover Image Required"
-            ], 400);
-        }
 
 
         // Function to get video duration
@@ -173,7 +163,7 @@ class PostController extends Controller
             "post_id" => $postID,
             "unique_id" => Auth::user()->unique_id,
             "user_email" => Auth::user()->email,
-            "cover_image" => json_encode($coverimagePath),
+            "cover_image" => $coverimagePath,
             "post_img_path" => json_encode($imagePaths),
             "post_vid_path" => $videoPath,
             "post_pdf_path" => $docPath,
