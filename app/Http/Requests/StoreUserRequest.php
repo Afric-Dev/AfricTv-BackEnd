@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\User;
 
 class StoreUserRequest extends FormRequest
 {
@@ -23,13 +22,35 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-                "avatar" => "nullable|image|max:2048",
-                "name" => "required",
-                "email" => "required|email|unique:users",
-                "phone_number" => "required",
-                "bio" => "nullable|max:100",
-                "link" => "nullable|max:100",
-                "password" => "required|confirmed"
+            "avatar" => "nullable|image|max:2048",
+            "name" => "required",
+            "email" => "required|email|unique:users",
+            "phone_number" => "required",
+            "bio" => "nullable|max:100",
+            "link" => "nullable|max:100",
+            "password" => "required|confirmed"
+        ];
+    }
+
+    /**
+     * Get the custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'avatar.image' => 'The avatar must be an image file.',
+            'avatar.max' => 'The avatar must not exceed 2048 kilobytes.',
+            'name.required' => 'The name field is required.',
+            'email.required' => 'The email field is required.',
+            'email.email' => 'The email must be a valid email address.',
+            'email.unique' => 'The email address is already registered.',
+            'phone_number.required' => 'The phone number field is required.',
+            'bio.max' => 'The bio must not exceed 100 characters.',
+            'link.max' => 'The link must not exceed 100 characters.',
+            'password.required' => 'The password field is required.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ];
     }
 }

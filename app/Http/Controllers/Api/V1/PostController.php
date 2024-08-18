@@ -8,34 +8,14 @@ use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StorePostRequest;
 
 class PostController extends Controller
 {
-     public function uploadpost(Request $request) 
+     public function uploadpost(StorePostRequest $request) 
     { 
         // Data Validation
-        $request->validate([ 
-            // "user_id" => "required",
-            // "user_name" => "required",
-            // "unique_id" => "required", 
-            // "user_email" => "required|email",
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'post_img_path' => 'array',
-            'post_img_path.*' => 'required|image|max:2048',
-            'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
-            // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
-            // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
-            "category" => "required|string|max:255",
-            "post_title" => "required|string|max:255",
-            "PostbodyHtml" => "required",
-            "postbodyJson" => "nullable",
-            "postBodytext" => "required",
-            "post_views" => "nullable",
-            "link" => "nullable",
-            "hashtags" => "nullable|max:255",
-            //"post_ending" => "nullable",
-            //"date" => "nullable|date",
-        ]);
+        $request->validated($request->all());
 
         $firstWord = strtok($request->user_name, ' ');
         // Generate a random four-digit number
