@@ -27,6 +27,7 @@ return new class extends Migration
             $table->enum('taken', ['YES', 'NO']);
             $table->string('ads_id');
             $table->timestamps();
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

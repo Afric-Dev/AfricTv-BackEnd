@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Models\Ads;
+use App\Models\User;
 use App\Models\AdsPayment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-
+use App\Mail\AdInactiveNotification;
+use Illuminate\Support\Facades\Mail;
 
 class AdsController extends Controller
 {
@@ -158,7 +160,7 @@ class AdsController extends Controller
     //not done with this work
     public function adInactive(Request $request)
     {
-        // Fetch ads with zero clicks and status 'YES'
+        // Fetch ads with zero clicks and status 'ACTIVE'
         $ads = Ads::where('status', 'ACTIVE')
                   ->where('clicks', 0)
                   ->get();
@@ -169,10 +171,18 @@ class AdsController extends Controller
             foreach ($ads as $ad) {
                 $ad->status = 'INACTIVE';
                 $ad->save();
-            }
 
+                //user relation in the Ads model to get the owner
+                $owner = $ad->user; 
+                
+                // Send email notification to the owner
+                if ($owner && $owner->email) {
+                    Mail::to($owner->email)->send(new AdInactiveNotification($ad));
+                }
+            }
+            
             return response()->json([
-                'message' => 'Ads with zero clicks have been deactivated.'
+                'message' => 'Ads with zero clicks have been deactivated, and notifications have been sent to the owners.'
             ]);
         } else {
             return response()->json([
@@ -180,7 +190,6 @@ class AdsController extends Controller
             ]);
         }
     }
-
 
     public function AdsPerClicks(Request $request)
     {

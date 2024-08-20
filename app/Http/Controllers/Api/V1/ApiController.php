@@ -23,6 +23,8 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Carbon\Carbon;    
+
     
 class ApiController extends Controller
 {
@@ -92,6 +94,12 @@ class ApiController extends Controller
             $request->validated($request->all());
 
             $user = User::find($userId);
+            if ($user->updated_at->gt(Carbon::now()->subHours(24))) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "You cannot update your profile until 24 hours have passed."
+                ]);
+            }
 
             if ($user) {
                 // Update user properties only if the input is provided, otherwise retain the current data
