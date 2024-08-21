@@ -17,4 +17,9 @@ class Likes extends Model
         'post_email',
         'reaction_type',
     ];
+
+   public function user()
+   {
+       return $this->belongsTo(User::class, 'user_id');
+   }
 }

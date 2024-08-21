@@ -438,7 +438,6 @@ class PostController extends Controller
 
         public function readspecificpost($uniqid, $post_title)
         {
-            // Retrieve the post with the given post_title and unique_id along with the user data
             $post = Post::with('user')
                         ->where('post_title', $post_title)
                         ->where('unique_id', $uniqid)

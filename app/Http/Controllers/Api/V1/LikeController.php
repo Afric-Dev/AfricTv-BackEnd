@@ -46,12 +46,12 @@ class LikeController extends Controller
 
                 return response()->json([
                     "status" => true,
-                    "message" => "Comment deleted successfully"
+                    "message" => "Like deleted successfully"
                 ]);
             } else {
                 return response()->json([
                     "status" => false,
-                    "message" => "Comment not found"
+                    "message" => "Like not found"
                 ]);
             }
         }
@@ -65,7 +65,9 @@ class LikeController extends Controller
             $postId = $validated['post_id'];
 
             // Find all like associated with the post ID
-            $like = likes::where('post_id', $postId)->get();
+            $like = likes::with('user')
+                        ->where('post_id', $postId)
+                        ->get();
 
             // Return the like in a JSON response
             return response()->json([

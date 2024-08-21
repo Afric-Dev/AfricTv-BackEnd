@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\SubscribtionController;
 use App\Http\Controllers\Api\V1\CommentsController; 
 use App\Http\Controllers\Api\V1\LikeController;
 use App\Http\Controllers\Api\V1\EducationalController;
+use App\Http\Controllers\Api\V1\TrendingController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
@@ -49,8 +50,10 @@ Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
-//Subscribers
+//Subscribers End Point
 Route::get("viewsubscribers", [SubscribtionController::class, "viewsubscribers"]);
+//Trending End point
+Route::get("trending", [TrendingController::class, "trending"]);
 
  
 //Protected Route  
