@@ -5,56 +5,77 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Likes;
+use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
-     public function like(Request $request) {
+    public function like(Request $request) {
+        // Validate the incoming request
         $request->validate([
-            // "user_id" => "required",
-            // "user_email" => "required",
-            "post_id" => "required",
-            "post_email" => "required",
+            "post_id" => "required|regex:/^@\w+$/", 
             "reaction_type" => "required|max:55",
         ]);
 
-        $likes = Likes::create([
-            "user_id" => Auth::user()->id,
-            "user_email" => Auth::user()->email,
-            "post_id" => $request->post_id,
-            "post_email" => $request->user_email,
-            "reaction_type" => $request->user_name,
-        ]);
+        // Find the post based on the post_id format
+        $post = Post::where('post_id', $request->post_id)->firstOrFail();
+
+        // Create or update the like/reaction
+        $like = Likes::updateOrCreate(
+            [
+                "user_id" => Auth::user()->id,
+                "post_id" => $post->id,
+            ],
+            [
+                "user_email" => Auth::user()->email,
+                "reaction_type" => $request->reaction_type
+            ]
+        );
+
+        // Increment the likes count
+        $post->increment('likes_count');
+        $post->save();
 
         return response()->json([
             "status" => true,
-            "message" => "Liked Successfully"
+            "message" => "Vote Successfully",
+            "like" => $like
         ]);
     }
 
-      public function unlike(Request $request)
-        {
-            $request->validate([
-                'like_id' => 'required|integer'
-            ]);
+    public function unlike(Request $request)
+    {
+        $request->validate([
+            'like_id' => 'required|integer'
+        ]);
 
-            $likeId = $request->input('like_id'); 
-            $like = Likes::find($likeId);
+        $likeId = $request->input('like_id'); 
+        $like = Likes::find($likeId);
 
-            if ($like) {
-                $like->delete();
+        if ($like) {
+            // Find the related post
+            $post = Post::find($like->post_id);
 
-                return response()->json([
-                    "status" => true,
-                    "message" => "Like deleted successfully"
-                ]);
-            } else {
-                return response()->json([
-                    "status" => false,
-                    "message" => "Like not found"
-                ]);
+            if ($post) {
+                // Decrement the likes count
+                $post->decrement('likes_count');
+                $post->save();
             }
+
+            // Delete the like
+            $like->delete();
+
+            return response()->json([
+                "status" => true,
+                "message" => "Vote deleted successfully"
+            ]);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Vote not found"
+            ]);
         }
+    }
 
         public function readlikes(Request $request)
         {

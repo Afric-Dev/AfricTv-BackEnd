@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Comments;
+use App\Models\Post;
 use Intervention\Image\Facades\Image;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Support\Facades\Auth;
@@ -12,22 +13,19 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class CommentsController extends Controller
 { 
-    public function comments(Request $request) {
+    public function comments(Request $request)
+    {
+        // Validate the incoming request
         $request->validate([
-            "post_id" => "required",
-            "post_email" => "required",
-            // "user_id" => "required",
-            // "user_email" => "required|email",
-            // "user_name" => "required",
-            //"unique_id" => "required",
+            "post_id" => "required|regex:/^@\w+$/",
             "comments" => "required",
-            "comments_vid_path" => "nullable|mimes:mp4,avi,mov,wmv,flv",
+            "comments_vid_path" => "nullable|mimes:mp4,avi,mov,wmv,flv|max:20480", // Max video file size: 20MB
             'comments_img_path' => 'array',
             'comments_img_path.*' => "nullable|image|max:2048",
-            "comments_link" => "nullable", 
+            "comments_link" => "nullable|url", 
         ]);
 
-       // Initialize an array to store image paths
+        // Initialize an array to store image paths
         $imagePaths = [];
         // Check if the request has files under the 'comments_img_path' key
         if ($request->hasFile('comments_img_path')) {
@@ -49,20 +47,18 @@ class CommentsController extends Controller
 
                     // Store the secure URL of the uploaded image
                     $imagePaths[] = $uploadCloudinary->getSecurePath();
-                } else {
-                    $imagePaths[] = "File is not valid";
                 }
             }
-        } else {
-            $imagePaths[] = "No images uploaded";
         }
 
         // Function to get video duration
         function getVideoDuration($file)
         {
+        
             return 0; 
         }
 
+        // Process video upload if exists
         if ($request->hasFile('comments_vid_path')) {
             // Get the duration of the video
             $duration = getVideoDuration($request->file('comments_vid_path'));
@@ -76,6 +72,7 @@ class CommentsController extends Controller
             }
 
             try {
+                // Upload video to Cloudinary
                 $uploadCloudinary = cloudinary()->upload(
                     $request->file('comments_vid_path')->getRealPath(),
                     [
@@ -96,26 +93,34 @@ class CommentsController extends Controller
                 ]);
             }
         } else {
-            $videoPath = "No Video Uploaded";
+            $videoPath = null;
         }
 
+        // Find the post by 'post_id'
+        $post = Post::where('post_id', $request->post_id)->firstOrFail();
 
+        // Create the comment
         $comments = Comments::create([
-            "post_id" => $request->post_id,
-            "post_email" => $request->post_email,
-            "user_id" => Auth::user()->id
+            "post_id" => $post->id,
+            "post_email" => $post->email, 
+            "user_id" => Auth::user()->id,
             "user_email" => Auth::user()->email,
             "user_name" => Auth::user()->name,
-            "unique_id" => Auth::user()->unique_id,
+            "unique_id" => uniqid(),
             "comments" => $request->comments,
             "comments_vid_path" => $videoPath,
-            "comments_img_path" => json_encode($imagePaths),
+            "comments_img_path" => json_encode($imagePaths), 
             "comments_link" => $request->comments_link,
+
         ]);
+
+        // Increment the comments count for the post
+        $post->increment('comments_count');
 
         return response()->json([
             "status" => true,
-            "message" => "Comment Uploaded Successfully"
+            "message" => "Comment Uploaded Successfully",
+            "comment" => $comments
         ]);
     }
 
@@ -252,7 +257,8 @@ class CommentsController extends Controller
         {
            // Validate the request
             $request->validate([
-                'comment_id' => 'required|integer'
+                'comment_id' => 'required|integer',
+                "post_id" => "required|regex:/^@\w+$/",
             ]);
 
             // Get the comment that has this comment_id
@@ -266,6 +272,16 @@ class CommentsController extends Controller
                     "message" => "comment not found"
                 ]);
             }
+
+            // Find the post by 'post_id'
+            $post = Post::find($comment->post_id);
+
+            if ($post) {
+                // Decrement the likes count
+                $post->decrement('comments_count');
+                $post->save();
+            }
+
 
             // Check if the authenticated user is the owner of the comment
             if (Auth::user()->id === $comment->user_id) {

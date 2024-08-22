@@ -71,11 +71,11 @@ Route::group([
     //Ads Endpoint
     Route::post("adActive", [AdsController::class, "adActive"]);
     Route::post("adInactive", [AdsController::class, "adInactive"]);
-    Route::delete("deleteads", [AdsController::class, "deleteads"]);
+    Route::post("deleteads", [AdsController::class, "deleteads"]);
     //THis is the BlogPost End Point
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
     Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
-    Route::delete("deleteposts/{id}", [PostController::class, "deleteposts"]);
+    Route::post("deleteposts", [PostController::class, "deleteposts"]);
     //THis is the Subscribtion Endpint
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
     Route::post("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
@@ -86,12 +86,12 @@ Route::group([
     //This is the Comment EndPoint
     Route::post("comments", [CommentsController::class, "comments"]);
     Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
-    Route::delete("deletecomment/{id}", [CommentsController::class, "deletecomment"]);
+    Route::post("deletecomment", [CommentsController::class, "deletecomment"]);
     //This is the Like EndPoint
     Route::post("like", [LikeController::class, "like"]);
-    Route::post("unlike/{id}", [LikeController::class, "unlike"]); 
+    Route::post("unlike", [LikeController::class, "unlike"]); 
 
     //This is for educational end point
     Route::post("educational", [EducationalController::class, "educational"]);
-    Route::delete("deleteedupost", [EducationalController::class, "deleteedupost"]);
+    Route::post("deleteedupost", [EducationalController::class, "deleteedupost"]);
 });

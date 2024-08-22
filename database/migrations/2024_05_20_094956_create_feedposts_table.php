@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('feedposts', function (Blueprint $table) {
-            $table->bigIncrements('id'); // Primary key
-            $table->unsignedBigInteger('user_id'); // Foreign key referencing users table
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('user_id'); 
             $table->string('user_name');
             $table->string('unique_id');
             $table->string('user_email');
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('post_body');
             $table->string('avatar_path');
             $table->string('user');
-            $table->integer('post_views')->default(0); // Assuming it's an integer type
+            $table->integer('post_views')->default(0); 
             $table->date('date')->nullable();
             $table->timestamps();
 

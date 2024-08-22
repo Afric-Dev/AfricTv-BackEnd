@@ -9,6 +9,8 @@ use Intervention\Image\Facades\Image;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePostRequest;
+use Carbon\Carbon;
+
 
 class PostController extends Controller
 {
@@ -16,8 +18,8 @@ class PostController extends Controller
     { 
         // Data Validation
         $request->validated($request->all());
-
-        $firstWord = strtok($request->user_name, ' ');
+        $user_name = Auth::user()->name;
+        $firstWord = strtok($user_name, ' ');
         // Generate a random four-digit number
         $randomNumber = rand(10000, 99999);
 
@@ -153,6 +155,8 @@ class PostController extends Controller
             "postbodyJson" => $request->postbodyJson,
             "postBodytext" => $request->postBodytext,
             "post_views" => $request->post_views ?? 0,
+            "likes_count" => $request->likes_count ?? 0,
+            "comments_count" => $request->comments_count ?? 0,
             "link" => $request->link,
             "hashtags" => $request->hashtags,
             //"post_ending" => $request->post_ending,
@@ -351,47 +355,47 @@ class PostController extends Controller
     }
 
 
-        public function deleteposts(Request $request)
-        {
-            // Validate the request
-            $request->validate([
-                'id' => 'required|integer'
+    public function deleteposts(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'post_id' => 'required|regex:/^@\w+$/'
+        ]);
+
+        // Get the post by post_id
+        $post = Post::where('post_id', $request->input('post_id'))->first();
+
+        // Check if the post exists
+        if (!$post) {
+            return response()->json([
+                "status" => false,
+                "message" => "Post not found"
             ]);
-
-            // Get the post that has this id
-            $postId = $request->input('id');
-            $post = Post::find($postId);
-
-            // Check if the post exists
-            if (!$post) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "Post not found"
-                ]);
-            }
-
-            // Check if the authenticated user is the owner of the post
-            if (Auth::user()->id === $post->user_id) {
-                // Delete the post
-                $post->delete();
-
-                return response()->json([
-                    "status" => true,
-                    "message" => "Post deleted successfully"
-                ]);
-            } else {
-                return response()->json([
-                    "status" => false,
-                    "message" => "You are not permitted to delete this post"
-                ]);
-            }
         }
+
+        // Check if the authenticated user is the owner of the post
+        if (Auth::user()->id === $post->user_id) {
+            // Delete the post
+            $post->delete();
+
+            return response()->json([
+                "status" => true,
+                "message" => "Post deleted successfully"
+            ]);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "You are not permitted to delete this post"
+            ]);
+        }
+    }
+
 
         public function postviews(Request $request)
         {
             // Validate the incoming request
             $validatedData = $request->validate([
-                'post_viewed' => 'required|boolean', //clicked is a boolean flag
+                'post_viewed' => 'required|boolean', 
                 'post_id' => 'required|integer|exists:posts,id' 
             ]);
 
@@ -419,22 +423,43 @@ class PostController extends Controller
             ]);
         }
 
-        public function readpost()
-        {
-            // Retrieve posts and order by recency and popularity
-            $posts = Post::orderBy('created_at', 'desc')
-                         ->orderBy('post_views', 'desc')
-                         ->get();
+    public function readpost()
+    {
+        // Timeframe for trending (posts from the last 48 hours)
+        $timeframe = Carbon::now()->subHours(48);   
 
-            $postCount = $posts->count();
+        // Fetch posts within the specified timeframe
+        $posts = Post::where('created_at', '>=', $timeframe)
+            ->withCount(['likes', 'comments']) 
+            ->get();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Post data',
-                'data' => $posts,
-                'count' => $postCount,
-            ]);
-        }
+        // Calculate a trending score for each post
+        $posts->map(function ($post) {
+            // Formula for trending score
+            $post->post_score = ($post->likes_count * 1.5) + 
+                                ($post->post_views * 1);
+            return $post;
+        });
+
+        // Sort posts by their trending score in descending order
+        $posts = $posts->sortByDesc('post_score');
+
+        // Introduce randomness: Shuffle the posts, but prioritize higher-scoring ones
+        $shuffledPosts = $posts->shuffle()->sortByDesc(function ($post) {
+            // Combine score priority and recency
+            return $post->post_score + (strtotime($post->created_at) / 1000000); 
+        });
+
+        $postCount = $shuffledPosts->count();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Post data',
+            'data' => $shuffledPosts->values()->all(),
+            'count' => $postCount,
+        ]);
+    }
+
 
         public function readspecificpost($uniqid, $post_title)
         {

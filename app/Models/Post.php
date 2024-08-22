@@ -24,6 +24,8 @@ class Post extends Model
         'postbodyJson',
         'postBodytext',
         'post_views',
+        'likes_count',
+        'comments_count',
         'link',
         'hashtags',
         'post_ending',
@@ -38,12 +40,12 @@ class Post extends Model
 
     public function likes()
     {
-        return $this->hasMany(Likes::class);
+        return $this->hasMany(Likes::class, 'post_id');
     }
 
     public function comments()
     {
-        return $this->hasMany(Comments::class);
+        return $this->hasMany(Comments::class, 'post_id');
     }
 
 }

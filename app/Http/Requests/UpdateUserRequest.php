@@ -27,7 +27,7 @@ class UpdateUserRequest extends FormRequest
             "email" => "required|email",
             "phone_number" => "required",
             "bio" => "nullable|max:100",
-            "link" => "nullable|max:100",
+            "link" => "nullable|max:100|url",
             "password" => "nullable|confirmed"
         ];
     }

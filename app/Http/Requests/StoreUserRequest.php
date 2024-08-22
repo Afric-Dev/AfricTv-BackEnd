@@ -27,7 +27,7 @@ class StoreUserRequest extends FormRequest
             "email" => "required|email|unique:users",
             "phone_number" => "required",
             "bio" => "nullable|max:100",
-            "link" => "nullable|max:100",
+            "link" => "nullable|max:100|url",
             "password" => "required|confirmed"
         ];
     }

@@ -11,19 +11,14 @@ class Comments extends Model
 
     protected $fillable = [
         "post_id",
-        "post_email",
         "user_id",
-        "user_email",
-        "user_name",
-        "unique_id",
         "comments",
         "comments_vid_path",
         "comments_img_path",
         "comments_link",
-        "date",
     ];
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+   public function user()
+   {
+       return $this->belongsTo(User::class, 'user_id');
+   }
 }

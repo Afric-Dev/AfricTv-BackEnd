@@ -14,7 +14,6 @@ class Likes extends Model
         'user_id',
         'user_email',
         'post_id',
-        'post_email',
         'reaction_type',
     ];
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('subscriber_id');
             $table->string('subscriber_email'); 
             $table->timestamps();
-            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
     });
 }
     /**

@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('likes', function (Blueprint $table) {
             $table->bigIncrements('id'); // Primary key
-            $table->integer('user_id'); 
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
             $table->string('user_email');
-            $table->integer('post_id');
-            $table->string('post_email');
+            $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
             $table->string('reaction_type')->nullable();
-            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::dropIfExists('likes');
+        Schema::dropIfExists('likes');
     }
 };

@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class TrendingController extends Controller
 {
     public function trending() {
-        // Set the timeframe for trending (posts from the last 24 hours)
+        //Timeframe for trending (posts from the last 24 hours)
         $timeframe = Carbon::now()->subHours(24);
 
         // Fetch posts within the specified timeframe

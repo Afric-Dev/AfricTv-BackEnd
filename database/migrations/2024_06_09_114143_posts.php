@@ -31,7 +31,9 @@ return new class extends Migration
             $table->string('link')->nullable();
             $table->string('hashtags')->nullable();
             $table->string('post_ending')->nullable();
-            $table->integer('post_views')->default(0); // Assuming it's an integer type
+            $table->integer('post_views')->default(0);
+            $table->integer('likes_count')->default(0);
+            $table->integer('comments_count')->default(0);
             $table->date('date')->nullable();
             $table->timestamps();
 
