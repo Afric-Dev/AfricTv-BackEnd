@@ -120,7 +120,7 @@ class ApiController extends Controller
                   // Delete the user former avatar
                   if ($user->imageId) {
                         Cloudinary::destroy($user->imageId);
-                    }
+                  }
 
                     $uploadCloudinary = cloudinary()->upload(
                         $request->file('avatar')->getRealPath(),

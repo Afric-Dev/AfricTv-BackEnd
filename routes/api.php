@@ -34,8 +34,6 @@ Route::get('readpost', [PostController::class, 'readpost']);
 Route::get('postviews', [PostController::class, 'postviews']);
 //Read Single BlogPost End Point
 Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
-//Blog Post view 
-Route::post('ViewBlog/{id}', [PostController::class, 'ViewBlog']);
 //Read FeedPost End Point
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
 //Read Comment End Point
@@ -74,7 +72,7 @@ Route::group([
     Route::post("deleteads", [AdsController::class, "deleteads"]);
     //THis is the BlogPost End Point
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
-    Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
+    // Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
     Route::post("deleteposts", [PostController::class, "deleteposts"]);
     //THis is the Subscribtion Endpint
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);

@@ -12,6 +12,7 @@ use App\Http\Requests\StorePostRequest;
 use Carbon\Carbon;
 
 
+
 class PostController extends Controller
 {
      public function uploadpost(StorePostRequest $request) 
@@ -47,7 +48,7 @@ class PostController extends Controller
 
                     // Store the secure URL of the uploaded image
                     $imagePaths[] = $uploadCloudinary->getSecurePath();
-                    $postimageId = $uploadCloudinary->getPublicId();
+                    $postimageId[] = $uploadCloudinary->getPublicId();
                 } else {
                     $imagePaths[] = "File is not valid";
                 }
@@ -149,7 +150,7 @@ class PostController extends Controller
             "cover_image" => $coverimagePath,
             "coverimageId" => $coverimageId,
             "post_img_path" => json_encode($imagePaths),
-            "postimageId" => $postimageId ?? 'no public id passed',
+            "postimageId" => json_encode($postimageId) ?? 'no public id passed',
             "post_vid_path" => $videoPath,
             "postvideoId" => $postvideoId ?? 'no public id passed',
             "post_pdf_path" => $docPath,
@@ -170,194 +171,171 @@ class PostController extends Controller
 
         return response()->json([
             "status" => true,
-            "message" => "BlogPost Uploaded Successfully"
+            "message" => "Blog Uploaded Successfully"
         ]);
     }
 
-      public function updateposts(Request $request)
-    {
-        $request->validate([
-            "id" => "required|exists:posts,id",
-            "cover_image" => 'nullable|image|max:2048',
-            'post_img_path' => 'array',
-            'post_img_path.*' => 'nullable|image|max:2048',
-            'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
-            "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
-            "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
-            "category" => "required",
-            "post_title" => "required",
-            "PostbodyHtml" => "required",
-            "postbodyJson" => "required",
-            "postBodytext" => "required",
-            "link" => "nullable",
-            "hashtags" => "nullable",
-            "post_ending" => "nullable",
-        ]);
+    //Not in use for now till after launch (Working on it)
+    //   public function updateposts(Request $request)
+    // {
+    //     $request->validate([
+    //         "id" => "required|exists:posts,id",
+    //         "cover_image" => 'nullable|image|max:2048',
+    //         'post_img_path' => 'array',
+    //         'post_img_path.*' => 'nullable|image|max:2048',
+    //         'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
+    //         "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
+    //         "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
+    //         "category" => "required",
+    //         "post_title" => "required",
+    //         "PostbodyHtml" => "required",
+    //         "postbodyJson" => "required",
+    //         "postBodytext" => "required",
+    //         "link" => "nullable",
+    //         "hashtags" => "nullable",
+    //         "post_ending" => "nullable",
+    //     ]);
 
-        $postId = $request->input('id'); 
-        $post = Post::find($postId);
+    //     $postId = $request->input('id'); 
+    //     $post = Post::find($postId);
 
-        if ($post) {
-            // Update post properties
-            $post->post_title = $request->post_title;
-            $post->category = $request->category;
-            $post->link = $request->link;
-            $post->PostbodyHtml = $request->PostbodyHtml;
-            $post->postbodyJson = $request->postbodyJson;
-            $post->postBodytext = $request->postBodytext;
-            $post->hashtags = $request->hashtags;
-            $post->post_ending = $request->post_ending;
+    //     if ($post) {
+    //         // Update post properties
+    //         $post->post_title = $request->post_title;
+    //         $post->category = $request->category;
+    //         $post->link = $request->link;
+    //         $post->PostbodyHtml = $request->PostbodyHtml;
+    //         $post->postbodyJson = $request->postbodyJson;
+    //         $post->postBodytext = $request->postBodytext;
+    //         $post->hashtags = $request->hashtags;
+    //         $post->post_ending = $request->post_ending;
 
-        // Initialize an array to store image paths
-        $imagePaths = [];
-        // Check if the request has files under the 'post_img_path' key
-        if ($request->hasFile('post_img_path')) {
-            foreach ($request->file('post_img_path') as $file) {
-                // Validate if the file is valid
-                if ($file->isValid()) {
-                    // Upload the file to Cloudinary
-                    $uploadCloudinary = cloudinary()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder' => 'africtv/blogs_images',
-                            'resource_type' => 'auto',
-                            'transformation' => [
-                                'quality' => 'auto',
-                                'fetch_format' => 'auto'
-                            ]
-                        ]
-                    );
+    //     // Initialize an array to store image paths
+    //     $imagePaths = [];
+    //     // Check if the request has files under the 'post_img_path' key
+    //     if ($request->hasFile('post_img_path')) {
+    //         foreach ($request->file('post_img_path') as $file) {
+    //             // Validate if the file is valid
+    //             if ($file->isValid()) {
+    //                 // Upload the file to Cloudinary
+    //                 $uploadCloudinary = cloudinary()->upload(
+    //                     $file->getRealPath(),
+    //                     [
+    //                         'folder' => 'africtv/blogs_images',
+    //                         'resource_type' => 'auto',
+    //                         'transformation' => [
+    //                             'quality' => 'auto',
+    //                             'fetch_format' => 'auto'
+    //                         ]
+    //                     ]
+    //                 );
 
-                    // Store the secure URL of the uploaded image
-                    $imagePaths[] = $uploadCloudinary->getSecurePath();
-                } else {
-                    $imagePaths[] = "File is not valid";
-                }
-            }
-        } else {
-            $imagePaths[] = "No images uploaded";
-        }
-
-
-          //Handle blog post cover image (required)
-          if ($request->hasFile('cover_image')) {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('cover_image')->getRealPath(),
-                    [
-                        'folder' => 'africtv/blogs_cover_images',
-                        'resource_type' => 'auto',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto'
-                        ]
-                    ]
-                );
-                $coverimagePath = $uploadCloudinary->getSecurePath();
-        } else {
-            return response()->json([
-                "status" => false,
-                "message" => "Cover Image Required"
-            ], 400);
-        }
-
-        // Function to get video duration
-        function getVideoDuration($file)
-        {
-            return 0; 
-        }
-
-        if ($request->hasFile('post_vid_path')) {
-            // Get the duration of the video
-            $duration = getVideoDuration($request->file('post_vid_path'));
-
-            // Validate video duration
-            if ($duration > 7200) { // 7200 seconds = 2 hours
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Video duration should not exceed 2 hours.',
-                ]);
-            }
-
-            try {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('post_vid_path')->getRealPath(),
-                    [
-                        'folder' => 'africtv/blogs_videos',
-                        'resource_type' => 'auto',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto'
-                        ]
-                    ]
-                );
-                $videoPath = $uploadCloudinary->getSecurePath();
-            } catch (\Exception $e) {
-                // Handle upload error
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Video upload failed: ' . $e->getMessage(),
-                ]);
-            }
-        } else {
-            $videoPath = null;
-        }
-
-            // Handle document upload
-            if ($request->hasFile('post_pdf_path')) {
-                $docPath = $request->file('post_pdf_path')->store('public/documents');
-                $docPath = str_replace('public/', '', $docPath);
-            } else {
-                $docPath = "no file uploaded";
-            }
-
-            // Handle song upload
-            if ($request->hasFile('post_song_path')) {
-                $songPath = $request->file('post_song_path')->store('public/songs');
-                $songPath = str_replace('public/', '', $songPath);
-            } else {
-                $songPath = "no file uploaded";
-            }
-            // Save the updated post
-            $post->save();
-
-            // Send mail if it was successful (commented out)
-            // Mail::to($request->user_email)->send(new ProfileUpdateMail($post));
-
-            return response()->json([
-                "status" => true,
-                "message" => "BlogPost Updated Successfully"
-            ]);
-        } else {
-            return response()->json([
-                "status" => false,
-                "message" => "BlogPost Not Found"
-            ]);
-        }
-    }
+    //                 // Store the secure URL of the uploaded image
+    //                 $imagePaths[] = $uploadCloudinary->getSecurePath();
+    //             } else {
+    //                 $imagePaths[] = "File is not valid";
+    //             }
+    //         }
+    //     } else {
+    //         $imagePaths[] = "No images uploaded";
+    //     }
 
 
-    public function ViewBlog($id)
-    {
-        // Retrieve the post
-        $post = Post::find($id);
+    //       //Handle blog post cover image (required)
+    //       if ($request->hasFile('cover_image')) {
+    //             $uploadCloudinary = cloudinary()->upload(
+    //                 $request->file('cover_image')->getRealPath(),
+    //                 [
+    //                     'folder' => 'africtv/blogs_cover_images',
+    //                     'resource_type' => 'auto',
+    //                     'transformation' => [
+    //                         'quality' => 'auto',
+    //                         'fetch_format' => 'auto'
+    //                     ]
+    //                 ]
+    //             );
+    //             $coverimagePath = $uploadCloudinary->getSecurePath();
+    //     } else {
+    //         return response()->json([
+    //             "status" => false,
+    //             "message" => "Cover Image Required"
+    //         ], 400);
+    //     }
 
-        if (!$post) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Post Not Found',
-            ]);
-        }
+    //     // Function to get video duration
+    //     function getVideoDuration($file)
+    //     {
+    //         return 0; 
+    //     }
 
-        // Increment the view count
-        $post->post_views += 1;
-        $post->save();
+    //     if ($request->hasFile('post_vid_path')) {
+    //         // Get the duration of the video
+    //         $duration = getVideoDuration($request->file('post_vid_path'));
 
-        return response()->json([
-            'status' => true,
-            'message' => 'View Updated successfully',
-            'post' => $post
-        ]);
-    }
+    //         // Validate video duration
+    //         if ($duration > 7200) { // 7200 seconds = 2 hours
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Video duration should not exceed 2 hours.',
+    //             ]);
+    //         }
+
+    //         try {
+    //             $uploadCloudinary = cloudinary()->upload(
+    //                 $request->file('post_vid_path')->getRealPath(),
+    //                 [
+    //                     'folder' => 'africtv/blogs_videos',
+    //                     'resource_type' => 'auto',
+    //                     'transformation' => [
+    //                         'quality' => 'auto',
+    //                         'fetch_format' => 'auto'
+    //                     ]
+    //                 ]
+    //             );
+    //             $videoPath = $uploadCloudinary->getSecurePath();
+    //         } catch (\Exception $e) {
+    //             // Handle upload error
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Video upload failed: ' . $e->getMessage(),
+    //             ]);
+    //         }
+    //     } else {
+    //         $videoPath = null;
+    //     }
+
+    //         // Handle document upload
+    //         if ($request->hasFile('post_pdf_path')) {
+    //             $docPath = $request->file('post_pdf_path')->store('public/documents');
+    //             $docPath = str_replace('public/', '', $docPath);
+    //         } else {
+    //             $docPath = "no file uploaded";
+    //         }
+
+    //         // Handle song upload
+    //         if ($request->hasFile('post_song_path')) {
+    //             $songPath = $request->file('post_song_path')->store('public/songs');
+    //             $songPath = str_replace('public/', '', $songPath);
+    //         } else {
+    //             $songPath = "no file uploaded";
+    //         }
+    //         // Save the updated post
+    //         $post->save();
+
+    //         // Send mail if it was successful (commented out)
+    //         // Mail::to($request->user_email)->send(new ProfileUpdateMail($post));
+
+    //         return response()->json([
+    //             "status" => true,
+    //             "message" => "BlogPost Updated Successfully"
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             "status" => false,
+    //             "message" => "BlogPost Not Found"
+    //         ]);
+    //     }
+    // }
 
 
     public function deleteposts(Request $request)
@@ -380,6 +358,28 @@ class PostController extends Controller
 
         // Check if the authenticated user is the owner of the post
         if (Auth::user()->id === $post->user_id) {
+            
+            // Delete the post media's
+            if ($post->coverimageId) {
+                Cloudinary::destroy($post->coverimageId);
+            }
+            if ($post->postimageId) {
+
+            // Check if it's an array
+            if (is_array($post->postimageId)) {
+                // Convert array of IDs to a comma-separated string
+                $imageIds = implode(',', $post->postimageId);
+            } else {
+                // If it's a single ID, just use it directly
+                $imageIds = $post->postimageId;
+            }
+            Cloudinary::destroy($imageIds);
+            }
+            
+            if ($post->postvideoId) {
+                Cloudinary::destroy($post->postvideoId);
+            }
+
             // Delete the post
             $post->delete();
 
