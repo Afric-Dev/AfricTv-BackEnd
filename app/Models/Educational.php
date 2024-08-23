@@ -13,11 +13,11 @@ class Educational extends Model
 
     protected $fillable = [
             "user_id",
-            "unique_id",
             "title",
             "description",
             "links",
             "edu_vid_path",
+            "eduvideoId",
             "edu_views",
     ];
     

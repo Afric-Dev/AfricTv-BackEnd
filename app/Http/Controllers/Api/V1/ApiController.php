@@ -68,6 +68,7 @@ class ApiController extends Controller
             // Create User
             $user = User::create([
                 "avatar" => $imageUrl,
+                "imageId" => $imageId,
                 "name" => $request->name,
                 "unique_id" => $unique_id,
                 "email" => $request->email,
@@ -115,6 +116,12 @@ class ApiController extends Controller
 
                 // Handle avatar upload if provided
                 if ($request->hasFile('avatar')) {
+                 
+                  // Delete the user former avatar
+                  if ($user->imageId) {
+                        Cloudinary::destroy($user->imageId);
+                    }
+
                     $uploadCloudinary = cloudinary()->upload(
                         $request->file('avatar')->getRealPath(),
                         [
@@ -128,6 +135,7 @@ class ApiController extends Controller
                     );
                     $imageUrl = $uploadCloudinary->getSecurePath();
                     $imageId = $uploadCloudinary->getPublicId();
+                    $user->imageId = $imageId;
                     $user->avatar = $imageUrl;
                 }
 
@@ -148,6 +156,7 @@ class ApiController extends Controller
                 ]);
             }
         }
+
 
           // Login Api(POST)
           public function login(LoginUserRequest $request)

@@ -47,6 +47,7 @@ class PostController extends Controller
 
                     // Store the secure URL of the uploaded image
                     $imagePaths[] = $uploadCloudinary->getSecurePath();
+                    $postimageId = $uploadCloudinary->getPublicId();
                 } else {
                     $imagePaths[] = "File is not valid";
                 }
@@ -69,7 +70,7 @@ class PostController extends Controller
                     ]
                 );
                 $coverimagePath = $uploadCloudinary->getSecurePath();
-                $imageId = $uploadCloudinary->getPublicId();
+                $coverimageId = $uploadCloudinary->getPublicId();
              } else {
                     return response()->json([
                         "status" => false,
@@ -109,6 +110,7 @@ class PostController extends Controller
                     ]
                 );
                 $videoPath = $uploadCloudinary->getSecurePath();
+                $postvideoId = $uploadCloudinary->getPublicId();
             } catch (\Exception $e) {
                 // Handle upload error
                 return response()->json([
@@ -145,8 +147,11 @@ class PostController extends Controller
             "unique_id" => Auth::user()->unique_id,
             "user_email" => Auth::user()->email,
             "cover_image" => $coverimagePath,
+            "coverimageId" => $coverimageId,
             "post_img_path" => json_encode($imagePaths),
+            "postimageId" => $postimageId ?? 'no public id passed',
             "post_vid_path" => $videoPath,
+            "postvideoId" => $postvideoId ?? 'no public id passed',
             "post_pdf_path" => $docPath,
             "post_song_path" => $songPath,
             "category" => $request->category,

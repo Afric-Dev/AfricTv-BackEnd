@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('education', function (Blueprint $table) {
             $table->id();
             $table->string('user_id');
-            $table->string('unique_id');
             $table->string('title');
             $table->text('description');
             $table->string('links')->nullable();
             $table->string('edu_vid_path');
+            $table->string('eduvideoId');
             $table->string('edu_views');
             $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

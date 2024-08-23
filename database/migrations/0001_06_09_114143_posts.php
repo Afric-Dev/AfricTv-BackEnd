@@ -13,20 +13,20 @@ return new class extends Migration
     {
        Schema::create('posts', function (Blueprint $table) {
             $table->bigIncrements('id'); // Primary key
-            $table->unsignedBigInteger('user_id'); // Foreign key referencing users table
-            $table->string('user_name');
-            $table->string('unique_id');
-            $table->string('user_email');
+            $table->unsignedBigInteger('user_id'); 
             $table->string('cover_image');
+            $table->string('coverimageId');
             $table->string('post_img_path');
+            $table->string('postimageId')->nullable();
             $table->string('post_vid_path');
+            $table->string('postvideoId')->nullable();
             $table->string('post_pdf_path');
             $table->string('post_song_path');
             $table->string('category');
             $table->string('post_intro')->nullable();
             $table->string('post_title'); 
             $table->text('PostbodyHtml');
-            $table->text('postbodyJson');
+            $table->text('postbodyJson')->nullable();
             $table->text('postBodytext');
             $table->string('link')->nullable();
             $table->string('hashtags')->nullable();
