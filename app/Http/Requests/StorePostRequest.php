@@ -24,7 +24,7 @@ class StorePostRequest extends FormRequest
         return [
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'post_img_path' => 'array',
-            'post_img_path.*' => 'required|image|max:2048',
+            'post_img_path.*' => 'nullable|image|max:2048',
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
             // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
             // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",

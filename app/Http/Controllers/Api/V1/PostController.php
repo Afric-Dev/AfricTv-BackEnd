@@ -143,10 +143,7 @@ class PostController extends Controller
         // Storing post data
         $post = Post::create([
             "user_id" => Auth::user()->id,
-            "user_name" => Auth::user()->name,
             "post_id" => $postID,
-            "unique_id" => Auth::user()->unique_id,
-            "user_email" => Auth::user()->email,
             "cover_image" => $coverimagePath,
             "coverimageId" => $coverimageId,
             "post_img_path" => json_encode($imagePaths),
