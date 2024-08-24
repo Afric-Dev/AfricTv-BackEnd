@@ -48,17 +48,14 @@ class PostController extends Controller
 
                     // Store the secure URL of the uploaded image
                     $imagePaths[] = $uploadCloudinary->getSecurePath();
-                   if (empty($uploadCloudinary)) {
-                        $postimageId[] = "No public id was passed.";
-                    } else {
-                        $postimageId[] = $uploadCloudinary->getPublicId();
-                    }
+                    $postimageId[] = $uploadCloudinary->getPublicId();
                 } else {
                     $imagePaths[] = "File is not valid";
                 }
             }
         } else {
             $imagePaths[] = "No images uploaded";
+            $postimageId[] = "No images uploaded";
         }
 
             // Handle cover_image upload and resizing
@@ -116,17 +113,6 @@ class PostController extends Controller
                 );
                 $videoPath = $uploadCloudinary->getSecurePath();
                 $postvideoId = $uploadCloudinary->getPublicId();
-
-                // Store the secure URL of the uploaded image
-                $imagePaths[] = $uploadCloudinary->getSecurePath();
-                if (empty($uploadCloudinary)) {
-                    $postvideoId = "No public id was passed.";
-                } else {
-                    $postvideoId = $uploadCloudinary->getPublicId();
-                }
-
-                } else 
-
             } catch (\Exception $e) {
                 // Handle upload error
                 return response()->json([
@@ -136,6 +122,7 @@ class PostController extends Controller
             }
         } else {
             $videoPath = "No Video Uploaded";
+            $postvideoId = "No Video Uploaded";
         }
 
 
