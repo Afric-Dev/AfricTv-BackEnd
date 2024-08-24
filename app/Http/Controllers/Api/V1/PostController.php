@@ -48,7 +48,11 @@ class PostController extends Controller
 
                     // Store the secure URL of the uploaded image
                     $imagePaths[] = $uploadCloudinary->getSecurePath();
-                    $postimageId[] = $uploadCloudinary->getPublicId();
+                   if (empty($uploadCloudinary)) {
+                        $postimageId[] = "No public id was passed.";
+                    } else {
+                        $postimageId[] = $uploadCloudinary->getPublicId();
+                    }
                 } else {
                     $imagePaths[] = "File is not valid";
                 }
@@ -112,6 +116,17 @@ class PostController extends Controller
                 );
                 $videoPath = $uploadCloudinary->getSecurePath();
                 $postvideoId = $uploadCloudinary->getPublicId();
+
+                // Store the secure URL of the uploaded image
+                $imagePaths[] = $uploadCloudinary->getSecurePath();
+                if (empty($uploadCloudinary)) {
+                    $postvideoId = "No public id was passed.";
+                } else {
+                    $postvideoId = $uploadCloudinary->getPublicId();
+                }
+
+                } else 
+
             } catch (\Exception $e) {
                 // Handle upload error
                 return response()->json([
