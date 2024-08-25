@@ -13,6 +13,7 @@ class Educational extends Model
 
     protected $fillable = [
             "user_id",
+            "unique_id",
             "title",
             "description",
             "links",

@@ -145,6 +145,7 @@ class PostController extends Controller
         // Storing post data
         $post = Post::create([
             "user_id" => Auth::user()->id,
+            "unique_id" => Auth::user()->unique_id,
             "post_id" => $postID,
             "cover_image" => $coverimagePath,
             "coverimageId" => $coverimageId,
@@ -433,7 +434,8 @@ class PostController extends Controller
         $timeframe = Carbon::now()->subHours(48);   
 
         // Fetch posts within the specified timeframe
-        $posts = Post::where('created_at', '>=', $timeframe)
+        $posts = Post::with('user')
+            ->where('created_at', '>=', $timeframe)
             ->withCount(['likes', 'comments']) 
             ->get();
 

@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
        Schema::create('posts', function (Blueprint $table) {
-            $table->bigIncrements('id'); // Primary key
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id'); 
+            $table->string('unique_id');
             $table->string('cover_image');
             $table->string('coverimageId');
             $table->string('post_img_path');
