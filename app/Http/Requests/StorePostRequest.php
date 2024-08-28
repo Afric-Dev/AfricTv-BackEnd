@@ -28,7 +28,7 @@ class StorePostRequest extends FormRequest
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
             // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
             // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
-            'category' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
             'post_title' => 'required|string|max:255',
             'PostbodyHtml' => 'required',
             'postbodyJson' => 'nullable',
@@ -64,7 +64,7 @@ class StorePostRequest extends FormRequest
             // 'post_pdf_path.mimes' => 'The PDF must be a file of type: pdf, doc, docx.',
             // 'post_song_path.mimes' => 'The song must be a file of type: mp3, wav, aac, flac.',
             
-            'category.required' => 'The category field is required.',
+            // 'category.required' => 'The category field is required.',
             'category.string' => 'The category must be a string.',
             'category.max' => 'The category may not be greater than 255 characters.',
             

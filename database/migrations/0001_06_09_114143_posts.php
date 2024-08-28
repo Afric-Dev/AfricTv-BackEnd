@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('postvideoId')->nullable();
             $table->string('post_pdf_path');
             $table->string('post_song_path');
-            $table->string('category');
+            $table->string('category')->nullable();
             $table->string('post_intro')->nullable();
             $table->string('post_title'); 
             $table->text('PostbodyHtml');
