@@ -83,7 +83,7 @@ class ApiController extends Controller
 
             return response()->json([
                 "status" => true,
-                "message" => "User Created Successfully"
+                "message" => "Account Created Successfully"
             ]);
         }
 
@@ -304,6 +304,9 @@ class ApiController extends Controller
         {
             $user = User::where('unique_id', $uniqid)
                         ->first();
+            $userPosts = Post::where('unique_id', $uniqid)->get();
+            $postCount = $userPosts->count();
+
             // Check if user exists
             if (!$user) {
                 return response()->json([
@@ -316,6 +319,8 @@ class ApiController extends Controller
                 'status' => true,
                 'message' => 'User data',
                 'data' => $user,
+                'userPosts' => $userPosts,
+                'postCount' => $postCount
             ]);
         }
 

@@ -34,7 +34,7 @@ class EducationalController extends Controller
             }
 
             // Upload watermark image and get public ID
-            $watermarkImage = cloudinary()->upload('https://res.cloudinary.com/dxbft8aci/image/upload/v1723021830/a_resize_bmujeu.png', [
+            $watermarkImage = cloudinary()->upload('https://res.cloudinary.com/dxbft8aci/image/upload/v1724838891/AfricTv_2_ov7mlc.png', [
                 'folder' => 'africtv/watermarks',
                 'resource_type' => 'image'
             ])->getPublicId();
@@ -49,7 +49,7 @@ class EducationalController extends Controller
                     'transformation' => [
                         'width' => 100,
                         'height' => 100,
-                        'crop' => 'fit', // Updated crop mode
+                        'crop' => 'fit',
                         'opacity' => 30
                     ]
                 ],
@@ -79,6 +79,7 @@ class EducationalController extends Controller
                                     ])
                                 ]);
                                 $videoPath[] = $uploadCloudinary->getSecurePath();
+                                $eduvideoId[] = $uploadCloudinary->getPublicId();
                             } catch (\Exception $e) {
                                 return response()->json([
                                     'status' => false,
@@ -113,6 +114,7 @@ class EducationalController extends Controller
                                 ])
                             ]);
                             $videoPath = $uploadCloudinary->getSecurePath();
+                            $eduvideoId = $uploadCloudinary->getPublicId();
                         } catch (\Exception $e) {
                             return response()->json([
                                 'status' => false,
@@ -138,6 +140,7 @@ class EducationalController extends Controller
                 'user_id' => Auth::user()->id,
                 'unique_id' => Auth::user()->unique_id,
                 'edu_vid_path' => json_encode($videoPath),
+                'eduvideoId' => json_encode($eduvideoId),
                 'title' => $request->title,
                 'edu_views' => $request->edu_views ?? 0,
                 'links' => $request->links,
@@ -172,6 +175,10 @@ class EducationalController extends Controller
 
                 // Check if the authenticated user is the owner of the edu post
                 if (Auth::user()->id === $edu->user_id) {
+                   // Delete the edu media
+                    if ($edu->eduvideoId) {
+                        Cloudinary::destroy($post->eduvideoId);
+                    }
                     // Delete the edu post
                     $edu->delete();
 
@@ -186,29 +193,6 @@ class EducationalController extends Controller
                     ]);
                 }
             }
-
-                public function ViewEdu($id)
-                {
-                    // Retrieve the edu
-                    $edu = Educational::find($id);
-
-                    if (!$edu) {
-                        return response()->json([
-                            'status' => false,
-                            'message' => 'edu Not Found',
-                        ]);
-                    }
-
-                    // Increment the view count
-                    $edu->edu_views += 1;
-                    $edu->save();
-
-                    return response()->json([
-                        'status' => true,
-                        'message' => 'View Updated successfully',
-                        'edu' => $edu
-                    ]);
-                }
 
 
             public function readspecificedupost($uniqid, $title) 
