@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('edu_vid_path');
             $table->string('eduvideoId');
             $table->string('edu_views');
-            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

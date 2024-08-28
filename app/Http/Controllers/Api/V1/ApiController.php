@@ -18,7 +18,7 @@ use MailerSend\MailerSend;
 use Illuminate\Validation\Rule;
 use Intervention\Image\Facades\Image;
 use App\Models\Post;
-use App\Models\Feedposts;
+use App\Models\Educational;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -271,7 +271,9 @@ class ApiController extends Controller
         {
             $user = auth()->user();
             $userPosts = Post::where('user_id', $user->id)->get();
+            $eduPosts = Educational::where('user_id', $user->id)->get();
             $postCount = $userPosts->count();
+            $noofeduposts = $eduPosts->count();
 
             // $feedPosts = Feedposts::where('user_id', $user->id)->get();
             // $feedpostCount = $userPosts->count();
@@ -281,6 +283,8 @@ class ApiController extends Controller
                 'user' => $user,
                 'noofblogpost' => $postCount,
                 'blogposts' => $userPosts,
+                'eduposts' => $eduPosts,
+                'noofeduposts' => $noofeduposts,
         ]);
       }
 
@@ -302,10 +306,9 @@ class ApiController extends Controller
 
         public function IndividualProfile($uniqid)
         {
-            $user = User::where('unique_id', $uniqid)
+            $user = User::with(['posts', 'educationals'])
+                        ->where('unique_id', $uniqid)
                         ->first();
-            $userPosts = Post::where('unique_id', $uniqid)->get();
-            $postCount = $userPosts->count();
 
             // Check if user exists
             if (!$user) {
@@ -315,14 +318,25 @@ class ApiController extends Controller
                 ]);
             }
 
+            // Fetch posts and educational posts using the user's ID
+            $userPosts = Post::where('user_id', $user->id)->get();
+            $eduPosts = Educational::where('user_id', $user->id)->get();
+
+            $postCount = $userPosts->count();
+            $noofeduposts = $eduPosts->count();
+
             return response()->json([
                 'status' => true,
                 'message' => 'User data',
                 'data' => $user,
-                'userPosts' => $userPosts,
-                'postCount' => $postCount
+                'noofblogpost' => $postCount,
+                'blogposts' => $userPosts,
+                'eduposts' => $eduPosts,
+                'noofeduposts' => $noofeduposts,
             ]);
         }
+
+
 
 }
 

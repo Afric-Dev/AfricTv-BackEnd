@@ -154,45 +154,58 @@ class EducationalController extends Controller
         }
 
 
-             public function deleteedupost(Request $request)
-            {
-                // Validate the request
-                $request->validate([
-                    'id' => 'required|integer'
+        public function deleteedupost(Request $request)
+        {
+            // Validate the request
+            $request->validate([
+                'edu_id' => 'required|integer'
+            ]);
+
+            // Get the edu that has this id
+            $eduId = $request->input('edu_id');
+            $edu = Educational::find($eduId);
+
+            // Check if the educational post exists
+            if (!$edu) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Oops! Not found"
                 ]);
-
-                // Get the edu that has this id
-                $eduId = $request->input('id');
-                $edu = Educational::find($eduId);
-
-                // Check if the educational exists
-                if (!$edu) {
-                    return response()->json([
-                        "status" => false,
-                        "message" => "Oops! Not found"
-                    ]);
-                }
-
-                // Check if the authenticated user is the owner of the edu post
-                if (Auth::user()->id === $edu->user_id) {
-                   // Delete the edu media
-                    if ($edu->eduvideoId) {
-                        Cloudinary::destroy($post->eduvideoId);
-                    }
-                    // Delete the edu post
-                    $edu->delete();
-
-                    return response()->json([
-                        "status" => true,
-                        "message" => "Deleted successfully"
-                    ]);
-                } else {
-                    return response()->json([
-                        "status" => false,
-                        "message" => "You are not permitted to delete this educational post"
-                    ]);
-                }
             }
+
+            // Check if the authenticated user is the owner of the edu post
+            if (Auth::user()->id === $edu->user_id) {
+                // Delete the edu media
+                if (!empty($edu->eduvideoId)) {
+                    $videoIds = json_decode($edu->eduvideoId, true); 
+
+                    if (is_array($videoIds)) {
+                        foreach ($videoIds as $videoId) {
+                            // Extract just the public ID from the video ID 
+                            $publicId = explode('/', $videoId);
+                            $publicId = end($publicId);
+
+                            // Delete the video from Cloudinary
+                            Cloudinary::destroy($publicId);
+                        }
+                    }
+                }
+
+                // Delete the edu post
+                $edu->delete();
+
+                return response()->json([
+                    "status" => true,
+                    "message" => "Deleted successfully"
+                ]);
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "You are not permitted to delete this educational post"
+                ]);
+            }
+        }
+
 
 
             public function readspecificedupost($uniqid, $title) 
