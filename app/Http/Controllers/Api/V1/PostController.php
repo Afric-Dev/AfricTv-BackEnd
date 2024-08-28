@@ -431,7 +431,7 @@ class PostController extends Controller
     public function readpost()
     {
         // Timeframe 
-        $timeframe = Carbon::create(9999, 12, 31);
+        $timeframe = 'desc';
 
         // Fetch posts within the specified timeframe
         $posts = Post::with('user')
