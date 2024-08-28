@@ -44,7 +44,7 @@ Route::get('readlikes', [LikeController::class, 'readlikes']);
 Route::get("readedu", [EducationalController::class, "readedu"]);
 Route::get("eduviews", [EducationalController::class, "eduviews"]);
 Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
-Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
+// Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);

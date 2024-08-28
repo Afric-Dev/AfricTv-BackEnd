@@ -430,8 +430,8 @@ class PostController extends Controller
 
     public function readpost()
     {
-        // Timeframe for trending (posts from the last 48 hours)
-        $timeframe = Carbon::now()->subHours(48);   
+        // Timeframe 
+        $timeframe = Carbon::create(9999, 12, 31);
 
         // Fetch posts within the specified timeframe
         $posts = Post::with('user')
