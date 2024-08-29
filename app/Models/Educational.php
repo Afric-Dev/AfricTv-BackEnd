@@ -12,6 +12,7 @@ class Educational extends Model
     protected $table = "education";
 
     protected $fillable = [
+            "edu_id",
             "user_id",
             "unique_id",
             "title",

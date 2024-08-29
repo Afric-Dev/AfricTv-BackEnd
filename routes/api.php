@@ -42,7 +42,7 @@ Route::get('readcomment', [CommentsController::class, 'readcomment']);
 Route::get('readlikes', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
-Route::get("eduviews", [EducationalController::class, "eduviews"]);
+Route::post("eduviews", [EducationalController::class, "eduviews"]);
 Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
 // Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
 //Ads

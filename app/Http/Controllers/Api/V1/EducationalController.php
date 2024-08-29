@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Cloudinary\Transformation\Video;
 use Cloudinary\Transformation\Image;
+use Illuminate\Support\Facades\Log;
 
 
 class EducationalController extends Controller
@@ -19,13 +20,19 @@ class EducationalController extends Controller
         {
             // Data Validation
             $request->validate([
-                'edu_vid_path' => 'array',
-                'edu_vid_path.*' => 'required|mimes:mp4,avi,mov,wmv,flv',
+                'edu_vid_path' => 'required|mimes:mp4,avi,mov,wmv,flv',
                 'title' => 'required|max:255',
                 'edu_views' => 'nullable',
                 'description' => 'required',
                 'links' => 'nullable|max:255',
             ]);
+
+            $user_name = Auth::user()->name;
+            $firstWord = strtok($user_name, ' ');
+            // Generate a random four-digit number
+            $randomNumber = rand(100000, 999999);
+
+            $eduID = '@' .$firstWord . $randomNumber;
 
             // Function to get video duration
             function getVideoDuration($file)
@@ -57,43 +64,6 @@ class EducationalController extends Controller
                 'x' => 0.07,
                 'y' => 0.01
             ];
-
-                if (is_array($files)) {
-                    foreach ($files as $file) {
-                        if ($file->isValid()) {
-                            $duration = getVideoDuration($file);
-                            if ($duration > 7200) {
-                                return response()->json([
-                                    'status' => false,
-                                    'message' => 'Video duration should not exceed 2 hours.',
-                                ]);
-                            }
-
-                            try {
-                                $uploadCloudinary = cloudinary()->upload($file->getRealPath(), [
-                                    'folder' => 'africtv/edu_videos',
-                                    'resource_type' => 'video',
-                                    'transformation' => array_merge($transformations, [
-                                        'quality' => 'auto',
-                                        'fetch_format' => 'auto'
-                                    ])
-                                ]);
-                                $videoPath[] = $uploadCloudinary->getSecurePath();
-                                $eduvideoId[] = $uploadCloudinary->getPublicId();
-                            } catch (\Exception $e) {
-                                return response()->json([
-                                    'status' => false,
-                                    'message' => 'Video upload failed: ' . $e->getMessage(),
-                                ]);
-                            }
-                        } else {
-                            return response()->json([
-                                'status' => false,
-                                'message' => 'Invalid file upload.',
-                            ]);
-                        }
-                    }
-                } else {
                     $file = $files;
                     if ($file->isValid()) {
                         $duration = getVideoDuration($file);
@@ -127,7 +97,7 @@ class EducationalController extends Controller
                             'message' => 'Invalid file upload.',
                         ]);
                     }
-                }
+                
             } else {
                 return response()->json([
                     'status' => false,
@@ -137,10 +107,11 @@ class EducationalController extends Controller
 
             // Storing educational data
             $edu = Educational::create([
+                'edu_id' => $eduID,
                 'user_id' => Auth::user()->id,
                 'unique_id' => Auth::user()->unique_id,
-                'edu_vid_path' => json_encode($videoPath),
-                'eduvideoId' => json_encode($eduvideoId),
+                'edu_vid_path' => $videoPath,
+                'eduvideoId' => $eduvideoId,
                 'title' => $request->title,
                 'edu_views' => $request->edu_views ?? 0,
                 'links' => $request->links,
@@ -154,16 +125,16 @@ class EducationalController extends Controller
         }
 
 
-        public function deleteedupost(Request $request)
+      public function deleteedupost(Request $request)
         {
             // Validate the request
             $request->validate([
-                'edu_id' => 'required|integer'
+                'edu_id' => 'required|regex:/^@\w+$/'
             ]);
 
             // Get the edu that has this id
             $eduId = $request->input('edu_id');
-            $edu = Educational::find($eduId);
+            $edu = Educational::where('edu_id', $eduId)->first();
 
             // Check if the educational post exists
             if (!$edu) {
@@ -174,22 +145,25 @@ class EducationalController extends Controller
             }
 
             // Check if the authenticated user is the owner of the edu post
-            if (Auth::user()->id === $edu->user_id) {
+            if (Auth::check() && Auth::user()->id === $edu->user_id) {
                 // Delete the edu media
-                if (!empty($edu->eduvideoId)) {
-                    $videoIds = json_decode($edu->eduvideoId, true); 
+                
+            if ($edu->eduvideoId) {
+                // Attempt to delete the video from Cloudinary
+                $response = Cloudinary::destroy($edu->eduvideoId, ['resource_type' => 'video']);
+                
+                // Log the full response for debugging
+                Log::info('Cloudinary Deletion Response:', ['response' => $response]);
 
-                    if (is_array($videoIds)) {
-                        foreach ($videoIds as $videoId) {
-                            // Extract just the public ID from the video ID 
-                            $publicId = explode('/', $videoId);
-                            $publicId = end($publicId);
-
-                            // Delete the video from Cloudinary
-                            Cloudinary::destroy($publicId);
-                        }
-                    }
+                // Check if the deletion was successful
+                if ($response['result'] !== 'ok') {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Failed to delete video from Cloudinary",
+                        "cloudinary_response" => $response // Include the full response for debugging
+                    ]);
                 }
+            }
 
                 // Delete the edu post
                 $edu->delete();
@@ -205,6 +179,7 @@ class EducationalController extends Controller
                 ]);
             }
         }
+
 
 
 
@@ -232,37 +207,37 @@ class EducationalController extends Controller
                 ]);
             }
 
-            public function eduviews(Request $request)
-            {
-                // Validate the incoming request
-                $validatedData = $request->validate([
-                    'edu_viewed' => 'required|boolean', //clicked is a boolean flag
-                    'edu_id' => 'required|integer|exists:educationals,id' 
-                ]);
+        public function eduviews(Request $request)
+        {
+            // Validate the incoming request
+            $validatedData = $request->validate([
+                'edu_viewed' => 'required|boolean',
+                'edu_id' => 'required|regex:/^@\w+$/'
+            ]);
 
-                // Get the edu based on the validated edu_id
-                $edu = Educational::find($validatedData['edu_id']);
-                
-                // Check if the edu exists
-                if (!$edu) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'edu Not Found',
-                    ]);
-                }
-
-                // If view is true, Increment the clicks
-                if ($validatedData['edu_viewed']) {
-                    $edu->edu_views += 1;
-                    $edu->save();
-                }
-
+            // Get the edu based on the validated edu_id
+            $edu = Educational::where('edu_id', $validatedData['edu_id'])->first();
+            
+            // Check if the edu exists
+            if (!$edu) {
                 return response()->json([
-                    'status' => true,
-                    'message' => 'edu view updated successfully',
-                    'edu' => $edu
+                    'status' => false,
+                    'message' => 'Edu Not Found',
                 ]);
             }
+
+            // If view is true, increment the views
+            if ($validatedData['edu_viewed']) {
+                $edu->edu_views += 1;
+                $edu->save();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Edu view updated successfully',
+                'edu' => $edu
+            ]);
+        }
 
             public function readedu()
             {
