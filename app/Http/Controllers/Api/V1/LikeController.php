@@ -20,17 +20,13 @@ class LikeController extends Controller
         // Find the post based on the post_id format
         $post = Post::where('post_id', $request->post_id)->firstOrFail();
 
-        // Create or update the like/reaction
-        $like = Likes::updateOrCreate(
-            [
-                "user_id" => Auth::user()->id,
-                "post_id" => $post->id,
-            ],
-            [
-                "user_email" => Auth::user()->email,
-                "reaction_type" => $request->reaction_type
-            ]
-        );
+        // Create the like/reaction
+        $like = Likes::create([
+            "user_id" => Auth::user()->id,
+            "post_id" => $post->id,
+            "user_email" => Auth::user()->email,
+            "reaction_type" => $request->reaction_type,
+        ]);
 
         // Increment the likes count
         $post->increment('likes_count');
@@ -42,6 +38,7 @@ class LikeController extends Controller
             "like" => $like
         ]);
     }
+
 
     public function unlike(Request $request)
     {
@@ -77,24 +74,28 @@ class LikeController extends Controller
         }
     }
 
-        public function readlikes(Request $request)
-        {
-            $validated = $request->validate([
-                'post_id' => 'required|integer',
-            ]);
+    public function readlikes(Request $request)
+    {
+        $validated = $request->validate([
+            'post_id' => 'required|regex:/^@\w+$/',
+        ]);
 
-            $postId = $validated['post_id'];
+        $postId = $validated['post_id'];
 
-            // Find all like associated with the post ID
-            $like = likes::with('user')
-                        ->where('post_id', $postId)
-                        ->get();
+        // Find the post using the provided post_id
+        $post = Post::where('post_id', $postId)->firstOrFail();
 
-            // Return the like in a JSON response
-            return response()->json([
-                'status' => true,
-                'message' => 'like data',
-                'data' => $like,
-            ]);
-        }
+        // Find all likes associated with the post ID
+        $likes = likes::with('user')
+                    ->where('post_id', $post->id)  
+                    ->get();
+
+        // Return the likes in a JSON response
+        return response()->json([
+            'status' => true,
+            'message' => 'like data',
+            'data' => $likes,
+        ]);
+    }
+
 }

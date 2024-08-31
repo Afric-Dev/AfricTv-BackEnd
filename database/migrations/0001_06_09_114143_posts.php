@@ -34,11 +34,12 @@ return new class extends Migration
             $table->string('post_ending')->nullable();
             $table->integer('post_views')->default(0);
             $table->integer('likes_count')->default(0);
+            $table->integer('bookmark_count')->default(0);
             $table->integer('comments_count')->default(0);
             $table->date('date')->nullable();
             $table->timestamps();
 
-            // Define foreign key relationship with users table
+            //Foreign key relationship with users table
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
   
         });

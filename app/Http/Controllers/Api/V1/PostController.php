@@ -444,6 +444,7 @@ class PostController extends Controller
             // Formula for trending score
             $post->post_score = ($post->likes_count * 1.5) + 
                                 ($post->post_views * 1);
+                                ($post->bookmark_count * 0.3);
             return $post;
         });
 
@@ -464,7 +465,7 @@ class PostController extends Controller
             'data' => $shuffledPosts->values()->all(),
             'count' => $postCount,
         ]);
-    }
+    } 
 
 
         public function readspecificpost($uniqid, $post_title)

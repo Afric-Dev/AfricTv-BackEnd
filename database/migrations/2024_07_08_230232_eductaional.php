@@ -22,6 +22,9 @@ return new class extends Migration
             $table->string('edu_vid_path');
             $table->string('eduvideoId');
             $table->string('edu_views');
+            $table->integer('vote_count')->default(0);
+            $table->integer('favourites_count')->default(0);
+            $table->integer('thoughts_count')->default(0);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

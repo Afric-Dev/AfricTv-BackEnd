@@ -15,13 +15,15 @@ use App\Http\Controllers\Api\V1\CommentsController;
 use App\Http\Controllers\Api\V1\LikeController;
 use App\Http\Controllers\Api\V1\EducationalController;
 use App\Http\Controllers\Api\V1\TrendingController;
+use App\Http\Controllers\Api\V1\BookmarkController;
+use App\Http\Controllers\Api\V1\SearchController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
 // })->middleware('auth:api');
 
 //Open Route
-//Auth Endpoint
+//Auth
 Route::post('register', [ApiController::class, 'register']);
 Route::post("login", [ApiController::class, "login"]);
 Route::get("IndividualProfile/{uniqid}", [ApiController::class, "IndividualProfile"]);
@@ -29,17 +31,17 @@ Route::post('forgot_password', [NewPasswordController::class, 'forgotPassword'])
 Route::post('reset_password', [NewPasswordController::class, 'resetPassword']);
 //Feed back Endpoint
 Route::post('feedback', [FeedbackController::class, 'feedback']);
-//Read BlogPost End Point
+//Read BlogPost
 Route::get('readpost', [PostController::class, 'readpost']);
 Route::get('postviews', [PostController::class, 'postviews']);
-//Read Single BlogPost End Point
+//Read Single BlogPost
 Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
-//Read FeedPost End Point
+//Read FeedPost
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
-//Read Comment End Point
-Route::get('readcomment', [CommentsController::class, 'readcomment']);
-//Read Like End Point
-Route::get('readlikes', [LikeController::class, 'readlikes']);
+//Read Comment
+Route::post('readcomment', [CommentsController::class, 'readcomment']);
+//Read Like
+Route::post('readlikes', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
 Route::post("eduviews", [EducationalController::class, "eduviews"]);
@@ -48,48 +50,52 @@ Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
-//Subscribers End Point
+//Subscribers
 Route::get("viewsubscribers", [SubscribtionController::class, "viewsubscribers"]);
-//Trending End point
+//Trending
 Route::get("trending", [TrendingController::class, "trending"]);
+
 
  
 //Protected Route  
 Route::group([
     "middleware" => ["auth:api"]
 ], function(){
-    //THis is the Auth User Actions End point
+    //Auth User Actions
     Route::get("profile", [ApiController::class, "profile"]);
     Route::post("logout", [ApiController::class, "logout"]);
     Route::post("updateprofile", [ApiController::class, "updateprofile"]);
-    //THis is the Payments Endpoint
+    //Payments (Ads)
     Route::post("payment", [ApiController::class, "payment"]);
     Route::post("carddetails", [UserCardDetails::class, "carddetails"]);
     Route::post("adsPayment", [AdsPaymentController::class, "adsPayment"]);
-    //Ads Endpoint
+    //Ads
     Route::post("adActive", [AdsController::class, "adActive"]);
     Route::post("adInactive", [AdsController::class, "adInactive"]);
     Route::post("deleteads", [AdsController::class, "deleteads"]);
-    //THis is the BlogPost End Point
+    //BlogPost
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
     // Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
     Route::post("deleteposts", [PostController::class, "deleteposts"]);
-    //THis is the Subscribtion Endpint
+    //Subscribtion
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
     Route::post("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
     //THis is the FeedPost EndPoint
     // Route::post("feedposts", [FeedPostController::class, "feedposts"]);
     // Route::post("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);
     // Route::delete("deletefeedposts/{id}", [FeedPostController::class, "deletefeedposts"]);
-    //This is the Comment EndPoint
+    //Comment
     Route::post("comments", [CommentsController::class, "comments"]);
-    Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
+    // Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
     Route::post("deletecomment", [CommentsController::class, "deletecomment"]);
-    //This is the Like EndPoint
+    //Like
     Route::post("like", [LikeController::class, "like"]);
     Route::post("unlike", [LikeController::class, "unlike"]); 
-
-    //This is for educational end point
+    //Educational 
     Route::post("educational", [EducationalController::class, "educational"]);
     Route::post("deleteedupost", [EducationalController::class, "deleteedupost"]);
+    //Bookmark 
+    Route::post("bookmark", [BookmarkController::class, "bookmark"]);
+    Route::post("deletebookmark", [BookmarkController::class, "deletebookmark"]);
+    Route::get("readbookmarks", [BookmarkController::class, "readbookmarks"]);
 });
