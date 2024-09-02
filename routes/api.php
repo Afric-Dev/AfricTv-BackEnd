@@ -41,7 +41,7 @@ Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 're
 //Read Comment
 Route::post('readcomment', [CommentsController::class, 'readcomment']);
 //Read Like
-Route::post('readlikes', [LikeController::class, 'readlikes']);
+Route::get('readlikes/{postID}', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
 Route::post("eduviews", [EducationalController::class, "eduviews"]);

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
+
     public function like(Request $request) {
         // Validate the incoming request
         $request->validate([
@@ -19,6 +20,18 @@ class LikeController extends Controller
 
         // Find the post based on the post_id format
         $post = Post::where('post_id', $request->post_id)->firstOrFail();
+
+        // Check if the user has already liked this post
+        $existingLike = Likes::where('user_id', Auth::user()->id)
+                              ->where('post_id', $post->id)
+                              ->first();
+
+        if ($existingLike) {
+            return response()->json([
+                "status" => false,
+                "message" => "You have already voted for this post.",
+            ], 400); 
+        }
 
         // Create the like/reaction
         $like = Likes::create([
@@ -74,28 +87,26 @@ class LikeController extends Controller
         }
     }
 
-    public function readlikes(Request $request)
+    public function readlikes($postID)
     {
-        $validated = $request->validate([
-            'post_id' => 'required|regex:/^@\w+$/',
-        ]);
-
-        $postId = $validated['post_id'];
-
-        // Find the post using the provided post_id
-        $post = Post::where('post_id', $postId)->firstOrFail();
-
         // Find all likes associated with the post ID
-        $likes = likes::with('user')
-                    ->where('post_id', $post->id)  
+        $likes = Likes::with('user')
+                    ->where('post_id', $postID)
                     ->get();
+
+        // Check if likes exist
+        if ($likes->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Oops! Not Found',
+            ]);
+        }
 
         // Return the likes in a JSON response
         return response()->json([
             'status' => true,
-            'message' => 'like data',
+            'message' => 'Like data',
             'data' => $likes,
         ]);
     }
-
 }
