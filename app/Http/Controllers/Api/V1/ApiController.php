@@ -95,12 +95,13 @@ class ApiController extends Controller
             $request->validated($request->all());
 
             $user = User::find($userId);
-            if ($user->updated_at->gt(Carbon::now()->subHours(24))) {
+            if ($user->updated_at->gt(Carbon::now()->subHour())) {
                 return response()->json([
                     "status" => false,
-                    "message" => "You cannot update your profile until 24 hours have passed."
+                    "message" => "You cannot update your profile until 1 hour has passed."
                 ]);
             }
+
 
             if ($user) {
                 // Update user properties only if the input is provided, otherwise retain the current data
