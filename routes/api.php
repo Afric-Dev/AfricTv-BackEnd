@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\V1\LikeController;
 use App\Http\Controllers\Api\V1\EducationalController;
 use App\Http\Controllers\Api\V1\TrendingController;
 use App\Http\Controllers\Api\V1\BookmarkController;
+use App\Http\Controllers\Api\V1\EduVoteController;
+use App\Http\Controllers\Api\V1\EduThoughtsController;
 use App\Http\Controllers\Api\V1\SearchController;
 
 // Route::get('/user', function (Request $request) {
@@ -38,14 +40,17 @@ Route::get('postviews', [PostController::class, 'postviews']);
 Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
 //Read FeedPost
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
-//Read Comment
-Route::post('readcomment', [CommentsController::class, 'readcomment']);
-//Read Like
+//Read Comment (Thoughts)
+Route::get('readcomment/{postID}', [CommentsController::class, 'readcomment']);
+//Read Like (Vote)
 Route::get('readlikes/{postID}', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
 Route::post("eduviews", [EducationalController::class, "eduviews"]);
 Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
+//Educational (Reactions)
+Route::get('readeduvotes/{eduID}', [EduVoteController::class, 'readeduvotes']);
+Route::get('readeduthoughts/{postID}', [EduThoughtsController::class, 'readeduthoughts']);
 // Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
@@ -88,12 +93,17 @@ Route::group([
     Route::post("comments", [CommentsController::class, "comments"]);
     // Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
     Route::post("deletecomment", [CommentsController::class, "deletecomment"]);
-    //Like
+    //Like (Vote)
     Route::post("like", [LikeController::class, "like"]);
     Route::post("unlike", [LikeController::class, "unlike"]); 
     //Educational 
     Route::post("educational", [EducationalController::class, "educational"]);
     Route::post("deleteedupost", [EducationalController::class, "deleteedupost"]);
+    //Educational (Reactions) 
+    Route::post("eduvote", [EduVoteController::class, "eduvote"]);
+    Route::post("uneduvote", [EduVoteController::class, "uneduvote"]); 
+    Route::post("eduthoughts", [EduThoughtsController::class, "eduthoughts"]); 
+    Route::post("deleteeduthoughts", [EduThoughtsController::class, "deleteeduthoughts"]); 
     //Bookmark 
     Route::post("bookmark", [BookmarkController::class, "bookmark"]);
     Route::post("deletebookmark", [BookmarkController::class, "deletebookmark"]);

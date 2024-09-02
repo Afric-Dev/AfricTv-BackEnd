@@ -22,7 +22,6 @@ class EducationalController extends Controller
             $request->validate([
                 'edu_vid_path' => 'required|mimes:mp4,avi,mov,wmv,flv',
                 'title' => 'required|max:255',
-                'edu_views' => 'nullable',
                 'description' => 'required',
                 'links' => 'nullable|max:255',
             ]);
@@ -114,6 +113,9 @@ class EducationalController extends Controller
                 'eduvideoId' => $eduvideoId,
                 'title' => $request->title,
                 'edu_views' => $request->edu_views ?? 0,
+                'vote_count' => $request->vote_count ?? 0,
+                'thoughts_count' => $request->thoughts_count ?? 0,
+                'favourites_count' => $request->favourites_count ?? 0,
                 'links' => $request->links,
                 'description' => $request->description,
             ]);

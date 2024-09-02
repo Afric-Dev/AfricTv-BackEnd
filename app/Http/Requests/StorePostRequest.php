@@ -33,7 +33,6 @@ class StorePostRequest extends FormRequest
             'PostbodyHtml' => 'required',
             'postbodyJson' => 'nullable',
             'postBodytext' => 'required',
-            'post_views' => 'nullable',
             'link' => 'nullable|url',
             'hashtags' => 'nullable|max:155',
         ];

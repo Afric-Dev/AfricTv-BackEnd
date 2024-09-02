@@ -99,13 +99,17 @@ class CommentsController extends Controller
         // Find the post by 'post_id'
         $post = Post::where('post_id', $request->post_id)->firstOrFail();
 
+        if (!$post) {
+            return response()->json([
+                "status" => false,
+                "message" => "Oops! Not found"
+            ]);
+        }
+
         // Create the comment
         $comments = Comments::create([
             "post_id" => $post->id,
-            "post_email" => $post->email, 
             "user_id" => Auth::user()->id,
-            "user_email" => Auth::user()->email,
-            "user_name" => Auth::user()->name,
             "unique_id" => uniqid(),
             "comments" => $request->comments,
             "comments_vid_path" => $videoPath,
@@ -300,21 +304,21 @@ class CommentsController extends Controller
         }
 
 
-        public function readComment(Request $request)
+        public function readComment($postID)
         {
-            $validated = $request->validate([
-                'post_id' => 'required|regex:/^@\w+$/',
-            ]);
-
-            $postId = $validated['post_id'];
-
-            // Find the post using the provided post_id
-            $post = Post::where('post_id', $postId)->firstOrFail();
 
             // Find all comments associated with the post ID and include user data
             $comments = Comments::with('user') 
-                                ->where('post_id', $post->id)
+                                ->where('post_id', $postID)
                                 ->get();
+
+            // Check if likes exist
+            if ($comments->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Oops! Not Found',
+                ]);
+            }
 
             // Return the comments in a JSON response
             return response()->json([

@@ -20,7 +20,11 @@ class Educational extends Model
             "links",
             "edu_vid_path",
             "eduvideoId",
-            "edu_views",
+            "edu_views", 
+            "vote_count",
+            "thoughts_count",
+            "favourites_count"
+           
     ];
     
     public function user()
