@@ -39,6 +39,6 @@ class SubscribtionMail extends Mailable
     public function build()
     {
         return $this->subject('AfricTv New Subscriber Notification')
-                    ->view('emails.subscribtion');
+                    ->view('emails.Subscribtion');
     }
 }
