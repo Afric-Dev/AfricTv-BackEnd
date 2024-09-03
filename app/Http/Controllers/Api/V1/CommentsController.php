@@ -312,7 +312,7 @@ class CommentsController extends Controller
                                 ->where('post_id', $postID)
                                 ->get();
 
-            // Check if likes exist
+            // Check if thoguts exist
             if ($comments->isEmpty()) {
                 return response()->json([
                     'status' => false,

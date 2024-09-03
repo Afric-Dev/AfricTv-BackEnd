@@ -59,7 +59,7 @@
         </div>
         <div class="content">
             <p>You have a new subscriber.</p>
-            <p>Subscriber Email: {{ $subscribtion->subscriber_email }}</p>
+            <p>Subscriber Email: {{ $subscribtion->user_email }}</p>
             <a href="{{ url('/') }}" class="button">Login</a>
         </div>
         <div class="footer">

@@ -56,7 +56,7 @@ Route::get('readeduthoughts/{postID}', [EduThoughtsController::class, 'readeduth
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
 //Subscribers
-Route::get("viewsubscribers", [SubscribtionController::class, "viewsubscribers"]);
+Route::get("viewsubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
 

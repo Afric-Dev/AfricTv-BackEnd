@@ -70,7 +70,7 @@ class SubscribtionController extends Controller
             // Validate the request
             $request->validate([
                 "subscriber_id" => "required|exists:users,id", 
-                "subscriber_email" => "required|email",
+                 "subscriber_email" => "required|email",
             ]);
 
             // Check if the user has already subscribed
@@ -111,17 +111,23 @@ class SubscribtionController extends Controller
 
         }
 
-        public function viewsubscribers(Request $request)
+        public function viewsubscribers($uniqid)
         {
-            // Validate that user_id is provided in the request
-            $request->validate([
-                "subscriber_id" => "required|integer",
-            ]);
+            // Find the user based on the unique_id format
+            $user = User::where('unique_id', $uniqid)->firstOrFail();
 
-            // Fetch subscriptions where user_id matches the provided subscriber_id
+            // Retrieve subscriptions for the user
             $subscriptions = Subscribtion::with('user')
-                                         ->where('subscriber_id', $request->subscriber_id)
-                                         ->get();
+                                            ->where('subscriber_id', $user->id)
+                                            ->get();
+
+            // Check if the user has no subscriptions
+            if ($subscriptions->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Oops! No Subscribers found',
+                ]);
+            }
 
             return response()->json([
                 'status' => true,
@@ -129,6 +135,7 @@ class SubscribtionController extends Controller
                 'subscriptions' => $subscriptions,
             ]);
         }
+
 
 
         
