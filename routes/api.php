@@ -59,6 +59,7 @@ Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
 Route::get("viewsubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
+Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
 
 
  
