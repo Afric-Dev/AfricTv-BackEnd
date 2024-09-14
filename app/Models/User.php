@@ -9,11 +9,25 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Support\Facades\Mail;
 // use App\Mail\ResetPasswordMail;
-
+use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected $keyType = 'uuid';
+
+    public $incrementing = false;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($customer) {
+            $customer->{$customer->getKeyName()} = (string) Str::uuid();
+        });
+    }
 
     /**
      * The attributes that are mass assignable.

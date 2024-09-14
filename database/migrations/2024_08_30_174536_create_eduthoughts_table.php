@@ -12,14 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('eduthoughts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('edu_id')->constrained('education')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('edu_id');
+            $table->uuid('user_id');
             $table->text('thoughts');
             $table->string('thoughts_vid_path')->nullable();
             $table->string('thoughts_img_path')->nullable();
             $table->string('thoughts_link')->nullable();
             $table->timestamps();
+
+            $table->foreign('edu_id')->references('id')->on('education')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

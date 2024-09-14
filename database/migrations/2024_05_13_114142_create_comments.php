@@ -12,15 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('comments', function (Blueprint $table) {
-            $table->id(); // Primary key
-            $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('post_id'); 
+            $table->uuid('user_id');
             $table->text('comments');
             $table->string('comments_vid_path')->nullable();
             $table->string('comments_img_path')->nullable();
             $table->string('comments_link')->nullable();
-            $table->timestamps(); 
+            $table->timestamps();
+
+            // Foreign key relationships
+            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
+
     }
 
     /**

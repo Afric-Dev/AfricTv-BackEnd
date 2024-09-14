@@ -24,7 +24,7 @@ class AdsController extends Controller
             "title" => 'required|string|max:255',
             "description" => 'required|string',
             "link" => 'required|string|max:255',
-            "ads_type" => 'required|string|max:25'
+            "ads_type" => 'required|in:PIC,VID,LINK'
         ]);
 
 
@@ -48,7 +48,8 @@ class AdsController extends Controller
                     );
 
                     // Store the secure URL of the uploaded image
-                    $imagePath[] = $uploadCloudinary->getSecurePath();
+                    $imagePath[] = $uploadCloudinary->getSecurePath(); 
+                    $imageId[] = $uploadCloudinary->getPublicId();
                 } else {
                     $imagePath[] = "File is not valid";
                 }
@@ -89,6 +90,7 @@ class AdsController extends Controller
                     ]
                 );
                 $videoPath = $uploadCloudinary->getSecurePath();
+                $videoId[] = $uploadCloudinary->getPublicId();
             } catch (\Exception $e) {
                 // Handle upload error
                 return response()->json([
@@ -134,7 +136,6 @@ class AdsController extends Controller
         // Storing ads data
         $ads = Ads::create([
             "user_id" => Auth::user()->id,
-            "user_email" => Auth::user()->email,
             "img_path" => json_encode($imagePath),
             "vid_path" => $videoPath,
             "title" => $validatedData['title'],
@@ -195,7 +196,7 @@ class AdsController extends Controller
     {
         // Validate the incoming request
         $validatedData = $request->validate([
-            'clicked' => 'required|boolean', //clicked is a boolean flag
+            'clicked' => 'required|boolean',
             'ads_id' => 'required|integer|exists:ads,id' 
         ]);
 
@@ -222,6 +223,7 @@ class AdsController extends Controller
             'ad' => $ad
         ]);
     }
+
     public function ads(Request $request)
     {
          $ads = Ads::inRandomOrder()

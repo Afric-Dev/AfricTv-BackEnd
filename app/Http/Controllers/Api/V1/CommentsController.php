@@ -261,7 +261,7 @@ class CommentsController extends Controller
         {
             // Validate the request
             $request->validate([
-                'comment_id' => 'required|integer',
+                'comment_id' => 'required',
                 "post_id" => "required|regex:/^@\w+$/",
             ]);
 

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('feedposts', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id'); 
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
             $table->string('user_name');
             $table->string('unique_id');
             $table->string('user_email');

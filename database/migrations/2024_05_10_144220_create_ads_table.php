@@ -13,26 +13,26 @@ class CreateAdsTable extends Migration
     public function up(): void
     {
         Schema::create('ads', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('ads_id');
-            $table->string('user_id'); 
-            $table->string('user_email'); 
+            $table->uuid('user_id');
             $table->string('img_path')->nullable();
+            $table->string('imageId')->nullable();
             $table->string('vid_path')->nullable();
+            $table->string('videoId')->nullable();
             $table->string('title');
             $table->string('description');
             $table->string('link')->nullable(); 
             $table->datetime('start_date');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->nullable();
             $table->string('clicks');
-            $table->string('ads_type');
+            $table->enum('ads_type', ['PIC', 'VID', 'LINK']);
             $table->timestamps();
 
             // Foreign key definition
-            // $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
-
     /**
      * Reverse the migrations.
      *

@@ -12,12 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('likes', function (Blueprint $table) {
-            $table->bigIncrements('id'); // Primary key
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
+            $table->uuid('id')->primary();
+            $table->uuid('user_id'); 
             $table->string('user_email');
-            $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
+            $table->uuid('post_id'); 
             $table->string('reaction_type')->nullable();
             $table->timestamps();
+
+            // Foreign key relationships
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
         });
     }
 

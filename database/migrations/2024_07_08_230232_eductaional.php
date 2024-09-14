@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('education', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('edu_id');
-            $table->unsignedBigInteger('user_id');
-            $table->string('unique_id');
+            $table->uuid('user_id');
+           
             $table->string('title');
             $table->text('description');
             $table->string('links')->nullable();

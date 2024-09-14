@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
          Schema::create('subscribtions', function (Blueprint $table) {
-            $table->bigIncrements('id'); // Primary key
-            $table->unsignedBigInteger('user_id'); // Foreign key referencing users table
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
             $table->string('user_email');
             $table->string('subscriber_id');
             $table->string('subscriber_email'); 

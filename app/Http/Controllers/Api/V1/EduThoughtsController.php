@@ -100,7 +100,6 @@ class EduThoughtsController extends Controller
         $educational = Eduthought::create([
             "edu_id" => $edu->id,
             "user_id" => Auth::user()->id,
-            // "unique_id" => uniqid(),
             "thoughts" => $request->thoughts,
             "thoughts_vid_path" => $videoPath,
             "thoughts_img_path" => json_encode($imagePaths), 
@@ -121,7 +120,7 @@ class EduThoughtsController extends Controller
     {
         // Validate the request
         $validated = $request->validate([
-            'thoughts_id' => 'required|integer',
+            'thoughts_id' => 'required',
             "edu_id" => "required|regex:/^@\w+$/",
         ]);
 

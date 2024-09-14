@@ -12,11 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('eduvotes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
-            $table->foreignId('edu_id')->constrained('education')->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
+            $table->uuid('edu_id');
             $table->string('reaction_type')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('edu_id')->references('id')->on('education')->onDelete('cascade');
         });
     }
 

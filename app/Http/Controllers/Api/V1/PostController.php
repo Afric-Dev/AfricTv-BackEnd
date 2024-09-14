@@ -7,10 +7,11 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePostRequest;
 use Carbon\Carbon;
-
+ 
 
 
 class PostController extends Controller
@@ -145,7 +146,7 @@ class PostController extends Controller
         // Storing post data
         $post = Post::create([
             "user_id" => Auth::user()->id,
-            "unique_id" => Auth::user()->unique_id,
+            // "unique_id" => Auth::user()->unique_id,
             "post_id" => $postID,
             "cover_image" => $coverimagePath,
             "coverimageId" => $coverimageId,
@@ -401,7 +402,7 @@ class PostController extends Controller
             // Validate the incoming request
             $validatedData = $request->validate([
                 'post_viewed' => 'required|boolean', 
-                'post_id' => 'required|integer|exists:posts,id' 
+                'post_id' => 'required|exists:posts,id' 
             ]);
 
             // Get the post based on the validated post_id
@@ -468,27 +469,40 @@ class PostController extends Controller
     } 
 
 
-        public function readspecificpost($uniqid, $post_title)
-        {
-            $post = Post::with('user')
-                        ->where('post_title', $post_title)
-                        ->where('unique_id', $uniqid)
-                        ->first();
+    public function readspecificpost($uniqid, $post_title)
+    {
+        // Find the user by their unique_id
+        $user = User::where('unique_id', $uniqid)->first();
 
-            // Check if post exists
-            if (!$post) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Post Not Found',
-                ]);
-            }
-
+        // Check if user exists
+        if (!$user) {
             return response()->json([
-                'status' => true,
-                'message' => 'Post data',
-                'data' => $post,
+                'status' => false,
+                'message' => 'User Not Found',
             ]);
         }
+
+        // Find the post using the user's ID and post_title
+        $post = Post::with('user')
+                    ->where('post_title', $post_title)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+        // Check if post exists
+        if (!$post) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Post Not Found',
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Post data',
+            'data' => $post,
+        ]);
+    }
+
 
 
 }

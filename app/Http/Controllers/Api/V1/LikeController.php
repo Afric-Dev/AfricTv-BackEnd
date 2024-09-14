@@ -56,7 +56,7 @@ class LikeController extends Controller
     public function unlike(Request $request)
     {
         $request->validate([
-            'like_id' => 'required|integer'
+            'like_id' => 'required'
         ]);
 
         $likeId = $request->input('like_id'); 

@@ -42,7 +42,7 @@ class BookmarkController extends Controller
         public function deletebookmark(Request $request)
     {
         $request->validate([
-            'book_id' => 'required|integer'
+            'book_id' => 'required'
         ]);
 
         $bookId = $request->input('book_id'); 

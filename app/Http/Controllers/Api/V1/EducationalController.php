@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Educational;
+use App\Models\User;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use Illuminate\Support\Facades\Auth;
@@ -162,7 +163,7 @@ class EducationalController extends Controller
                     return response()->json([
                         "status" => false,
                         "message" => "Failed to delete video from Cloudinary",
-                        "cloudinary_response" => $response // Include the full response for debugging
+                        "cloudinary_response" => $response 
                     ]);
                 }
             }
@@ -185,29 +186,40 @@ class EducationalController extends Controller
 
 
 
-            public function readspecificedupost($uniqid, $title) 
-            {
-                // Retrieve the edu with the given user uniqid and title 
-                $edu = Educational::with('user')
-                        ->where('title', $title)
-                        ->where('unique_id', $uniqid)
-                        ->first();
+         public function readspecificedupost($uniqid, $title)
+        {
+            // Find the user by their unique_id
+            $user = User::where('unique_id', $uniqid)->first();
 
-
-                // Check if post exists
-                if (!$edu) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Edu Not Found',
-                    ]);
-                }
- 
+            // Check if user exists
+            if (!$user) {
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Edu data',
-                    'data' => $edu,
+                    'status' => false,
+                    'message' => 'User Not Found',
                 ]);
             }
+
+            // Find the educational record using the user's ID and title
+            $edu = Educational::with('user')
+                               ->where('title', $title)
+                               ->where('user_id', $user->id)
+                               ->first();
+
+            // Check if educational record exists
+            if (!$edu) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Edu Not Found',
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Edu data',
+                'data' => $edu,
+            ]);
+        }
+
 
         public function eduviews(Request $request)
         {

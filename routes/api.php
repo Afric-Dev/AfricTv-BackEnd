@@ -35,7 +35,7 @@ Route::post('reset_password', [NewPasswordController::class, 'resetPassword']);
 Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost
 Route::get('readpost', [PostController::class, 'readpost']);
-Route::get('postviews', [PostController::class, 'postviews']);
+Route::post('postviews', [PostController::class, 'postviews']);
 //Read Single BlogPost
 Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
 //Read FeedPost
@@ -110,3 +110,4 @@ Route::group([
     Route::post("deletebookmark", [BookmarkController::class, "deletebookmark"]);
     Route::get("readbookmarks", [BookmarkController::class, "readbookmarks"]);
 });
+ 

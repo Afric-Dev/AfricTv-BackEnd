@@ -12,22 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ads_payments', function (Blueprint $table) {
-            $table->id();
-            $table->string('user_email');
-            $table->string('user_name');
-            $table->string('user_id');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
             $table->string('amount');
-            $table->string('ads_type');
-            $table->string('duration'); //maybe for a 24hrs or a week or a month, per hr is about 0.069.... so the front end dev handling the payemtn int will give a input  where the user choose which plan they want
-            $table->string('payment_type');
-            $table->string('payment_status');
-            $table->string('payment_method');
+            $table->enum('ads_type', ['PIC', 'VID', 'LINK']);
+            $table->string('duration'); 
+            $table->enum('status', ['PAID', 'PENDING', 'FAILED']);
+            $table->enum('method', ['PAYSTACK', 'PAYPAL'])->default('PAYSTACK');
             $table->string('currency');
             $table->string('clicks');
             $table->enum('taken', ['YES', 'NO']);
             $table->string('ads_id');
             $table->timestamps();
-            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

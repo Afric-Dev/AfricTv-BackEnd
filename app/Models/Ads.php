@@ -4,16 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 class Ads extends Model
 {
     use HasFactory;
 
+    protected $keyType = 'uuid';
+
+    public $incrementing = false;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($customer) {
+            $customer->{$customer->getKeyName()} = (string) Str::uuid();
+        });
+    }
+
     protected $fillable = [
         'user_id',
-        'user_email',
         'img_path',
+        'imageId',
         'vid_path',
+        'videoId',
         'title',
         'description',
         'link',

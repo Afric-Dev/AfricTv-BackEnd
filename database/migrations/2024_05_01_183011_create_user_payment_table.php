@@ -12,14 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id();
-            $table->string('user_id');
-            $table->string('user_email');
-            $table->string('user_name');
-            $table->string('amount');
-            $table->string('payment_type');
-            $table->string('payment_status');
-            $table->string('payment_method');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');
+            $table->string('amount')->nullable();
+            $table->enum('payment_status', ['PAID', 'PENDING', 'FAILED']);
+            $table->enum('payment_method', ['PAYSTACK', 'PAYPAL'])->default('PAYSTACK');
             $table->string('currency');
             $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

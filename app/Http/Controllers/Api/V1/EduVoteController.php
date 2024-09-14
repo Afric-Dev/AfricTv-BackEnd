@@ -59,7 +59,7 @@ class EduVoteController extends Controller
        public function uneduvote(Request $request)
     {
         $request->validate([
-            'vote_id' => 'required|integer'
+            'vote_id' => 'required'
         ]);
 
         $voteId = $request->input('vote_id'); 
