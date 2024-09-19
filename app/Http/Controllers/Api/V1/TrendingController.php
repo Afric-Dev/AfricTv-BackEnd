@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Post;
+use App\Models\Ads;
 use App\Models\Educational;
 use Carbon\Carbon;
 
@@ -84,6 +85,11 @@ class TrendingController extends Controller
             ->sortByDesc('trending_score') // Sort by trending score
             ->sortByDesc('created_at');    // Then sort by created_at
 
+            // Search ads Posts
+            $ads = Ads::where('title', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('description', 'LIKE', "%{$searchQuery}%")
+            ->get();
+
         return response()->json([
             "status" => true,
             "message" => "Search results",
@@ -91,6 +97,7 @@ class TrendingController extends Controller
                 'users' => $users,
                 'educationals' => $educationals,
                 'posts' => $posts,
+                'ads' => $ads,
             ],
         ]);
     }
