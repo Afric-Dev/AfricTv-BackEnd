@@ -469,10 +469,20 @@ class PostController extends Controller
     } 
 
 
-    public function readspecificpost($uniqid, $post_title)
+    public function readspecificpost($post_id, $post_title)
     {
         // Find the user by their unique_id
-        $user = User::where('unique_id', $uniqid)->first();
+        $post = Post::where('post_id', $post_id)->first();
+
+        // Ensure $post is not null before trying to access its user_id
+        if ($post) {
+            $user = User::where('id', $post->user_id)->first();
+        } else {
+            // Handle the case where the post is not found
+            return response()->json([
+                'message' => 'Post not found'
+            ], 404);
+        }
 
         // Check if user exists
         if (!$user) {

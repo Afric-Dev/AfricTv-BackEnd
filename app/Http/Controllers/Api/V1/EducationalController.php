@@ -186,11 +186,21 @@ class EducationalController extends Controller
 
 
 
-         public function readspecificedupost($uniqid, $title)
+        public function readspecificedupost($edu_id, $title)
         {
             // Find the user by their unique_id
-            $user = User::where('unique_id', $uniqid)->first();
-
+            $edu = Educational::where('edu_id', $edu_id)->first();
+    
+            // Ensure $edu is not null before trying to access its user_id
+            if ($edu) {
+                $user = User::where('id', $edu->user_id)->first();
+            } else {
+                // Handle the case where the edu is not found
+                return response()->json([
+                    'message' => 'Edu not found'
+                ], 404);
+            }
+    
             // Check if user exists
             if (!$user) {
                 return response()->json([
@@ -198,28 +208,27 @@ class EducationalController extends Controller
                     'message' => 'User Not Found',
                 ]);
             }
-
-            // Find the educational record using the user's ID and title
+    
+            // Find the edu using the user's ID and edu_title
             $edu = Educational::with('user')
-                               ->where('title', $title)
-                               ->where('user_id', $user->id)
-                               ->first();
-
-            // Check if educational record exists
+                        ->where('title', $title)
+                        ->where('user_id', $user->id)
+                        ->first();
+    
+            // Check if edu exists
             if (!$edu) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Edu Not Found',
                 ]);
             }
-
+    
             return response()->json([
                 'status' => true,
-                'message' => 'Edu data',
+                'message' => 'edu data',
                 'data' => $edu,
             ]);
         }
-
 
         public function eduviews(Request $request)
         {

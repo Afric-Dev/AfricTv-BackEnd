@@ -37,7 +37,7 @@ Route::post('feedback', [FeedbackController::class, 'feedback']);
 Route::get('readpost', [PostController::class, 'readpost']);
 Route::post('postviews', [PostController::class, 'postviews']);
 //Read Single BlogPost
-Route::get('readspecificpost/{uniqid}/{post_title}', [PostController::class, 'readspecificpost']);
+Route::get('readspecificpost/{post_id}/{post_title}', [PostController::class, 'readspecificpost']);
 //Read FeedPost
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
 //Read Comment (Thoughts)
@@ -47,7 +47,7 @@ Route::get('readlikes/{postID}', [LikeController::class, 'readlikes']);
 //Read Edu post 
 Route::get("readedu", [EducationalController::class, "readedu"]);
 Route::post("eduviews", [EducationalController::class, "eduviews"]);
-Route::get('readspecificedupost/{uniqid}/{title}', [EducationalController::class, 'readspecificedupost']);
+Route::get('readspecificedupost/{edu_id}/{title}', [EducationalController::class, 'readspecificedupost']);
 //Educational (Reactions)
 Route::get('readeduvotes/{eduID}', [EduVoteController::class, 'readeduvotes']);
 Route::get('readeduthoughts/{postID}', [EduThoughtsController::class, 'readeduthoughts']);
