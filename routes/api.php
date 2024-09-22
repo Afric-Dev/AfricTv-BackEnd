@@ -55,8 +55,7 @@ Route::get('readeduthoughts/{postID}', [EduThoughtsController::class, 'readeduth
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
-//Subscribers
-Route::get("viewsubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
+
 
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
@@ -88,6 +87,7 @@ Route::group([
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
     Route::post("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
     Route::get("subscribers", [SubscribtionController::class, "subscribers"]);
+    Route::get("viewsubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
     //THis is the FeedPost EndPoint
     // Route::post("feedposts", [FeedPostController::class, "feedposts"]);
     // Route::post("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);
