@@ -31,7 +31,7 @@ Route::post("login", [ApiController::class, "login"]);
 Route::get("IndividualProfile/{uniqid}", [ApiController::class, "IndividualProfile"]);
 Route::post('forgot_password', [NewPasswordController::class, 'forgotPassword']);
 Route::post('reset_password', [NewPasswordController::class, 'resetPassword']);
-//Feed back Endpoint
+//Feedback 
 Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost
 Route::get('readpost', [PostController::class, 'readpost']);
@@ -57,6 +57,7 @@ Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
 //Subscribers
 Route::get("viewsubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
+
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
@@ -86,11 +87,12 @@ Route::group([
     //Subscribtion
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
     Route::post("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
+    Route::get("subscribers", [SubscribtionController::class, "subscribers"]);
     //THis is the FeedPost EndPoint
     // Route::post("feedposts", [FeedPostController::class, "feedposts"]);
     // Route::post("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);
     // Route::delete("deletefeedposts/{id}", [FeedPostController::class, "deletefeedposts"]);
-    //Comment
+    //Comment  (Thought)
     Route::post("comments", [CommentsController::class, "comments"]);
     // Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
     Route::post("deletecomment", [CommentsController::class, "deletecomment"]);
