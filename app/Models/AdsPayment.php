@@ -32,7 +32,8 @@ class AdsPayment extends Model
         "ads_type",
         "duration",
         "clicks",
-        'taken'
+        "taken",
+        "ads_id"
     ];
 
 }

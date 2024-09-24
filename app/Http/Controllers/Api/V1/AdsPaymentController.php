@@ -16,7 +16,9 @@ class AdsPaymentController extends Controller
         $validatedData = $request->validated();
 
         // Calculate clicksNumber based on the amount provided in the request
-        $clicksNumber = $request->input('amount') / 0.10;
+        $amount = $request->input('amount');
+        $cleanAmount = str_replace(',', '', $amount); // Remove commas
+        $clicksNumber = (float)$cleanAmount / 0.10;
 
         // Validate that the calculated clicks number is greater than zero
         if ($clicksNumber <= 0) {
@@ -28,6 +30,14 @@ class AdsPaymentController extends Controller
         }
 
         $taken = "NO";
+        $duration = "NOT SET";
+
+        $uniqueId = time();
+        $AdsID = strtoupper(substr($request->status, 0, 2)) . '-' . 
+                 strtoupper(substr($request->method, 0, 2)) . '-' . 
+                 strtoupper(substr($request->currency, 0, 2)) . '-' . 
+                 $uniqueId;
+
 
         // Storing payment data
         $payment = AdsPayment::create([
@@ -37,10 +47,11 @@ class AdsPaymentController extends Controller
             "method" => $validatedData['method'],
             "currency" => $validatedData['currency'],
             "ads_type" => $validatedData['ads_type'],
-            "duration" => $validatedData['duration'],
+            "duration" => $duration,
             "status" => $validatedData['status'],
             "clicks" => $clicksNumber,
             "taken" => $taken,
+            "ads_id" => $AdsID
         ]);
 
         return response()->json([
