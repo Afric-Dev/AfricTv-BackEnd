@@ -18,8 +18,7 @@ class AdsController extends Controller
       public function adActive(Request $request)
       {
         $validatedData = $request->validate([
-            "img_path" => 'array',
-            "img_path*" => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            "img_path" => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             "vid_path" => 'nullable|mimes:mp4,avi,mov,wmv,flv',
             "title" => 'required|string|max:255',
             "description" => 'required|string',
@@ -28,36 +27,24 @@ class AdsController extends Controller
         ]);
 
 
-        $imagePath = [];
-        // Check if the request has files under the 'post_img_path' key
         if ($request->hasFile('img_path')) {
-            foreach ($request->file('img_path') as $file) {
-                // Validate if the file is valid
-                if ($file->isValid()) {
-                    // Upload the file to Cloudinary
-                    $uploadCloudinary = cloudinary()->upload(
-                        $file->getRealPath(),
-                        [
-                            'folder' => 'africtv/ad_img',
-                            'resource_type' => 'auto',
-                            'transformation' => [
-                                'quality' => 'auto',
-                                'fetch_format' => 'auto'
-                            ]
-                        ]
-                    );
-
-                    // Store the secure URL of the uploaded image
-                    $imagePath[] = $uploadCloudinary->getSecurePath(); 
-                    $imageId[] = $uploadCloudinary->getPublicId();
-                } else {
-                    $imagePath[] = "File is not valid";
-                }
-            }
+            $uploadCloudinary = cloudinary()->upload(
+                $request->file('img_path')->getRealPath(),
+                [
+                    'folder' => 'africtv/ad_image',
+                    'resource_type' => 'auto',
+                    'transformation' => [
+                        'quality' => 'auto',
+                        'fetch_format' => 'auto'
+                    ]
+                ]
+            );
+            $imageUrl = $uploadCloudinary->getSecurePath();
+            $imageId = $uploadCloudinary->getPublicId();
         } else {
-            $imagePath[] = "No Image Uploaded";
+            $imageUrl = "No File Uploaded";
+            $imageId = Null;
         }
-
 
         // Function to get video duration
         function getVideoDuration($file)
@@ -90,7 +77,7 @@ class AdsController extends Controller
                     ]
                 );
                 $videoPath = $uploadCloudinary->getSecurePath();
-                $videoId[] = $uploadCloudinary->getPublicId();
+                $videoId = $uploadCloudinary->getPublicId();
             } catch (\Exception $e) {
                 // Handle upload error
                 return response()->json([
@@ -100,6 +87,7 @@ class AdsController extends Controller
             }
         } else {
             $videoPath = "No Video Uploaded";
+            $videoId = Null;
         }
 
         $userId = Auth::user()->id;
@@ -136,8 +124,10 @@ class AdsController extends Controller
         // Storing ads data
         $ads = Ads::create([
             "user_id" => Auth::user()->id,
-            "img_path" => json_encode($imagePath),
+            "img_path" => $imageUrl,
+            "imageId" => $imageId,
             "vid_path" => $videoPath,
+            "videoId" => $videoId,
             "title" => $validatedData['title'],
             "description" => $validatedData['description'],
             "link" => $validatedData['link'],
@@ -249,7 +239,7 @@ class AdsController extends Controller
     {
         // Validate the request
         $request->validate([
-            'id' => 'required|integer'
+           'id' => 'required|exists:ads,id',
         ]);
 
         // Get the ad with this id
@@ -263,23 +253,43 @@ class AdsController extends Controller
                 "message" => "Ad not found"
             ]);
         }
+                    // Check if the authenticated user is the owner of the edu post
+                    if (Auth::check() && Auth::user()->id === $ad->user_id) {
+                        // Delete the edu media
+                        
+                    if ($ad->videoId) {
+                        // Attempt to delete the video from Cloudinary
+                        $response = Cloudinary::destroy($ad->videoId, ['resource_type' => 'video']);
+                        
+                        // Log the full response for debugging
+                        // Log::info('Cloudinary Deletion Response:', ['response' => $response]);
+        
+                        // Check if the deletion was successful
+                        if ($response['result'] !== 'ok') {
+                            return response()->json([
+                                "status" => false,
+                                "message" => "Failed to delete video from Cloudinary",
+                                "cloudinary_response" => $response 
+                            ]);
+                        }
+                    }
+                    
+                    if ($ad->imageId) {
+                        Cloudinary::destroy($ad->imageId);
+                    }
 
-        // Check if the authenticated user is the owner of the ad
-        if (Auth::user()->id === $ad->user_id) {
-            // Delete the ad
-            $ad->delete();
-
-            return response()->json([
-                "status" => true,
-                "message" => "Ad deleted successfully"
-            ]);
-        } else {
-            return response()->json([
-                "status" => false,
-                "message" => "Unauthorized action"
-            ]);
-        }
+                        // Delete the edu post
+                        $ad->delete();
+        
+                        return response()->json([
+                            "status" => true,
+                            "message" => "Deleted successfully"
+                        ]);
+                    } else {
+                        return response()->json([
+                            "status" => false,
+                            "message" => "You are not permitted to delete this ad post"
+                        ]);
+                    }
     }
-
-
 }

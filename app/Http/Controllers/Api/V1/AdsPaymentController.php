@@ -17,7 +17,7 @@ class AdsPaymentController extends Controller
 
         // Calculate clicksNumber based on the amount provided in the request
         $amount = $request->input('amount');
-        $cleanAmount = str_replace(',', '', $amount); // Remove commas
+        $cleanAmount = str_replace(',', '', $amount);
         $clicksNumber = (float)$cleanAmount / 0.10;
 
         // Validate that the calculated clicks number is greater than zero
