@@ -87,39 +87,39 @@ class LikeController extends Controller
         }
     }
 
-public function readlikes($postID)
-{
-    // Find the post by post_id
-    $post = Post::where('post_id', $postID)->first();
+    public function readlikes($postID)
+    {
+        // Find the post by post_id
+        $post = Post::where('post_id', $postID)->first();
 
-    // Ensure the post exists before proceeding
-    if (!$post) {
-        // Handle the case where the post is not found
+        // Ensure the post exists before proceeding
+        if (!$post) {
+            // Handle the case where the post is not found
+            return response()->json([
+                'status' => false,
+                'message' => 'Post Not Found',
+            ], 404);
+        }
+
+        // Find all likes associated with the post ID
+        $likes = Likes::with('user')
+                      ->where('post_id', $post->id)
+                      ->get();
+
+        // Check if likes exist
+        if ($likes->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Oops! Not Found',
+            ]);
+        }
+
+        // Return the likes in a JSON response
         return response()->json([
-            'status' => false,
-            'message' => 'Post Not Found',
-        ], 404);
-    }
-
-    // Find all likes associated with the post ID
-    $likes = Likes::with('user')
-                  ->where('post_id', $post->id)
-                  ->get();
-
-    // Check if likes exist
-    if ($likes->isEmpty()) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Oops! Not Found',
+            'status' => true,
+            'message' => 'Like data',
+            'data' => $likes,
         ]);
     }
-
-    // Return the likes in a JSON response
-    return response()->json([
-        'status' => true,
-        'message' => 'Like data',
-        'data' => $likes,
-    ]);
-}
 
 }
