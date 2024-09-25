@@ -306,14 +306,13 @@ class CommentsController extends Controller
 
         public function readComment($postID)
         {
-
             // Find all comments associated with the post ID and include user data
             $comments = Comments::with('user') 
                                 ->where('post_id', $postID)
                                 ->get();
 
-            // Check if thoguts exist
-            if (!$comments->isEmpty()) {
+            // Check if comments exist
+            if ($comments->isEmpty()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Oops! Not Found',
@@ -327,5 +326,6 @@ class CommentsController extends Controller
                 'data' => $comments,
             ]);
         }
+
 
 }
