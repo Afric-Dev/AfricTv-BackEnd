@@ -91,25 +91,38 @@ class EduVoteController extends Controller
     }
 
         public function readeduvotes($eduID)
-    {
-        // Find all edu associated with the post ID
-        $edu = Eduvote::with('user')
-                    ->where('edu_id', $eduID)
-                    ->get();
+        {
+            // Find the educational vote by edu_id
+            $eduVote = Educational::where('edu_id', $eduID)->first();
 
-        // Check if edu exist
-        if ($edu->isEmpty()) {
+            // Ensure the educational vote exists before proceeding
+            if (!$eduVote) {
+                // Handle the case where the educational vote is not found
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Educational Vote Not Found',
+                ], 404);
+            }
+
+            // Find all votes associated with the edu ID and include user data
+            $votes = Eduvote::with('user')
+                            ->where('edu_id', $eduVote->id)
+                            ->get();
+
+            // Check if votes exist
+            if ($votes->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Oops! Not Found',
+                ]);
+            }
+
+            // Return the votes in a JSON response
             return response()->json([
-                'status' => false,
-                'message' => 'Oops! Not Found',
+                'status' => true,
+                'message' => 'Vote data',
+                'data' => $votes,
             ]);
         }
 
-        // Return the edu in a JSON response
-        return response()->json([
-            'status' => true,
-            'message' => 'Like data',
-            'data' => $edu,
-        ]);
-    }
 }

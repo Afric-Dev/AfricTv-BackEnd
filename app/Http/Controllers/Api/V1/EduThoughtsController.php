@@ -167,29 +167,41 @@ class EduThoughtsController extends Controller
     }
 
 
-        public function readeduthoughts($eduID)
-        {
+    public function readeduthoughts($eduID)
+    {
+        // Find the educational thought by edu_id
+        $eduThought = Educational::where('edu_id', $eduID)->first();
 
-            // Find all thought associated with the edu ID and include user data
-            $thought = Eduthought::with('user') 
-                                ->where('edu_id', $eduID)
-                                ->get();
-
-            // Check if likes exist
-            if ($thought->isEmpty()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Oops! Not Found',
-                ]);
-            }
-
-            // Return the thought in a JSON response
+        // Ensure the educational thought exists before proceeding
+        if (!$eduThought) {
+            // Handle the case where the educational thought is not found
             return response()->json([
-                'status' => true,
-                'message' => 'thought data',
-                'data' => $thought,
+                'status' => false,
+                'message' => 'Educational Thought Not Found',
+            ], 404);
+        }
+
+        // Find all thoughts associated with the edu ID and include user data
+        $thoughts = Eduthought::with('user') 
+                              ->where('edu_id', $eduThought->id)
+                              ->get();
+
+        // Check if thoughts exist
+        if ($thoughts->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Oops! Not Found',
             ]);
         }
+
+        // Return the thoughts in a JSON response
+        return response()->json([
+            'status' => true,
+            'message' => 'Thought data',
+            'data' => $thoughts,
+        ]);
+    }
+
 
 
 }

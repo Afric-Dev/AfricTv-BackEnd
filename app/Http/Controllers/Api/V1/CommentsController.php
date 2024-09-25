@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Comments;
 use App\Models\Post;
+use App\Models\User;
 use Intervention\Image\Facades\Image;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Support\Facades\Auth;
@@ -306,9 +307,32 @@ class CommentsController extends Controller
 
         public function readComment($postID)
         {
-            // Find all comments associated with the post ID and include user data
-            $comments = Comments::with('user') 
-                                ->where('post_id', $postID)
+            // Find the post by post_id
+            $post = Post::where('post_id', $postID)->first();
+
+            // Ensure the post exists before proceeding
+            if (!$post) {
+                // Handle the case where the post is not found
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Post Not Found',
+                ], 404);
+            }
+
+            // Find the user associated with the post
+            $user = User::where('id', $post->user_id)->first();
+
+            // Check if the user exists
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User Not Found',
+                ]);
+            }
+
+            // Find all comments associated with the post
+            $comments = Comments::with('user')
+                                ->where('post_id', $post->id)
                                 ->get();
 
             // Check if comments exist
@@ -326,6 +350,8 @@ class CommentsController extends Controller
                 'data' => $comments,
             ]);
         }
+
+
 
 
 }
