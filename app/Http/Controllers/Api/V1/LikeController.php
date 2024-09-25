@@ -95,7 +95,7 @@ class LikeController extends Controller
                     ->get();
 
         // Check if likes exist
-        if ($likes->isEmpty()) {
+        if (!$likes->isEmpty()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Oops! Not Found',

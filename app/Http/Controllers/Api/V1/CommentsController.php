@@ -313,7 +313,7 @@ class CommentsController extends Controller
                                 ->get();
 
             // Check if thoguts exist
-            if ($comments->isEmpty()) {
+            if (!$comments->isEmpty()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Oops! Not Found',
