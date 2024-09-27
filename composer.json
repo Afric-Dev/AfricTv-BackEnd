@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.9",
         "mailersend/laravel-driver": "^2.5",
         "minuteoflaravel/laravel-audio-video-validator": "^1.1",
+        "openai-php/laravel": "^0.10.1",
         "pbmedia/laravel-ffmpeg": "^8.5",
         "symfony/http-client": "^7.0",
         "symfony/mailgun-mailer": "^7.0"

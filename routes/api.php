@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\BookmarkController;
 use App\Http\Controllers\Api\V1\EduVoteController;
 use App\Http\Controllers\Api\V1\EduThoughtsController;
 use App\Http\Controllers\Api\V1\SearchController;
+use App\Http\Controllers\Api\V1\AIController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
@@ -114,5 +115,7 @@ Route::group([
     Route::post("bookmark", [BookmarkController::class, "bookmark"]);
     Route::post("deletebookmark", [BookmarkController::class, "deletebookmark"]);
     Route::get("readbookmarks", [BookmarkController::class, "readbookmarks"]);
+    //AI 
+    Route::post("ai", [AIController::class, "ai"]);
 });
  
