@@ -42,6 +42,7 @@ Route::get('readspecificpost/{post_id}/{post_title}', [PostController::class, 'r
 // Route::get('readfeedpost', [FeedPostController::class, 'readfeedpost']);
 //Read Comment (Thoughts)
 Route::get('readcomment/{postID}', [CommentsController::class, 'readcomment']);
+Route::get('readinndercomment/{commentID}', [CommentsController::class, 'readInnerComment']);
 //Read Like (Vote)
 Route::get('readlikes/{postID}', [LikeController::class, 'readlikes']);
 //Read Edu post 
@@ -94,8 +95,10 @@ Route::group([
     // Route::delete("deletefeedposts/{id}", [FeedPostController::class, "deletefeedposts"]);
     //Comment  (Thought)
     Route::post("comments", [CommentsController::class, "comments"]);
+    Route::post("innerComments", [CommentsController::class, "innerComments"]);
     // Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
     Route::post("deletecomment", [CommentsController::class, "deletecomment"]);
+    Route::post("deleteinnercomment", [CommentsController::class, "deleteInnerComment"]);
     //Like (Vote)
     Route::post("like", [LikeController::class, "like"]);
     Route::post("unlike", [LikeController::class, "unlike"]); 
