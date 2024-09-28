@@ -12,6 +12,7 @@ use Intervention\Image\Facades\Image;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use App\Models\Notification;
 
 class CommentsController extends Controller
 { 
@@ -122,6 +123,23 @@ class CommentsController extends Controller
 
         // Increment the comments count for the post
         $post->increment('comments_count');
+
+        $user = Auth::user();
+        //Notification
+        $type = "THOUGHT";
+        $title = "THOUGHT NOTIFICATION";
+        $message = $user->name . " has just shared their thoughts on your blog post!";
+
+
+        $notification = Notification::create([
+            'user_id' => $post->user_id,
+            'post_id' => $post->post_id,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'is_read' => false,
+        ]);
+
 
         return response()->json([
             "status" => true,
@@ -334,6 +352,7 @@ class CommentsController extends Controller
             // Find all comments associated with the post
             $comments = Comments::with('user')
                                 ->where('post_id', $post->id)
+                                ->orderBy('created_at', 'desc')
                                 ->get();
 
             // Check if comments exist
@@ -558,6 +577,7 @@ class CommentsController extends Controller
             // Find all comments associated with the post
             $comments = InnerComment::with('user')
                                 ->where('comment_id', $comment->id)
+                                ->orderBy('created_at', 'desc')
                                 ->get();
 
             // Check if comments exist

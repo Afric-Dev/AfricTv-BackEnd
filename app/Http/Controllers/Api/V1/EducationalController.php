@@ -13,6 +13,8 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Cloudinary\Transformation\Video;
 use Cloudinary\Transformation\Image;
 use Illuminate\Support\Facades\Log;
+use App\Models\Notification;
+use App\Models\Subscribtion;
 
 
 class EducationalController extends Controller
@@ -120,6 +122,29 @@ class EducationalController extends Controller
                 'links' => $request->links,
                 'description' => $request->description,
             ]);
+
+        $user = Auth::user();
+
+        // Retrieve all subscribers of the user
+        $subscribers = Subscribtion::where('subscriber_id', $user->id)->get();
+
+        // Define notification details
+        $type = "EDUCATIONAL POST";
+        $title = "EDUCATIONAL POST UPLOAD NOTIFICATION";
+        $message = "A new educational post has been uploaded by " . $user->name . ". Check it out now!";
+
+        // Loop through subscribers and send notifications
+        foreach ($subscribers as $subscriber) {
+            Notification::create([
+                'user_id' => $subscriber->user_id, // The ID of the subscriber
+                'edu_id' => $edu->edu_id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'is_read' => false,
+            ]);
+        }
+
 
             return response()->json([
                 'status' => true,

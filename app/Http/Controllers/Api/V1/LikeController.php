@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Likes;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
+use App\Models\Subscribtion;
 
 class LikeController extends Controller
 {
@@ -44,6 +46,22 @@ class LikeController extends Controller
         // Increment the likes count
         $post->increment('likes_count');
         $post->save();
+
+        $user = Auth::user();
+
+        //Notification
+        $type = "VOTE";
+        $title = "VOTE NOTIFICATION";
+        $message = "A new vote has been cast by " . $user->name . "Your post is booming!";
+
+        $notification = Notification::create([
+            'user_id' => $post->user_id,
+            'post_id' => $post_id,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'is_read' => false,
+        ]);
 
         return response()->json([
             "status" => true,

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Notification;
+use App\Models\Subscribtion;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePostRequest;
 use Carbon\Carbon;
@@ -169,6 +171,30 @@ class PostController extends Controller
             //"post_ending" => $request->post_ending,
             //"date" => $request->date,
         ]);
+
+
+        $user = Auth::user();
+
+        // Retrieve all subscribers of the user
+        $subscribers = Subscribtion::where('subscriber_id', $user->id)->get();
+
+        // Define notification details
+        $type = "BLOG POST";
+        $title = "BLOG POST UPLOAD NOTIFICATION";
+        $message = "A new blog post has been uploaded by " . $user->name . ". Check it out now!";
+
+        // Loop through subscribers and send notifications
+        foreach ($subscribers as $subscriber) {
+            Notification::create([
+                'user_id' => $subscriber->user_id, // The ID of the subscriber
+                'post_id' => $post->post_id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'is_read' => false,
+            ]);
+        }
+
 
         return response()->json([
             "status" => true,

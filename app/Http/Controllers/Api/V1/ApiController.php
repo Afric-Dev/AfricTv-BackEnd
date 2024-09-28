@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\RegistrationMail;
@@ -177,6 +178,19 @@ class ApiController extends Controller
                 //To send email after user login in successfully
                 Mail::to($user->email)->send(new LoginMail($user));
 
+                //Notification
+                $type = "LOGIN";
+                $title = "LOGIN NOTIFICATION";
+                $message = "We noticed a new login to your account. If this was you, no further action is needed. However, if you did not authorize this login, please secure your account immediately by resetting your password and reviewing your account activity.";
+
+                $notification = Notification::create([
+                    'user_id' => $user->id,
+                    'type' => $type,
+                    'title' => $title,
+                    'message' => $message,
+                    'is_read' => false,
+                ]);
+             
                 return response()->json([
                     "status" => true,
                     "message" => "Login successful",

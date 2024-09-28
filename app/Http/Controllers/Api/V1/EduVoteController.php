@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Eduvote;
 use App\Models\Educational;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
+use App\Models\Subscribtion;
 
 class EduVoteController extends Controller
 {
@@ -48,6 +50,22 @@ class EduVoteController extends Controller
         // Increment the likes count
         $educational->increment('vote_count');
         $educational->save();
+
+        $user = Auth::user();
+        //Notification
+        $type = "VOTE";
+        $title = "VOTE NOTIFICATION";
+        $message = "A new vote has been cast by " . $user->name . "Your post is booming!";
+
+        $notification = Notification::create([
+            'user_id' => $educational->user_id,
+            'edu_id' => $educational->edu_id,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'is_read' => false,
+        ]);
+
 
         return response()->json([
             "status" => true,

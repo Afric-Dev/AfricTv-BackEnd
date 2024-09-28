@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Educational;
 use App\Models\Eduthought;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class EduThoughtsController extends Controller
 {
@@ -110,12 +111,31 @@ class EduThoughtsController extends Controller
         // Increment the educational count for the edu
         $edu->increment('thoughts_count');
 
+        $user = Auth::user();
+        //Notification
+        $type = "THOUGHT";
+        $title = "THOUGHT NOTIFICATION";
+        $message = $user->name . " has just shared their thoughts on your educational post!";
+
+
+        $notification = Notification::create([
+            'user_id' => $edu->user_id,
+            'edu_id' => $edu->edu_id,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'is_read' => false,
+        ]);
+
+
         return response()->json([
             "status" => true,
             "message" => "Thoughts Uploaded Successfully",
             "comment" => $educational
         ]);
     }
+
+    
     public function deleteeduthoughts(Request $request)
     {
         // Validate the request
