@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\EduVoteController;
 use App\Http\Controllers\Api\V1\EduThoughtsController;
 use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\AIController;
+use App\Http\Controllers\Api\V1\NotificationsController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
@@ -117,5 +118,9 @@ Route::group([
     Route::get("readbookmarks", [BookmarkController::class, "readbookmarks"]);
     //AI 
     Route::post("ai", [AIController::class, "ai"]);
+    //NOTIFICATION
+    Route::get("notifications", [NotificationsController::class, "index"]);
+    Route::get("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);
+    Route::get("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
 });
  

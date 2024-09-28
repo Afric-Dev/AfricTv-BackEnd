@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('message'); 
             $table->boolean('is_read')->default(false); 
             $table->timestamp('read_at')->nullable(); 
-
+            $table->timestamps();
             // Foreign key to user table
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

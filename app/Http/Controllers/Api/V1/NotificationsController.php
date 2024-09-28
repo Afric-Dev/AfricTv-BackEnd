@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
-class NotificationController extends Controller
+class NotificationsController extends Controller
 {
     
     public function index()
     {
-        $userId = Auth::id();
-        $notifications = Notification::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+        $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,
@@ -46,20 +47,20 @@ class NotificationController extends Controller
     //     ]);
     // }
 
-    public function show($uuid)
+    // public function show($uuid)
+    // {
+    //     $notification = Notification::where('uuid', $uuid)->firstOrFail();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'notification' => $notification
+    //     ]);
+    // }
+
+
+    public function markAsRead($id)
     {
-        $notification = Notification::where('uuid', $uuid)->firstOrFail();
-
-        return response()->json([
-            'success' => true,
-            'notification' => $notification
-        ]);
-    }
-
-
-    public function markAsRead($uuid)
-    {
-        $notification = XNotification::where('uuid', $uuid)->firstOrFail();
+        $notification = Notification::where('id', $id)->first();
 
         if (!$notification->is_read) {
             $notification->markAsRead();
@@ -72,9 +73,9 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function destroy($uuid)
+    public function destroy($id)
     {
-        $notification = XNotification::where('uuid', $uuid)->firstOrFail();
+        $notification = Notification::where('id', $id)->first();
 
         $notification->delete();
 
