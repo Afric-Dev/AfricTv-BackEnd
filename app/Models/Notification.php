@@ -31,7 +31,7 @@ class Notification extends Model
         'uuid',
         'user_id',
         'post_id',
-        'unique_id',
+        'subscriber_unique_id',
         'edu_id',
         'type',
         'title',
@@ -54,6 +54,13 @@ class Notification extends Model
         $this->update([
             'is_read' => true,
             'read_at' => now(),
+        ]);
+    }
+
+    public function markAsUnRead()
+    {
+        $this->update([
+            'is_read' => false,
         ]);
     }
 

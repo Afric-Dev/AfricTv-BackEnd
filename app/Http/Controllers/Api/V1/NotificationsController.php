@@ -67,8 +67,23 @@ class NotificationsController extends Controller
         }
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Notification marked as read',
+            'notification' => $notification
+        ]);
+    }
+
+    public function markAsUnRead($id)
+    {
+        $notification = Notification::where('id', $id)->first();
+
+        if ($notification->is_read) {
+            $notification->markAsUnRead();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Notification un read successfully',
             'notification' => $notification
         ]);
     }
@@ -80,7 +95,7 @@ class NotificationsController extends Controller
         $notification->delete();
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Notification deleted successfully'
         ]);
     }

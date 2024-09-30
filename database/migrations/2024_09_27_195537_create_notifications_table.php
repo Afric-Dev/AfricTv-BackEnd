@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('user_id'); 
             $table->string('post_id')->nullable(); 
             $table->string('edu_id')->nullable(); 
-            $table->string('unique_id')->nullable(); 
+            $table->string('subscriber_unique_id')->nullable(); 
             $table->string('type'); 
             $table->string('title'); 
             $table->text('message'); 

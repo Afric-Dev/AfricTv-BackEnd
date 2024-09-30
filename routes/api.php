@@ -121,6 +121,7 @@ Route::group([
     //Notification
     Route::get("notifications", [NotificationsController::class, "index"]);
     Route::get("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);
+    Route::get("markAsUnRead/{id}", [NotificationsController::class, "markAsUnRead"]);
     Route::get("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
 });
  

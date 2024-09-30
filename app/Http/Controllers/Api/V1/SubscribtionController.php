@@ -60,12 +60,12 @@ class SubscribtionController extends Controller
                 //Notification
                 $type = "SUBSCRIBTION";
                 $title = "SUBSCRIBTION NOTIFICATION";
-                $message ="Great news! " .  $user->name . " just subscribe to your account. Keep writing awesome blogs!!";
+                $message ="Great news! " .  $user->name . " just subscribe to your account. Keep creating awesome blogs!!";
 
 
                 $notification = Notification::create([
                     'user_id' => $subscribtion->subscriber_id,
-                    'unique_id' => $user->unique_id,
+                    'subscriber_unique_id' => $user->unique_id,
                     'type' => $type,
                     'title' => $title,
                     'message' => $message,
