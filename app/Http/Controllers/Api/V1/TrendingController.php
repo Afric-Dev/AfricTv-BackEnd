@@ -22,12 +22,12 @@ class TrendingController extends Controller
         // Fetch blogs within the specified timeframe and get categories
         $posts = Post::where('created_at', '>=', $timeframe)->get();
 
-        // Create a collection to store category counts
+        // Create a collection to store category counts  (Note that i chaged it from category to #hashtag)
         $categoryCounts = collect();
 
         // Count the occurrences of each category
         foreach ($posts as $post) {
-            $categories = explode(',', $post->category);
+            $categories = explode(',', $post->hashtags);
             foreach ($categories as $category) {
                 $category = trim($category); // Remove any extra spaces
                 if ($category !== '') {
@@ -41,7 +41,7 @@ class TrendingController extends Controller
 
         return response()->json([
             "status" => true,
-            "message" => "Trending categories",
+            "message" => "Trending",
             "data" => $trendingCategories,
         ]);
     }

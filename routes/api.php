@@ -97,7 +97,6 @@ Route::group([
     // Route::delete("deletefeedposts/{id}", [FeedPostController::class, "deletefeedposts"]);
     //Comment  (Thought)
     Route::post("comments", [CommentsController::class, "comments"]);
-    Route::post("innerComments", [CommentsController::class, "innerComments"]);
     // Route::post("updatecomments/{id}", [CommentsController::class, "updatecomments"]);
     Route::post("deletecomment", [CommentsController::class, "deletecomment"]);
     Route::post("deleteinnercomment", [CommentsController::class, "deleteInnerComment"]);

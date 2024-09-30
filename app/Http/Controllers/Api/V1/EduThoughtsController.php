@@ -16,6 +16,7 @@ class EduThoughtsController extends Controller
         // Validate the incoming request
         $request->validate([
             "edu_id" => "required|regex:/^@\w+$/",
+            "parent_id" => 'nullable|exists:eduthoughts,id',
             "thoughts" => "required",
             // "thoughts_vid_path" => "nullable|mimes:mp4,avi,mov,wmv,flv|max:20480", // Max video file size: 20MB
             // 'thoughts_img_path' => 'array',
@@ -100,6 +101,7 @@ class EduThoughtsController extends Controller
         // Create the comment
         $educational = Eduthought::create([
             "edu_id" => $edu->id,
+            "parent_id" => $request->parent_id, // This will be null if it’s a top-level thought
             "user_id" => Auth::user()->id,
             "thoughts" => $request->thoughts,
             "thoughts_vid_path" => $videoPath,
@@ -203,7 +205,10 @@ class EduThoughtsController extends Controller
 
         // Find all thoughts associated with the edu ID and include user data
         $thoughts = Eduthought::with('user') 
+                              ->with('replies.user')
                               ->where('edu_id', $eduThought->id)
+                              ->where('parent_id', Null)
+                              ->orderBy('created_at', 'desc')
                               ->get();
 
         // Check if thoughts exist

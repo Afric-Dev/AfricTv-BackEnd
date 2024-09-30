@@ -21,6 +21,7 @@ class CommentsController extends Controller
         // Validate the incoming request
         $request->validate([
             "post_id" => "required|regex:/^@\w+$/",
+            "parent_id" => 'nullable|exists:comments,id',
             "comments" => "required",
             "comments_vid_path" => "nullable|mimes:mp4,avi,mov,wmv,flv|max:20480", // Max video file size: 20MB
             'comments_img_path' => 'array',
@@ -113,7 +114,7 @@ class CommentsController extends Controller
         $comments = Comments::create([
             "post_id" => $post->id,
             "user_id" => Auth::user()->id,
-            // "unique_id" => uniqid(),
+            "parent_id" => $request->parent_id, // This will be null if it’s a top-level comment
             "comments" => $request->comments,
             "comments_vid_path" => $videoPath,
             "comments_img_path" => json_encode($imagePaths), 
@@ -351,7 +352,9 @@ class CommentsController extends Controller
 
             // Find all comments associated with the post
             $comments = Comments::with('user')
+                                ->with('replies.user')
                                 ->where('post_id', $post->id)
+                                ->where('parent_id', Null)
                                 ->orderBy('created_at', 'desc')
                                 ->get();
 

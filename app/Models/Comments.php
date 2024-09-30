@@ -27,14 +27,29 @@ class Comments extends Model
     protected $fillable = [
         "post_id",
         "user_id",
+        "parent_id",
         "comments",
         "comments_vid_path",
         "comments_img_path",
         "comments_link",
     ];
-   public function user()
-   {
-       return $this->belongsTo(User::class);
-   }
+    public function post()
+    {
+        return $this->belongsTo(Post::class);
+    }
 
+    public function user()
+    {
+       return $this->belongsTo(User::class);
+    }
+    // Self-referencing relationship for parent comment
+    public function parent()
+    {
+        return $this->belongsTo(Comments::class, 'parent_id');
+    }
+    // Get child comments (replies)
+    public function replies()
+    {
+        return $this->hasMany(Comments::class, 'parent_id')->with('replies'); // Recursive relationship for nested comments
+    }
 }

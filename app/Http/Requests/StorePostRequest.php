@@ -34,7 +34,7 @@ class StorePostRequest extends FormRequest
             'postbodyJson' => 'nullable',
             'postBodytext' => 'required',
             'link' => 'nullable|url',
-            'hashtags' => 'nullable|max:155',
+            'hashtags' => 'required|max:155',
         ];
     }
 
@@ -81,7 +81,7 @@ class StorePostRequest extends FormRequest
             
             'link.nullable' => 'The link is optional.',
             
-            //'hashtags.nullable' => 'The hashtags are optional.',
+            'hashtags.required' => 'The hashtags are required.',
             'hashtags.max' => 'The hashtags may not be greater than 155 characters.',
         ];
     }
