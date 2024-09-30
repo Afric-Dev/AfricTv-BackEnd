@@ -31,6 +31,7 @@ class Notification extends Model
         'uuid',
         'user_id',
         'post_id',
+        'unique_id',
         'edu_id',
         'type',
         'title',

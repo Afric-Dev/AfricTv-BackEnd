@@ -9,6 +9,7 @@ use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Models\Subscribtion;
+use App\Models\Notification;
 use App\Mail\SubscribtionMail;
 use Illuminate\Support\Facades\Auth;
  
@@ -54,6 +55,22 @@ class SubscribtionController extends Controller
                     "message" => "Unknown Error",
                 ]);
             }
+
+                $user = Auth::user();
+                //Notification
+                $type = "SUBSCRIBTION";
+                $title = "SUBSCRIBTION NOTIFICATION";
+                $message ="Great news! " .  $user->name . " just subscribe to your account. Keep writing awesome blogs!!";
+
+
+                $notification = Notification::create([
+                    'user_id' => $subscribtion->subscriber_id,
+                    'unique_id' => $user->unique_id,
+                    'type' => $type,
+                    'title' => $title,
+                    'message' => $message,
+                    'is_read' => false,
+                ]);
 
             // Send an email to the user
             Mail::to($subscribtion->subscriber_email)->send(new SubscribtionMail($subscribtion));

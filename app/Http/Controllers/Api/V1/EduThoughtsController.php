@@ -125,7 +125,7 @@ class EduThoughtsController extends Controller
             'title' => $title,
             'message' => $message,
             'is_read' => false,
-        ]);
+        ]); 
 
 
         return response()->json([
