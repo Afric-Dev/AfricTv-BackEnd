@@ -38,4 +38,14 @@ return [
         ],
     ],
 
+    'deezer' => [
+        'base_uri' => env('DEEZER_API_URL', 'https://api.deezer.com/'),
+    ],
+
+   'shazam' => [
+        'key' => env('SHAZAM_API_KEY'),
+        'base_uri' => env('SHAZAM_BASE_URL'),
+    ],
+
+
 ];

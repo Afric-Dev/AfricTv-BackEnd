@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\EduThoughtsController;
 use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\NotificationsController;
+use App\Http\Controllers\Api\V1\MusicController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
@@ -58,8 +59,9 @@ Route::get('readeduthoughts/{postID}', [EduThoughtsController::class, 'readeduth
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
-
-
+//Music
+Route::get('musicSearch', [MusicController::class, 'search']);
+Route::post('getDetails/{trackId}', [MusicController::class, 'artist']);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
