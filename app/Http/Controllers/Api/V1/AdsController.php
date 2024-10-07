@@ -23,9 +23,37 @@ class AdsController extends Controller
             "title" => 'required|string|max:255',
             "description" => 'required|string',
             "link" => 'required|string|max:255',
-            "ads_type" => 'required|in:PIC,VID,LINK'
+            // "ads_type" => 'required|in:PIC,VID,LINK'
         ]);
 
+        $userId = Auth::user()->id;
+        $adPayment = AdsPayment::where('user_id', $userId)
+                              ->where('taken', 'NO')
+                              ->first();
+        if($adPayment->ads_type !== 'VID' && !empty($validatedData['vid_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sorry! You did not pay for this type of ads. The  ads type you paid for  was: ' . $adPayment->ads_type,
+            ], 422);
+        } 
+        if ($adPayment->ads_type !== 'PIC' && !empty($validatedData['img_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sorry! You did not pay for this type of ads. The  ads type you paid for  was: ' . $adPayment->ads_type,
+            ], 422);
+        }
+        if ($adPayment->ads_type == 'PIC' && empty($validatedData['img_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Image Field is required',
+            ], 422);
+        }
+        if ($adPayment->ads_type == 'VID' && empty($validatedData['vid_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Video Field is required',
+            ], 422);
+        }
 
         if ($request->hasFile('img_path')) {
             $uploadCloudinary = cloudinary()->upload(
@@ -90,10 +118,7 @@ class AdsController extends Controller
             $videoId = Null;
         }
 
-        $userId = Auth::user()->id;
-        $adPayment = AdsPayment::where('user_id', $userId)
-                              ->where('taken', 'NO')
-                              ->first();
+
         
         if (!$adPayment) {
             // No ad payment found or already used
@@ -135,7 +160,7 @@ class AdsController extends Controller
             "clicks" => $clicks,
             "ads_id" => $ads_id,
             "start_date" => Carbon::now(),
-            "ads_type" => $validatedData['ads_type']
+            "ads_type" => $adPayment->ads_type,
         ]);
 
         return response()->json([
@@ -144,16 +169,15 @@ class AdsController extends Controller
             'data' => $ads,
         ]);
 
-
       }
 
 
-    //not done with this work
+    
     public function adInactive(Request $request)
     {
         // Fetch ads with zero clicks and status 'ACTIVE'
         $ads = Ads::where('status', 'ACTIVE')
-                  ->where('clicks', 0)
+                  ->where('clicks', '<=', 0)
                   ->get();
 
         // Check if there are any ads to update
@@ -182,12 +206,90 @@ class AdsController extends Controller
         }
     }
 
+    public function UserSetAdsInactive(Request $request)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'ads_id' => 'required|exists:ads,id' 
+        ]);
+
+        // Get the ad based on the validated ads_id
+        $ad = Ads::find($validatedData['ads_id']);
+
+         if (Auth::check() && Auth::user()->id !== $ad->user_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'INVALID ATTEMPT',
+            ]);
+         }
+
+        // Check if the ad exists
+        if (!$ad) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ad Not Found',
+            ]);
+        }
+
+        $ad->status = "INACTIVE";
+        $ad->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Ad successfully set to INACTIVE',
+            'ad' => $ad
+        ]);
+    }
+
+        public function UserSetAdsActive(Request $request)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'ads_id' => 'required|exists:ads,id' 
+        ]);
+
+        // Get the ad based on the validated ads_id
+        $ad = Ads::find($validatedData['ads_id']);
+
+         if (Auth::check() && Auth::user()->id !== $ad->user_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'INVALID ATTEMPT',
+            ]);
+         }
+
+        // Check if the ad exists
+        if (!$ad) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ad Not Found',
+            ]);
+        }
+
+                // Check if the ad exists
+        if ($ad->clicks <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Oops! INVALID ATTEMPT',
+            ]);
+        }
+
+        $ad->status = "ACTIVE";
+        $ad->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Ad successfully set to ACTIVE',
+            'ad' => $ad
+        ]);
+    }
+
     public function AdsPerClicks(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
             'clicked' => 'required|boolean',
-            'ads_id' => 'required|integer|exists:ads,id' 
+            'ads_id' => 'required|exists:ads,id' 
         ]);
 
         // Get the ad based on the validated ads_id
@@ -203,7 +305,18 @@ class AdsController extends Controller
 
         // If clicked is true, decrement the clicks
         if ($validatedData['clicked']) {
-            $ad->clicks -= 1;
+            if($ad->ads_type == 'VID') {
+               $ad->clicks -= 1;
+            } elseif ($ad->ads_type == 'PIC') {
+               $ad->clicks -= 1;
+            } elseif ($ad->ads_type == 'LINK') {
+               $ad->clicks -= 1;
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'INVALID ATTEMPT',
+                ], 422);
+            }
             $ad->save();
         }
 

@@ -36,7 +36,7 @@ class AIController extends Controller
             $result = OpenAI::chat()->create([
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
-                    ['role' => 'user', 'content' => 'Hello!'],
+                    ['role' => 'user', 'content' => $request->message],
                 ],
             ]);
             return response->json([
@@ -54,7 +54,7 @@ class AIController extends Controller
             $result = OpenAI::chat()->create([
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
-                    ['role' => 'user', 'content' => 'Hello!'],
+                    ['role' => 'user', 'content' => $request->message],
                 ],
             ]);
 

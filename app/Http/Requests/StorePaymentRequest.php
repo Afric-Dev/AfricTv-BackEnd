@@ -23,7 +23,7 @@ class StorePaymentRequest extends FormRequest
     {
         return [
             'currency' => 'required|string', 
-            'amount' => ['required', 'regex:/^\d{1,3}(,\d{3})*(\.\d{1,2})?$/'],
+            'amount' => ['required'],
             'ads_type' => 'required|in:PIC,VID,LINK',
             'status' => 'required|in:PENDING,PAID,FAILED',
             'method' => 'required|in:PAYSTACK',

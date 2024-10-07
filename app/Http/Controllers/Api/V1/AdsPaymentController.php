@@ -18,7 +18,18 @@ class AdsPaymentController extends Controller
         // Calculate clicksNumber based on the amount provided in the request
         $amount = $request->input('amount');
         $cleanAmount = str_replace(',', '', $amount);
-        $clicksNumber = (float)$cleanAmount / 0.10;
+        if($validatedData['ads_type'] == 'VID') {
+            $clicksNumber = (float)$cleanAmount / 0.20;
+        } elseif ($validatedData['ads_type'] == 'PIC') {
+            $clicksNumber = (float)$cleanAmount / 0.15;
+        } elseif ($validatedData['ads_type'] == 'LINK') {
+            $clicksNumber = (float)$cleanAmount / 0.10;
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'INVALID ATTEMPT',
+            ], 422);
+        }
 
         // Validate that the calculated clicks number is greater than zero
         if ($clicksNumber <= 0) {
