@@ -171,7 +171,126 @@ class AdsController extends Controller
 
       }
 
+    public function updateAd(Request $request, $adId)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            "img_path" => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            "vid_path" => 'nullable|mimes:mp4,avi,mov,wmv,flv',
+            "title" => 'required|string|max:255',
+            "description" => 'required|string',
+            "link" => 'required|string|max:255',
+        ]);
 
+        // Fetch the ad to be updated
+        $ads = Ads::find($adId);
+        if (!$ads) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Ad not found',
+            ], 404);
+        }
+        $userId = Auth::user()->id;
+        $adTaken = Ads::where('id' , $adId)
+                  ->where('status', 'ACTIVE')
+                  ->first();
+
+        if($adTaken->ads_type !== 'VID' && !empty($validatedData['vid_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sorry! You did not pay for this type of ads. The  ads type you paid for  was: ' . $adTaken->ads_type,
+            ], 422);
+        } 
+        if ($adTaken->ads_type !== 'PIC' && !empty($validatedData['img_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sorry! You did not pay for this type of ads. The  ads type you paid for  was: ' . $adTaken->ads_type,
+            ], 422);
+        }
+        if ($adTaken->ads_type == 'PIC' && empty($validatedData['img_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Image Field is required',
+            ], 422);
+        }
+        if ($adTaken->ads_type == 'VID' && empty($validatedData['vid_path'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Video Field is required',
+            ], 422);
+        }
+
+        // Handling image upload if provided
+        if ($request->hasFile('img_path')) {
+           // Delete the user former avatar
+            if ($ads->imageId) {
+                    Cloudinary::destroy($ads->imageId);
+            }
+            $uploadCloudinary = cloudinary()->upload(
+                $request->file('img_path')->getRealPath(),
+                [
+                    'folder' => 'africtv/ad_image',
+                    'resource_type' => 'auto',
+                    'transformation' => [
+                        'quality' => 'auto',
+                        'fetch_format' => 'auto',
+                    ],
+                ]
+            );
+            $ads->img_path = $uploadCloudinary->getSecurePath();
+            $ads->imageId = $uploadCloudinary->getPublicId();
+        }
+
+        // Handling video upload if provided
+        if ($request->hasFile('vid_path')) {
+            if ($ads->videoId) {
+                $response = Cloudinary::destroy($ad->videoId, ['resource_type' => 'video']);
+            }
+            $duration = getVideoDuration($request->file('vid_path'));
+            if ($duration > 7200) { // 7200 seconds = 2 hours
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Video duration should not exceed 2 hours.',
+                ]);
+            }
+
+            try {
+                $uploadCloudinary = cloudinary()->upload(
+                    $request->file('vid_path')->getRealPath(),
+                    [
+                        'folder' => 'africtv/ad_videos',
+                        'resource_type' => 'auto',
+                        'transformation' => [
+                            'quality' => 'auto',
+                            'fetch_format' => 'auto',
+                        ],
+                    ]
+                );
+                $ads->vid_path = $uploadCloudinary->getSecurePath();
+                $ads->videoId = $uploadCloudinary->getPublicId();
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Video upload failed: ' . $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Update ad details with validated data
+        $ads->title = $validatedData['title'];
+        $ads->description = $validatedData['description'];
+        $ads->link = $validatedData['link'];
+        $ads->updated_at = Carbon::now();
+
+        // Save the updated ad
+        $ads->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Ad updated successfully',
+            'data' => $ads,
+        ]);
+    }
     
     public function adInactive(Request $request)
     {
@@ -366,9 +485,9 @@ class AdsController extends Controller
                 "message" => "Ad not found"
             ]);
         }
-                    // Check if the authenticated user is the owner of the edu post
+                    // Check if the authenticated user is the owner of the ads post
                     if (Auth::check() && Auth::user()->id === $ad->user_id) {
-                        // Delete the edu media
+                        // Delete the ads media
                         
                     if ($ad->videoId) {
                         // Attempt to delete the video from Cloudinary
@@ -391,7 +510,7 @@ class AdsController extends Controller
                         Cloudinary::destroy($ad->imageId);
                     }
 
-                        // Delete the edu post
+                        // Delete the ads post
                         $ad->delete();
         
                         return response()->json([

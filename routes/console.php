@@ -8,4 +8,9 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 //To Auto Inacive ads
-$schedule->command('ads:inactive')->hourly();
+
+
+
+Schedule::call(function () {
+    command('ads:inactive');
+})->everyMinute();

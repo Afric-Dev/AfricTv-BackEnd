@@ -86,7 +86,7 @@ Route::group([
     Route::post("UserSetAdsActive", [AdsController::class, "UserSetAdsActive"]);
     Route::post("adInactive", [AdsController::class, "adInactive"]);
     Route::post("deleteads", [AdsController::class, "deleteads"]); 
-
+    Route::post('updateAd/{adId}', [AdsController::class, 'updateAd']);
     //BlogPost
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
     // Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
