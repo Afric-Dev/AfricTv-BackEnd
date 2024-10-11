@@ -3,8 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\ApiController;
-use App\Http\Controllers\Api\V1\NewPasswordController;
-use App\Http\Controllers\Api\V1\UserCardDetails;
+use App\Http\Controllers\Api\V1\ForgotPasswordController;
+// use App\Http\Controllers\Api\V1\UserCardDetails;
 use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\AdsPaymentController;
 use App\Http\Controllers\Api\V1\AdsController;
@@ -32,8 +32,9 @@ use App\Http\Controllers\Api\V1\MusicController;
 Route::post('register', [ApiController::class, 'register']);
 Route::post("login", [ApiController::class, "login"]);
 Route::get("IndividualProfile/{uniqid}", [ApiController::class, "IndividualProfile"]);
-Route::post('forgot_password', [NewPasswordController::class, 'forgotPassword']);
-Route::post('reset_password', [NewPasswordController::class, 'resetPassword']);
+//Forget and Rest password
+Route::post('password/forgot', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [ForgotPasswordController::class, 'reset']);
 //Feedback 
 Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost
@@ -89,7 +90,7 @@ Route::group([
     Route::post('updateAd/{adId}', [AdsController::class, 'updateAd']);
     //BlogPost
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
-    // Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
+    //Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
     Route::post("deleteposts", [PostController::class, "deleteposts"]);
     //Subscribtion
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);

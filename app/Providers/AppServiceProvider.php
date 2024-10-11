@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Notifications\ResetPassword;
+use App\Models\User;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        ResetPassword::createUrlUsing(function ($user, string $token) {
+            return match (true) {
+                $user instanceof User => 'http://our-website/reset-password' . '?token=' . $token . '&email=' . urlencode($user->email),
+                default => throw new \Exception("Invalid user type"),
+            };
+        });
     }
 }
