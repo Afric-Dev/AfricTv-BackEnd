@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         ResetPassword::createUrlUsing(function ($user, string $token) {
             return match (true) {
-                $user instanceof User => 'http://our-website/reset-password' . '?token=' . $token . '&email=' . urlencode($user->email),
+                $user instanceof User => 'http://localhost:5173/resetpassword' . '?token=' . $token . '&email=' . urlencode($user->email),
                 default => throw new \Exception("Invalid user type"),
             };
         });
