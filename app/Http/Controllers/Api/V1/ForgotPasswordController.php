@@ -36,13 +36,13 @@ class ForgotPasswordController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Too many reset requests. Please wait before trying again.',
-                'error_code' => $status
+                //'error_code' => $status
             ], 429);
         } else {
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to send reset link.',
-                'error_code' => $status,
+                //'error_code' => $status,
             ], 500);
         }
     }
