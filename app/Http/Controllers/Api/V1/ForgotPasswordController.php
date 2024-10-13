@@ -29,15 +29,18 @@ class ForgotPasswordController extends Controller
 
         if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
+                'status' => true,
                 'message' => 'Reset password link sent successfully.'
             ], 200);
         } elseif ($status === Password::RESET_THROTTLED) {
             return response()->json([
+                'status' => false,
                 'message' => 'Too many reset requests. Please wait before trying again.',
                 'error_code' => $status
             ], 429);
         } else {
             return response()->json([
+                'status' => false,
                 'message' => 'Failed to send reset link.',
                 'error_code' => $status,
             ], 500);
@@ -55,6 +58,7 @@ class ForgotPasswordController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
+                'status' => false,
                 'message' => 'Invalid input.',
                 'errors' => $validator->errors()
             ], 422);
@@ -71,10 +75,12 @@ class ForgotPasswordController extends Controller
 
         if ($status === Password::PASSWORD_RESET) {
             return response()->json([
+                'status' => true,
                 'message' => 'Password reset successful.'
             ], 200);
         } else {
             return response()->json([
+                'status' => false,
                 'message' => 'Failed to reset password. Please try again.',
             ], 500);
         }
