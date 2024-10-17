@@ -46,7 +46,7 @@ class LikeController extends Controller
         // Increment the likes count
         $post->increment('likes_count');
         $post->save();
-
+    
         $user = Auth::user();
 
         //Notification
@@ -56,7 +56,7 @@ class LikeController extends Controller
 
         $notification = Notification::create([
             'user_id' => $post->user_id,
-            'post_id' => $post_id,
+            'post_id' => $like->post_id,
             'type' => $type,
             'title' => $title,
             'message' => $message,
