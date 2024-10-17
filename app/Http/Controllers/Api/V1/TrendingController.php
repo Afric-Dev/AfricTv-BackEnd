@@ -16,35 +16,47 @@ class TrendingController extends Controller
 
     public function trending()
     {
-        // Timeframe for trending (posts from the last 24 hours)
+        // Timeframe for trending (posts from the last 48 hours)
         $timeframe = Carbon::now()->subHours(48);
 
-        // Fetch blogs within the specified timeframe and get categories
+        // Fetch posts within the specified timeframe
         $posts = Post::where('created_at', '>=', $timeframe)->get();
 
-        // Create a collection to store category counts  (Note that i chaged it from category to #hashtag)
-        $categoryCounts = collect();
+        // Collection to store hashtag counts with category
+        $hashtagCounts = collect();
 
-        // Count the occurrences of each category
+        // Count occurrences of each hashtag and associate with category
         foreach ($posts as $post) {
-            $categories = explode(',', $post->hashtags);
-            foreach ($categories as $category) {
-                $category = trim($category); // Remove any extra spaces
-                if ($category !== '') {
-                    $categoryCounts->put($category, $categoryCounts->get($category, 0) + 1);
+            // Split hashtags by spaces or commas
+            $trendings = preg_split('/[\s,]+/', $post->hashtags);
+
+            // Extract the first word of the category
+            $categoryFirstWord = strtok($post->category, ' '); // Get the first word of the category
+
+            foreach ($trendings as $hashtag) {
+                // Remove the # symbol and trim spaces
+                $hashtag = ltrim(trim($hashtag), '#');
+
+                if ($hashtag !== '') {
+                    // Create the key with category and hashtag divided by ":"
+                    $categoryAndHashtag = "{$categoryFirstWord} : {$hashtag}";
+                    
+                    // Increment the count of the hashtag
+                    $hashtagCounts->put($categoryAndHashtag, $hashtagCounts->get($categoryAndHashtag, 0) + 1);
                 }
             }
         }
 
-        // Sort categories by their count in descending order
-        $trendingCategories = $categoryCounts->sortDesc()->take(20);
+        // Sort hashtags by their count in descending order
+        $trendingHashtags = $hashtagCounts->sortDesc()->take(20);
 
         return response()->json([
             "status" => true,
             "message" => "Trending",
-            "data" => $trendingCategories,
+            "data" => $trendingHashtags,
         ]);
     }
+
 
 
     public function search($searchQuery)
