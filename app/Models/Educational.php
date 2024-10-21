@@ -37,8 +37,8 @@ class Educational extends Model
             "edu_views", 
             "vote_count",
             "thoughts_count",
-            "favourites_count"
-           
+            "favourites_count",
+            "is_status"
     ];
     
     public function user()

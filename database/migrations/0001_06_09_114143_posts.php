@@ -35,6 +35,7 @@ return new class extends Migration
             $table->integer('likes_count')->default(0);
             $table->integer('bookmark_count')->default(0);
             $table->integer('comments_count')->default(0);
+            $table->enum('is_status', ['ACTIVE', 'INACTIVE', 'BANNED'])->default('ACTIVE');
             $table->date('date')->nullable();
             $table->timestamps();
 

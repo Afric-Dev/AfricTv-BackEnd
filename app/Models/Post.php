@@ -47,6 +47,7 @@ class Post extends Model
         'post_ending',
         'post_id',
         'date',
+        "is_status"
     ];
 
     public function user()

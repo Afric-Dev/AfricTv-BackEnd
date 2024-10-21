@@ -463,6 +463,7 @@ class PostController extends Controller
         // Fetch posts within the specified timeframe
         $posts = Post::with('user')
             ->where('created_at', '>=', $timeframe)
+            ->where('is_status', 'ACTIVE')
             ->withCount(['likes', 'comments']) 
             ->get();
 
@@ -529,6 +530,13 @@ class PostController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Post Not Found',
+            ]);
+        }
+
+        if ($post->is_status == "INACTIVE") {
+            return response()->json([
+                'status' => false,
+                'message' => 'Apologies, but this blog has been removed due to violations of our privacy policy.',
             ]);
         }
 

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('vote_count')->default(0);
             $table->integer('favourites_count')->default(0);
             $table->integer('thoughts_count')->default(0);
+            $table->enum('is_status', ['ACTIVE', 'INACTIVE', 'BANNED'])->default('ACTIVE');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

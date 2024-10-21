@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\NotificationsController;
 use App\Http\Controllers\Api\V1\MusicController;
+use App\Http\Controllers\Api\V1\UploadMediaController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
@@ -128,5 +129,11 @@ Route::group([
     Route::get("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);
     Route::get("markAsUnRead/{id}", [NotificationsController::class, "markAsUnRead"]);
     Route::get("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
+    //Media's (Blogs and Educational)
+    Route::post("uploadImage", [UploadMediaController::class, "uploadImage"]);
+    Route::post("uploadVideo", [UploadMediaController::class, "uploadVideo"]);
+    Route::post("deleteImage", [UploadMediaController::class, "deleteImage"]);
+    Route::post("deleteVideo", [UploadMediaController::class, "deleteVideo"]);
+
 });
  

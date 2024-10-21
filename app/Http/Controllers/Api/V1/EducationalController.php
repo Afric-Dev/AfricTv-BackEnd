@@ -187,8 +187,8 @@ class EducationalController extends Controller
                 if ($response['result'] !== 'ok') {
                     return response()->json([
                         "status" => false,
-                        "message" => "Failed to delete video from Cloudinary",
-                        "cloudinary_response" => $response 
+                        "message" => "Failed to delete video",
+                        //"cloudinary_response" => $response 
                     ]);
                 }
             }
@@ -247,7 +247,14 @@ class EducationalController extends Controller
                     'message' => 'Edu Not Found',
                 ]);
             }
-    
+            
+            if ($edu->is_status == "INACTIVE") {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Apologies, but this post has been removed due to violations of our privacy policy.',
+                ]);
+            }
+
             return response()->json([
                 'status' => true,
                 'message' => 'edu data',
@@ -291,8 +298,9 @@ class EducationalController extends Controller
             {
                 // Retrieve educational records with user data
                 $edus = Educational::with('user')
-                    ->orderBy('created_at', 'desc')  
+                    ->orderBy('created_at', 'desc')
                     ->orderBy('edu_views', 'desc')       
+                    ->where('is_status', 'ACTIVE')
                     ->get();
                 $eduCount = $edus->count();
 
