@@ -40,6 +40,7 @@ Route::post('password/reset', [ForgotPasswordController::class, 'reset']);
 Route::post('feedback', [FeedbackController::class, 'feedback']);
 //Read BlogPost
 Route::get('readpost', [PostController::class, 'readpost']);
+Route::get('toppost', [PostController::class, 'toppost']);
 Route::post('postviews', [PostController::class, 'postviews']);
 //Read Single BlogPost
 Route::get('readspecificpost/{post_id}/{post_title}', [PostController::class, 'readspecificpost']);

@@ -496,6 +496,46 @@ class PostController extends Controller
     } 
 
 
+      public function toppost()
+    {
+        // Fetch active posts created within the last 24 hours
+        $posts = Post::with('user')
+            ->where('created_at', '>=', now()->subDay())
+            ->where('is_status', 'ACTIVE')
+            ->withCount(['likes', 'comments']) 
+            ->get();
+
+        // Calculate a trending score for each post
+        $posts->map(function ($post) {
+            // Formula for trending score
+            $post->post_score = ($post->likes_count * 1.5) +
+                                ($post->post_views * 1) +
+                                ($post->bookmark_count * 0.3);
+            return $post;
+        });
+
+        // Filter posts with a score between 1,000 and 2,000
+        $filteredPosts = $posts->filter(function ($post) {
+            return $post->post_score >= 1000 && $post->post_score <= 2000;
+        });
+
+        // Sort by score in descending order and take the top 7 posts
+        $topPosts = $filteredPosts->sortByDesc('post_score')->take(7);
+
+        // Shuffle posts if needed, prioritizing high-scoring ones
+        $shuffledPosts = $topPosts->shuffle();
+
+        $postCount = $shuffledPosts->count();
+
+        // Return the result as a JSON response
+        return response()->json([
+            'status' => true,
+            'message' => 'Post data',
+            'data' => $shuffledPosts->values()->all(),
+            'count' => $postCount,
+        ]);
+    }
+
     public function readspecificpost($post_id, $post_title)
     {
         // Find the user by their unique_id
