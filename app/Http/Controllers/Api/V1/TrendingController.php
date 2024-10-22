@@ -85,6 +85,8 @@ class TrendingController extends Controller
         // Search and calculate trending score for Posts
         $posts = Post::where('post_title', 'LIKE', "%{$searchQuery}%")
             ->orWhere('PostbodyHtml', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('hashtags', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('category', 'LIKE', "%{$searchQuery}%")
             ->with('user') 
             ->get()
             ->map(function ($post) {
