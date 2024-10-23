@@ -19,6 +19,16 @@ class BookmarkController extends Controller
 
         // Find the post based on the post_id format
         $post = Post::where('post_id', $request->post_id)->firstOrFail();
+        $bookmarkBefore = Bookmark::where('user_id', Auth::user()->id)
+        ->where('post_id', $request->post_id)
+        ->firstOrFail();
+
+        if($bookmarkBefore) {
+            return response()->json([
+                "status" => false,
+                "message" => "You've added this blog to bookmark before",
+               ]);
+        }
 
         // Create the Bookmark
         $bookmark = Bookmark::Create(
@@ -90,5 +100,39 @@ class BookmarkController extends Controller
         ]);
     }
 
+        public function readbookmarkspost($postID)
+    {
+        // Find the post by post_id
+        $post = Post::where('post_id', $postID)->first();
+
+        // Ensure the post exists before proceeding
+        if (!$post) {
+            // Handle the case where the post is not found
+            return response()->json([
+                'status' => false,
+                'message' => 'Post Not Found',
+            ], 404);
+        }
+
+        // Find all bookmark associated with the post ID
+        $bookmark = Bookmark::with('user')
+                      ->where('post_id', $post->id)
+                      ->get();
+
+        // Check if bookmark exist
+        if ($bookmark->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Oops! Empty',
+            ]);
+        }
+
+        // Return the bookmark in a JSON response
+        return response()->json([
+            'status' => true,
+            'message' => 'Bookmark data',
+            'data' => $bookmark,
+        ]);
+    }
 
 }

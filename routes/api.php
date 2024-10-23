@@ -68,7 +68,8 @@ Route::post('getDetails/{trackId}', [MusicController::class, 'artist']);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
-
+//Bookmark
+Route::get("readbookmarkspost/{postID}", [BookmarkController::class, "readbookmarkspost"]);
 
  
 //Protected Route  

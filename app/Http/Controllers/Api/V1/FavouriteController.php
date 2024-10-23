@@ -18,7 +18,16 @@ class FavouriteController extends Controller
 
         // Find the edu based on the edu_id format
         $edu = Educational::where('edu_id', $request->edu_id)->firstOrFail();
+        $favouriteBefore = Favourite::where('user_id', Auth::user()->id)
+        ->where('edu_id', $request->edu_id)
+        ->firstOrFail();
 
+        if($favouriteBefore) {
+            return response()->json([
+                "status" => false,
+                "message" => "You've added this post to favourite before",
+               ]);
+        }
         // Create the Bookmark
         $favourite = Favourite::Create(
             [
@@ -85,6 +94,40 @@ class FavouriteController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Favourite data',
+            'data' => $favourites,
+        ]);
+    }
+    public function readfavouritespost($postID)
+    {
+        // Find the post by post_id
+        $post = Educational::where('edu_id', $postID)->first();
+
+        // Ensure the post exists before proceeding
+        if (!$post) {
+            // Handle the case where the post is not found
+            return response()->json([
+                'status' => false,
+                'message' => 'Post Not Found',
+            ], 404);
+        }
+
+        // Find all favourites associated with the post ID
+        $favourites = Favourite::with('user')
+                      ->where('edu_id', $post->id)
+                      ->get();
+
+        // Check if favourites exist
+        if ($favourites->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Oops! Empty',
+            ]);
+        }
+
+        // Return the favourites in a JSON response
+        return response()->json([
+            'status' => true,
+            'message' => 'Like data',
             'data' => $favourites,
         ]);
     }
