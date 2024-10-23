@@ -10,94 +10,107 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class UploadMediaController extends Controller
 {
-    public function uploadImage(Request $request)
+        public function uploadImages(Request $request)
+        {
+            $request->validate([
+                'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            try {
+                $uploadedImages = [];
+
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        $uploadCloudinary = cloudinary()->upload(
+                            $image->getRealPath(),
+                            [
+                                'folder' => 'africtv/media_uploads_blogs_edu_images',
+                                'resource_type' => 'auto',
+                                'transformation' => [
+                                    'quality' => 'auto',
+                                    'fetch_format' => 'auto'
+                                ]
+                            ]
+                        );
+
+                        // Store the image path and ID in an array
+                        $uploadedImages[] = [
+                            'url' => $uploadCloudinary->getSecurePath(),
+                            'id' => $uploadCloudinary->getPublicId()
+                        ];
+                    }
+                }
+
+                return response()->json([
+                    "status" => true,
+                    "message" => "Images uploaded", 
+                    "images" => $uploadedImages
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    "status" => false,
+                    "message" => 'Image upload failed: ' . $e->getMessage(),
+                ], 500);
+            }
+        }
+
+    public function uploadVideos(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'videos.*' => 'required|mimes:mp4,avi,mov,wmv,flv',
         ]);
 
+        
+        function getVideoDuration($file)
+        {
+            return 600;
+        }
+
         try {
-            if ($request->hasFile('image')) {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('image')->getRealPath(),
-                    [
-                        'folder' => 'africtv/media_uploads_blogs_edu_images',
-                        'resource_type' => 'auto',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto'
+            $uploadedVideos = [];
+
+            if ($request->hasFile('videos')) {
+                foreach ($request->file('videos') as $video) {
+                    $duration = getVideoDuration($video);
+
+                    if ($duration > 7200) { // 7200 seconds = 2 hours
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Video duration should not exceed 2 hours for video: ' . $video->getClientOriginalName(),
+                        ]);
+                    }
+
+                    $uploadCloudinary = cloudinary()->upload(
+                        $video->getRealPath(),
+                        [
+                            'folder' => 'africtv/media_uploads_blogs_edu_videos',
+                            'resource_type' => 'video',
+                            'transformation' => [
+                                'quality' => 'auto',
+                                'fetch_format' => 'auto'
+                            ]
                         ]
-                    ]
-                );
-                $imagePath = $uploadCloudinary->getSecurePath();
-                $imageId = $uploadCloudinary->getPublicId();
+                    );
+
+                    // Store the video path and ID in an array
+                    $uploadedVideos[] = [
+                        'url' => $uploadCloudinary->getSecurePath(),
+                        'id' => $uploadCloudinary->getPublicId()
+                    ];
+                }
             }
 
             return response()->json([
                 "status" => true,
-                "message" => "Image uploaded", 
-                "url" => $imagePath,
-                "id" => $imageId
+                "message" => "Videos uploaded", 
+                "videos" => $uploadedVideos
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 "status" => false,
-                "message" => 'Image upload failed: ' . $e->getMessage(),
+                "message" => 'Video upload failed: ' . $e->getMessage(),
             ], 500);
         }
-    }
-
-    public function uploadVideo(Request $request)
-    {
-        $request->validate([
-            'video' => 'required|mimes:mp4,avi,mov,wmv,flv',
-        ]);
-
-        // Implement actual video duration fetching
-        function getVideoDuration($file)
-        {
-           
-            return 0;
-        }
-
-        if ($request->hasFile('video')) {
-            $duration = getVideoDuration($request->file('video'));
-
-            if ($duration > 7200) { // 7200 seconds = 2 hours
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Video duration should not exceed 2 hours.',
-                ]);
-            }
-
-            try {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('video')->getRealPath(),
-                    [
-                        'folder' => 'africtv/media_uploads_blogs_edu_videos',
-                        'resource_type' => 'auto',
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'auto'
-                        ]
-                    ]
-                );
-                $videoPath = $uploadCloudinary->getSecurePath();
-                $videoId = $uploadCloudinary->getPublicId();
-            } catch (\Exception $e) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Video upload failed: ' . $e->getMessage(),
-                ]);
-            }
-        }
-
-        return response()->json([
-            "status" => true,
-            "message" => "Video uploaded", 
-            "url" => $videoPath,
-            "id" => $videoId
-        ], 200);
     }
 
     public function deleteImage(Request $request)

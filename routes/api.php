@@ -132,9 +132,9 @@ Route::group([
     Route::get("markAsUnRead/{id}", [NotificationsController::class, "markAsUnRead"]);
     Route::get("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
     //Media's (Blogs and Educational)
-    Route::post("uploadImage", [UploadMediaController::class, "uploadImage"]);
-    Route::post("uploadVideo", [UploadMediaController::class, "uploadVideo"]);
-    Route::post("deleteImage", [UploadMediaController::class, "deleteImage"]);
+    Route::post("uploadImage", [UploadMediaController::class, "uploadImages"]);
+    Route::post("uploadVideo", [UploadMediaController::class, "uploadVideos"]);
+    Route::post("deleteImage", [UploadMediaController::class, "deleteImages"]);
     Route::post("deleteVideo", [UploadMediaController::class, "deleteVideo"]);
 
 });
