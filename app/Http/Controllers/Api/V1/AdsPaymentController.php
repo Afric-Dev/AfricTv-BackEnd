@@ -58,6 +58,7 @@ class AdsPaymentController extends Controller
             "method" => $validatedData['method'],
             "currency" => $validatedData['currency'],
             "ads_type" => $validatedData['ads_type'],
+            "is_ads_type_sec" => $validatedData['is_ads_type_sec'],
             "duration" => $duration,
             "status" => $validatedData['status'],
             "clicks" => $clicksNumber,

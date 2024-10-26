@@ -27,6 +27,7 @@ class CreateAdsTable extends Migration
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->nullable();
             $table->string('clicks');
             $table->enum('ads_type', ['PIC', 'VID', 'LINK']);
+            $table->enum('is_ads_type_sec', ['FEED', 'BANNER', 'SIDE']);
             $table->timestamps();
 
             // Foreign key definition

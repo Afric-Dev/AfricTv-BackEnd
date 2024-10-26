@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->string('amount');
             $table->enum('ads_type', ['PIC', 'VID', 'LINK']);
+            $table->enum('is_ads_type_sec', ['FEED', 'BANNER', 'SIDE']);
             $table->string('duration'); 
             $table->enum('status', ['PAID', 'PENDING', 'FAILED']);
             $table->enum('method', ['PAYSTACK', 'PAYPAL'])->default('PAYSTACK');

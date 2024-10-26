@@ -161,6 +161,7 @@ class AdsController extends Controller
             "ads_id" => $ads_id,
             "start_date" => Carbon::now(),
             "ads_type" => $adPayment->ads_type,
+            "is_ads_type_sec" => $adPayment->is_ads_type_sec,
         ]);
 
         return response()->json([
