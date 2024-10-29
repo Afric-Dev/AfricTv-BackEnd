@@ -57,7 +57,7 @@ Route::post("eduviews", [EducationalController::class, "eduviews"]);
 Route::get('readspecificedupost/{edu_id}/{title}', [EducationalController::class, 'readspecificedupost']);
 //Educational (Reactions)
 Route::get('readeduvotes/{eduID}', [EduVoteController::class, 'readeduvotes']);
-Route::get('readeduthoughts/{postID}', [EduThoughtsController::class, 'readeduthoughts']);
+Route::get('readeduthoughts/{eduID}', [EduThoughtsController::class, 'readeduthoughts']);
 // Route::post('ViewEdu/{id}', [EducationalController::class, 'ViewEdu']);
 //Ads
 Route::get("ads", [AdsController::class, "ads"]);
