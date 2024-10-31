@@ -9,12 +9,13 @@ use App\Models\Post;
 use App\Models\Ads;
 use App\Models\Educational;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;  
 
 class TrendingController extends Controller
 {
 
 
-    public function trending()
+    public function trending(): JsonResponse
     {
         // Timeframe for trending (posts from the last 48 hours)
         $timeframe = Carbon::now()->subHours(48);
@@ -59,7 +60,7 @@ class TrendingController extends Controller
 
 
 
-    public function search($searchQuery)
+    public function search($searchQuery): JsonResponse
     {
         // Search Users by name, unique_id, or email
         $users = User::where('name', 'LIKE', "%{$searchQuery}%")

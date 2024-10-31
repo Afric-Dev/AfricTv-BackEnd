@@ -9,10 +9,12 @@ use App\Models\Educational;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
 use App\Models\Subscribtion;
+use Illuminate\Http\JsonResponse;
 
 class EduVoteController extends Controller
 {
-        public function eduvote(Request $request) {
+        public function eduvote(Request $request): JsonResponse
+     {
         // Validate the incoming request
         $request->validate([
             "edu_id" => "required|regex:/^@\w+$/", 
@@ -74,7 +76,7 @@ class EduVoteController extends Controller
         ]);
     }
 
-       public function uneduvote(Request $request)
+       public function uneduvote(Request $request): JsonResponse
     {
         $request->validate([
             'vote_id' => 'required'
@@ -108,7 +110,7 @@ class EduVoteController extends Controller
         }
     }
 
-        public function readeduvotes($eduID)
+        public function readeduvotes($eduID): JsonResponse
         {
             // Find the educational vote by edu_id
             $eduVote = Educational::where('edu_id', $eduID)->first();

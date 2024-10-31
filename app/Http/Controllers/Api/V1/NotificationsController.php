@@ -7,11 +7,12 @@ use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse; 
 
 class NotificationsController extends Controller
 {
     
-    public function index()
+    public function index(): JsonResponse
     {
         $user = Auth::user();
         $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
@@ -58,7 +59,7 @@ class NotificationsController extends Controller
     // }
 
 
-    public function markAsRead($id)
+    public function markAsRead($id): JsonResponse
     {
         $notification = Notification::where('id', $id)->first();
 
@@ -73,7 +74,7 @@ class NotificationsController extends Controller
         ]);
     }
 
-    public function markAsUnRead($id)
+    public function markAsUnRead($id): JsonResponse
     {
         $notification = Notification::where('id', $id)->first();
 
@@ -88,7 +89,7 @@ class NotificationsController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         $notification = Notification::where('id', $id)->first();
 

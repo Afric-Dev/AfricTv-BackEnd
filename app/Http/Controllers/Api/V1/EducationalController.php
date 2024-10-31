@@ -15,11 +15,11 @@ use Cloudinary\Transformation\Image;
 use Illuminate\Support\Facades\Log;
 use App\Models\Notification;
 use App\Models\Subscribtion;
-
+use Illuminate\Http\JsonResponse;
 
 class EducationalController extends Controller
 {
-         public function educational(Request $request)
+         public function educational(Request $request): JsonResponse
         {
             // Data Validation
             $request->validate([
@@ -153,7 +153,7 @@ class EducationalController extends Controller
         }
 
 
-      public function deleteedupost(Request $request)
+      public function deleteedupost(Request $request): JsonResponse
         {
             // Validate the request
             $request->validate([
@@ -211,7 +211,7 @@ class EducationalController extends Controller
 
 
 
-        public function readspecificedupost($edu_id, $title)
+        public function readspecificedupost($edu_id, $title): JsonResponse
         {
             // Find the user by their unique_id
             $edu = Educational::where('edu_id', $edu_id)->first();
@@ -262,7 +262,7 @@ class EducationalController extends Controller
             ]);
         }
 
-        public function eduviews(Request $request)
+        public function eduviews(Request $request): JsonResponse
         {
             // Validate the incoming request
             $validatedData = $request->validate([
@@ -294,7 +294,7 @@ class EducationalController extends Controller
             ]);
         }
 
-            public function readedu()
+            public function readedu(): JsonResponse
             {
                 // Retrieve educational records with user data
                 $edus = Educational::with('user')

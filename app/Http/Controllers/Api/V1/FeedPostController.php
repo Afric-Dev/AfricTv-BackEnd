@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use App\Models\Feedposts;
- 
+use Illuminate\Http\JsonResponse; 
+
 class FeedPostController extends Controller
 {
-    public function feedposts(Request $request)
+    public function feedposts(Request $request): JsonResponse
     {
         // Data Validation
         $request->validate([
@@ -130,7 +131,7 @@ class FeedPostController extends Controller
             "message" => "FeedPost Uploaded Successfully"
         ]);
     }
-   public function updatefeedposts(Request $request)
+   public function updatefeedposts(Request $request): JsonResponse
 {
     $request->validate([
         "avatar_path" => "nullable",
@@ -240,7 +241,7 @@ class FeedPostController extends Controller
             }
         }
 
-       public function deletefeedposts(Request $request)
+       public function deletefeedposts(Request $request): JsonResponse
         {
             $request->validate([
                 'post_id' => 'required|integer'
@@ -264,7 +265,7 @@ class FeedPostController extends Controller
             }
         }
 
-        public function readfeedpost()
+        public function readfeedpost(): JsonResponse
         {
             $posts = Feedposts::all(); // Retrieve all posts from the database
 

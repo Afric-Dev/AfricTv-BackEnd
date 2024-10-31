@@ -8,18 +8,19 @@ use OpenAI\Laravel\Facades\OpenAI;
 use App\Models\AI;
 use Carbon\Carbon;
 use App\Services\GeminiService;
+use Illuminate\Http\JsonResponse;
 
 class AIController extends Controller
 {
 
         protected $geminiService;
 
-        public function __construct(GeminiService $geminiService)
+        public function __construct(GeminiService $geminiService): JsonResponse
         {
             $this->geminiService = $geminiService;
         }
 
-        public function ai(Request $request)
+        public function ai(Request $request): JsonResponse
         {
             $inputText = $request->input('message');
 

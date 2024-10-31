@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\JsonResponse; 
 
+//NOT IN USE
 class SearchController extends Controller
 {
-        public function search(Request $request)
+        public function search(Request $request): JsonResponse
         {
             $user = User::with(['posts', 'educationals'])
                         ->where('unique_id', $uniqid)

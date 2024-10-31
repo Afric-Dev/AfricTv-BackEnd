@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use App\Models\Favourite;
 use App\Models\Educational;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class FavouriteController extends Controller
 {
-    public function favourite(Request $request) {
+    public function favourite(Request $request): JsonResponse
+    {
         // Validate the incoming request
         $request->validate([
             "edu_id" => "required|regex:/^@\w+$/", 
@@ -47,7 +49,7 @@ class FavouriteController extends Controller
         ]);
     }
 
-    public function deletefavourite(Request $request)
+    public function deletefavourite(Request $request): JsonResponse
     {
         $request->validate([
             'fav_id' => 'required'
@@ -81,7 +83,7 @@ class FavouriteController extends Controller
         }
     }
 
-    public function readfavourites(Request $request)
+    public function readfavourites(Request $request): JsonResponse
     {
         $userId = Auth::user()->id;
 
@@ -97,7 +99,7 @@ class FavouriteController extends Controller
             'data' => $favourites,
         ]);
     }
-    public function readfavouritespost($postID)
+    public function readfavouritespost($postID): JsonResponse
     {
         // Find the post by post_id
         $post = Educational::where('edu_id', $postID)->first();

@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
+use Illuminate\Http\JsonResponse;  
 
 class UploadMediaController extends Controller
 {
-        public function uploadImages(Request $request)
+        public function uploadImages(Request $request): JsonResponse
         {
             $request->validate([
                 'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -54,7 +54,7 @@ class UploadMediaController extends Controller
             }
         }
 
-    public function uploadVideos(Request $request)
+    public function uploadVideos(Request $request): JsonResponse
     {
         $request->validate([
             'videos.*' => 'required|mimes:mp4,avi,mov,wmv,flv',
@@ -113,7 +113,7 @@ class UploadMediaController extends Controller
         }
     }
 
-    public function deleteImage(Request $request)
+    public function deleteImage(Request $request): JsonResponse
     {
         $request->validate([
             'id' => 'required'
@@ -129,7 +129,7 @@ class UploadMediaController extends Controller
         ]);
     }
 
-    public function deleteVideo(Request $request)
+    public function deleteVideo(Request $request): JsonResponse
     {
         $request->validate([
             'id' => 'required'

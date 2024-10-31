@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ShazamService;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\JsonResponse; 
 
 class MusicController extends Controller
 {
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {   
 
         $request->validate([

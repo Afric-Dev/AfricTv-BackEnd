@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CardDetails;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;  
 
 
 class UserCardDetails extends Controller
 {
-    public function carddetails(Request $request) {
+    public function carddetails(Request $request): JsonResponse
+    {
     $request->validate([
         "card_name" => "required",
         // "user_id" => "required",

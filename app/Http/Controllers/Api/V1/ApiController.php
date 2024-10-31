@@ -25,12 +25,13 @@ use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Carbon\Carbon;    
+use Illuminate\Http\JsonResponse;
 
     
 class ApiController extends Controller
 {
         // Register Api(POST)
-        public function register(StoreUserRequest $request)
+        public function register(StoreUserRequest $request): JsonResponse
         {
             // Data Validation
             $request->validated($request->all());
@@ -89,7 +90,7 @@ class ApiController extends Controller
         }
 
         //Update Profile (PUT)
-       public function updateprofile(UpdateUserRequest $request)
+       public function updateprofile(UpdateUserRequest $request): JsonResponse
         {
             // Get the id of the Authenticated User
             $userId = Auth::id();
@@ -161,7 +162,7 @@ class ApiController extends Controller
 
 
           // Login Api(POST)
-          public function login(LoginUserRequest $request)
+          public function login(LoginUserRequest $request): JsonResponse
         {
             // Data validation
             $request->validated($request->all());

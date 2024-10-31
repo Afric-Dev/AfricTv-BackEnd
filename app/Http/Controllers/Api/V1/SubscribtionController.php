@@ -12,10 +12,11 @@ use App\Models\Subscribtion;
 use App\Models\Notification;
 use App\Mail\SubscribtionMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;  
  
 class SubscribtionController extends Controller
 {
-        public function subscribe(Request $request)
+        public function subscribe(Request $request): JsonResponse
         {
             // Validate the request
             $request->validate([
@@ -82,7 +83,7 @@ class SubscribtionController extends Controller
             ]);
         }
 
-        public function unsubscribe(Request $request)
+        public function unsubscribe(Request $request): JsonResponse
         {
             // Validate the request
             $request->validate([
@@ -128,7 +129,7 @@ class SubscribtionController extends Controller
 
         }
 
-        public function viewsubscribers($uniqid)
+        public function viewsubscribers($uniqid): JsonResponse
         {
             // Get the current authenticated user
             $authenticatedUser = Auth::user();
@@ -171,7 +172,7 @@ class SubscribtionController extends Controller
         
 
 
-        public function subscribers()
+        public function subscribers(): JsonResponse
         {
             // Find the user based on the id format
             $user = Auth()->user()->id;

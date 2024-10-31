@@ -13,12 +13,13 @@ use App\Models\Subscribtion;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePostRequest;
 use Carbon\Carbon;
- 
+use Illuminate\Http\JsonResponse; 
+
 
 
 class PostController extends Controller
 {
-     public function uploadpost(StorePostRequest $request) 
+     public function uploadpost(StorePostRequest $request): JsonResponse
     { 
         // Data Validation
         $request->validated($request->all());
@@ -365,7 +366,7 @@ class PostController extends Controller
     // }
 
 
-    public function deleteposts(Request $request)
+    public function deleteposts(Request $request): JsonResponse
     {
         // Validate the request
         $request->validate([
@@ -423,7 +424,7 @@ class PostController extends Controller
     }
 
 
-        public function postviews(Request $request)
+        public function postviews(Request $request): JsonResponse
         {
             // Validate the incoming request
             $validatedData = $request->validate([
@@ -455,7 +456,7 @@ class PostController extends Controller
             ]);
         }
 
-    public function readpost()
+    public function readpost(): JsonResponse
     {
         // Timeframe 
         $timeframe = 'desc';
@@ -496,7 +497,7 @@ class PostController extends Controller
     } 
 
 
-      public function toppost()
+      public function toppost(): JsonResponse
     {
         // Fetch active posts created within the last 24 hours
         $posts = Post::with('user')
@@ -536,7 +537,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function readspecificpost($post_id, $post_title)
+    public function readspecificpost($post_id, $post_title): JsonResponse
     {
         // Find the user by their unique_id
         $post = Post::where('post_id', $post_id)->first();

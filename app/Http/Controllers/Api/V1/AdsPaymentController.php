@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\AdsPayment;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePaymentRequest;
+use Illuminate\Http\JsonResponse;
 
 class AdsPaymentController extends Controller
 {  
-     public function adsPayment(StorePaymentRequest $request)
+     public function adsPayment(StorePaymentRequest $request): JsonResponse
     {
         // Initial validation for fields excluding clicks
         $validatedData = $request->validated();

@@ -13,10 +13,12 @@ use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Models\Notification;
+use Illuminate\Http\JsonResponse;
+
 
 class CommentsController extends Controller
 { 
-    public function comments(Request $request)
+    public function comments(Request $request): JsonResponse
     {
         // Validate the incoming request
         $request->validate([

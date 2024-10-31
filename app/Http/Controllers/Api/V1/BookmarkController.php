@@ -7,11 +7,12 @@ use Illuminate\Http\Request;
 use App\Models\Bookmark;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Http\JsonResponse;
 
 class BookmarkController extends Controller
 {
-    public function bookmark(Request $request) {
+    public function bookmark(Request $request): JsonResponse
+     {
         // Validate the incoming request
         $request->validate([
             "post_id" => "required|regex:/^@\w+$/", 
@@ -49,7 +50,7 @@ class BookmarkController extends Controller
         ]);
     }
 
-        public function deletebookmark(Request $request)
+        public function deletebookmark(Request $request): JsonResponse
     {
         $request->validate([
             'book_id' => 'required'
@@ -83,7 +84,7 @@ class BookmarkController extends Controller
         }
     }
 
-    public function readbookmarks(Request $request)
+    public function readbookmarks(Request $request): JsonResponse
     {
         $userId = Auth::user()->id;
 
@@ -100,7 +101,7 @@ class BookmarkController extends Controller
         ]);
     }
 
-        public function readbookmarkspost($postID)
+        public function readbookmarkspost($postID): JsonResponse
     {
         // Find the post by post_id
         $post = Post::where('post_id', $postID)->first();

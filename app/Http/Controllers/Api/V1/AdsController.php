@@ -12,10 +12,11 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\AdInactiveNotification;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\JsonResponse;
 
 class AdsController extends Controller
 {
-      public function adActive(Request $request)
+      public function adActive(Request $request): JsonResponse
       {
         $validatedData = $request->validate([
             "img_path" => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -172,7 +173,7 @@ class AdsController extends Controller
 
       }
 
-    public function updateAd(Request $request, $adId)
+    public function updateAd(Request $request, $adId): JsonResponse
     {
         // Validate the incoming request
         $validatedData = $request->validate([
@@ -293,7 +294,7 @@ class AdsController extends Controller
         ]);
     }
     
-    public function adInactive(Request $request)
+    public function adInactive(Request $request): JsonResponse
     {
         // Fetch ads with zero clicks and status 'ACTIVE'
         $ads = Ads::where('status', 'ACTIVE')
@@ -326,7 +327,7 @@ class AdsController extends Controller
         }
     }
 
-    public function UserSetAdsInactive(Request $request)
+    public function UserSetAdsInactive(Request $request): JsonResponse
     {
         // Validate the incoming request
         $validatedData = $request->validate([
@@ -361,7 +362,7 @@ class AdsController extends Controller
         ]);
     }
 
-        public function UserSetAdsActive(Request $request)
+        public function UserSetAdsActive(Request $request): JsonResponse
     {
         // Validate the incoming request
         $validatedData = $request->validate([
@@ -404,7 +405,7 @@ class AdsController extends Controller
         ]);
     }
 
-    public function AdsPerClicks(Request $request)
+    public function AdsPerClicks(Request $request): JsonResponse
     {
         // Validate the incoming request
         $validatedData = $request->validate([
@@ -447,7 +448,7 @@ class AdsController extends Controller
         ]);
     }
 
-    public function ads(Request $request)
+    public function ads(Request $request): JsonResponse
     {
          $ads = Ads::inRandomOrder()
          ->where('status', 'ACTIVE')
@@ -468,7 +469,7 @@ class AdsController extends Controller
             ]);
     }
 
-    public function deleteads(Request $request)
+    public function deleteads(Request $request): JsonResponse
     {
         // Validate the request
         $request->validate([

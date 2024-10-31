@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Feedback as FeedbackModel;
+use Illuminate\Http\JsonResponse;
 
 class FeedbackController extends Controller
 {
-    public function feedback(Request $request)
+    public function feedback(Request $request): JsonResponse
     {
         $request->validate([
             "feature_love" => "required",

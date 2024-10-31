@@ -8,10 +8,11 @@ use App\Models\Educational;
 use App\Models\Eduthought;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
+use Illuminate\Http\JsonResponse;
 
 class EduThoughtsController extends Controller
 {
-        public function eduthoughts(Request $request)
+        public function eduthoughts(Request $request): JsonResponse
     {
         // Validate the incoming request
         $request->validate([
@@ -138,7 +139,7 @@ class EduThoughtsController extends Controller
     }
 
     
-    public function deleteeduthoughts(Request $request)
+    public function deleteeduthoughts(Request $request): JsonResponse
     {
         // Validate the request
         $validated = $request->validate([
@@ -189,7 +190,7 @@ class EduThoughtsController extends Controller
     }
 
 
-    public function readeduthoughts($eduID)
+    public function readeduthoughts($eduID): JsonResponse
     {
         // Find the educational thought by edu_id
         $eduThought = Educational::where('edu_id', $eduID)->first();

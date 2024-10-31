@@ -9,11 +9,14 @@ use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Notification;
 use App\Models\Subscribtion;
+use Illuminate\Http\JsonResponse; 
+
 
 class LikeController extends Controller
 {
 
-    public function like(Request $request) {
+    public function like(Request $request): JsonResponse
+    {
         // Validate the incoming request
         $request->validate([
             "post_id" => "required|regex:/^@\w+$/", 
@@ -71,7 +74,7 @@ class LikeController extends Controller
     }
 
 
-    public function unlike(Request $request)
+    public function unlike(Request $request): JsonResponse
     {
         $request->validate([
             'like_id' => 'required'
@@ -105,7 +108,7 @@ class LikeController extends Controller
         }
     }
 
-    public function readlikes($postID)
+    public function readlikes($postID): JsonResponse
     {
         // Find the post by post_id
         $post = Post::where('post_id', $postID)->first();
