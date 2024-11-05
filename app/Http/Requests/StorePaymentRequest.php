@@ -26,7 +26,7 @@ class StorePaymentRequest extends FormRequest
             'amount' => ['required'],
             'ads_type' => 'required|in:PIC,VID,LINK', 
             'is_ads_type_sec' => 'required|in:FEED,BANNER,SIDE', 
-            'status' => 'required|in:PENDING,PAID,FAILED',
+            //'status' => 'required|in:PENDING,PAID,FAILED',
             'method' => 'required|in:PAYSTACK',
         ];
     }

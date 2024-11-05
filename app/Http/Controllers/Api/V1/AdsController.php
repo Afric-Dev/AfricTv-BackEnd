@@ -31,6 +31,20 @@ class AdsController extends Controller
         $adPayment = AdsPayment::where('user_id', $userId)
                               ->where('taken', 'NO')
                               ->first();
+        if ($adPayment->status === "PENDING") {
+            return response()->json([
+                'status' => false,
+                'message' => 'Your ads payment is still PENDING.',
+            ]);
+        } 
+
+        if ($adPayment->status === "FAILED") { // Updated condition
+            return response()->json([
+                'status' => false,
+                'message' => 'Your ads payment FAILED.',
+            ]);
+        }
+
         if($adPayment->ads_type !== 'VID' && !empty($validatedData['vid_path'])) {
             return response()->json([
                 'status' => false,

@@ -73,8 +73,14 @@ class AdsPaymentController extends Controller
         ];
 
         // Update or create payment record
-        $payment = $paymentCheck ? $paymentCheck->update($paymentData) : AdsPayment::create($paymentData);
-
+        // $payment = $paymentCheck ? $paymentCheck->update($paymentData) : AdsPayment::create($paymentData);
+        if ($paymentCheck) {
+            $paymentCheck->update($paymentData);
+            $payment = $paymentCheck; // Assign the updated model instance to $payment
+        } else {
+            $payment = AdsPayment::create($paymentData);
+        }
+        
         // Generate Paystack transaction reference
         $transactionReference = Paystack::genTranxRef();
 

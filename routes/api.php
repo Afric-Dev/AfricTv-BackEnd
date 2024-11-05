@@ -71,7 +71,7 @@ Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
 //Bookmark
 Route::get("readbookmarkspost/{postID}", [BookmarkController::class, "readbookmarkspost"]);
 //Paystack Callback
-Route::get('payment/callback', [StudentPaymentController::class, 'callback'])->name('adspayment.callback');
+Route::get('payment/callback', [AdsPaymentController::class, 'callback'])->name('adspayment.callback');
 
 //Protected Route  
 Route::group([
