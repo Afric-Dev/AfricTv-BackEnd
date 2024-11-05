@@ -15,14 +15,15 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->string('amount');
+            $table->string('reference')->nullable();
             $table->enum('ads_type', ['PIC', 'VID', 'LINK']);
             $table->enum('is_ads_type_sec', ['FEED', 'BANNER', 'SIDE']);
             $table->string('duration'); 
-            $table->enum('status', ['PAID', 'PENDING', 'FAILED']);
+            $table->enum('status', ['PAID', 'PENDING', 'FAILED'])->default('PENDING');
             $table->enum('method', ['PAYSTACK', 'PAYPAL'])->default('PAYSTACK');
             $table->string('currency');
             $table->string('clicks');
-            $table->enum('taken', ['YES', 'NO']);
+            $table->enum('taken', ['YES', 'NO'])->default('NO');
             $table->string('ads_id');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

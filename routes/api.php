@@ -70,8 +70,9 @@ Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
 //Bookmark
 Route::get("readbookmarkspost/{postID}", [BookmarkController::class, "readbookmarkspost"]);
+//Paystack Callback
+Route::get('payment/callback', [StudentPaymentController::class, 'callback'])->name('adspayment.callback');
 
- 
 //Protected Route  
 Route::group([
     "middleware" => ["auth:api"]

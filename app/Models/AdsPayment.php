@@ -26,14 +26,16 @@ class AdsPayment extends Model
      protected $fillable = [
         "user_id",
         "amount",
-        "payment_status",
-        "payment_method",
+        "status",
+        "method",
         "currency",
         "ads_type",
         "duration",
         "clicks",
         "taken",
-        "ads_id"
+        "reference",
+        "ads_id",
+        "is_ads_type_sec"
     ];
 
 }

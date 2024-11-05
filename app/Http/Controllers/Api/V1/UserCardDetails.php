@@ -8,7 +8,7 @@ use App\Models\CardDetails;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;  
 
-
+//NOT IN USE
 class UserCardDetails extends Controller
 {
     public function carddetails(Request $request): JsonResponse
