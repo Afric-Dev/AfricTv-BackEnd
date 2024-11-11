@@ -16,6 +16,8 @@
         "minuteoflaravel/laravel-audio-video-validator": "^1.1",
         "openai-php/laravel": "^0.10.1",
         "pbmedia/laravel-ffmpeg": "^8.5",
+        "php-ai/php-ml": "^0.10.0",
+        "sabatinomasala/replicate-php": "^1.2",
         "symfony/http-client": "^7.0",
         "symfony/mailgun-mailer": "^7.0",
         "unicodeveloper/laravel-paystack": "^1.2"

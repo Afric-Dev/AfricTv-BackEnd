@@ -9,30 +9,56 @@ use App\Models\AI;
 use Carbon\Carbon;
 use App\Services\GeminiService;
 use Illuminate\Http\JsonResponse;
+use App\Services\ReplicateService;
 
 class AIController extends Controller
-{
+{   
 
-        protected $geminiService;
+        protected $replicateService;
 
-        public function __construct(GeminiService $geminiService): JsonResponse
+        public function __construct(ReplicateService $replicateService)
         {
-            $this->geminiService = $geminiService;
+            $this->replicateService = $replicateService;
         }
 
-        public function ai(Request $request): JsonResponse
+        public function createPrediction(Request $request)
         {
-            $inputText = $request->input('message');
+            $model = "meta/llama-2-7b-chat";
+            $input = $request->input('input_data');
 
-            // Call the Gemini service to generate text
-            $generatedText = $this->geminiService->generateText($inputText);
+            $result = $this->replicateService->makePrediction($model, $input);
 
-            // Return a JSON response with the generated text
-            return response()->json([
-                "status" => true,
-                "data" => $generatedText,
-            ]);
+            return response()->json($result);
         }
+
+        public function getPredictionStatus($predictionId)
+        {
+            $result = $this->replicateService->getPredictionStatus($predictionId);
+
+            return response()->json($result);
+        }
+
+
+        // protected $geminiService;
+
+        // public function __construct(GeminiService $geminiService): JsonResponse
+        // {
+        //     $this->geminiService = $geminiService;
+        // }
+
+        // public function ai(Request $request): JsonResponse
+        // {
+        //     $inputText = $request->input('message');
+
+        //     // Call the Gemini service to generate text
+        //     $generatedText = $this->geminiService->generateText($inputText);
+
+        //     // Return a JSON response with the generated text
+        //     return response()->json([
+        //         "status" => true,
+        //         "data" => $generatedText,
+        //     ]);
+        // }
 
         // protected $falconService;
 

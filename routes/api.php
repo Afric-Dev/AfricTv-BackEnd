@@ -127,6 +127,9 @@ Route::group([
     Route::get("readbookmarks", [BookmarkController::class, "readbookmarks"]);
     //AI 
     Route::post("ai", [AIController::class, "ai"]);
+    Route::post('prediction', [AIController::class, 'createPrediction']);
+    Route::get('prediction/{id}', [AIController::class, 'getPredictionStatus']);
+
     //Notification
     Route::get("notifications", [NotificationsController::class, "index"]);
     Route::get("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);

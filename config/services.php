@@ -47,5 +47,9 @@ return [
         'base_uri' => env('SHAZAM_BASE_URL'),
     ],
 
+    'replicate' => [
+        'base_uri' => 'https://api.replicate.com/v1/',
+        'key' => env('REPLICATE_API_KEY'),
+    ],
 
 ];
