@@ -24,20 +24,44 @@ class AIController extends Controller
         public function createPrediction(Request $request)
         {
             $model = "meta/llama-2-7b-chat";
-            $input = $request->input('input_data');
+            $version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
 
-            $result = $this->replicateService->makePrediction($model, $input);
+            $input = [
+                'prompt' => $request->input('message')
+            ];
 
-            return response()->json($result);
+            $result = $this->replicateService->makePrediction($model, $input, $version);
+
+            if (isset($result['id'])) {
+                return response()->json(['prediction_id' => $result['id']]);
+            }
+
+            return response()->json($result, 500); // Return an error if no prediction ID is returned
         }
 
-        public function getPredictionStatus($predictionId)
+        public function getPredictionResult($predictionId)
         {
             $result = $this->replicateService->getPredictionStatus($predictionId);
 
-            return response()->json($result);
-        }
+            // Check if the prediction has completed
+            if ($result['status'] === 'succeeded') {
+                // Combine and clean the output text
+                $output = is_array($result['output']) ? implode(" ", $result['output']) : $result['output'];
+                
+                // Clean up the text:
+                $output = preg_replace('/\s+/', ' ', $output); // Remove multiple spaces
+                $output = preg_replace('/\s([?.!,:;])/', '$1', $output); // Remove space before punctuation
+                $output = preg_replace('/(\d)\s+(\d)/', '$1$2', $output); // Join split numbers
+                $output = trim($output); // Remove any leading/trailing spaces
 
+                return response()->json(['output' => $output]);
+            } elseif ($result['status'] === 'failed') {
+                return response()->json(['error' => $result['error']], 500);
+            }
+
+            // If still processing, return the current status
+            return response()->json(['status' => $result['status']]);
+        }
 
         // protected $geminiService;
 

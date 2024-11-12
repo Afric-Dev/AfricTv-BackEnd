@@ -15,17 +15,19 @@ class ReplicateService
         $this->apiKey = config('services.replicate.key');
     }
 
-    public function makePrediction($model, $input)
+    public function makePrediction($model, $input, $version = null)
     {
         $url = $this->baseUri . "predictions";
+
+        $payload = [
+            'version' => $version ?? 'f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4',
+            'input' => $input, 
+        ];
 
         $response = Http::withHeaders([
             'Authorization' => 'Token ' . $this->apiKey,
             'Content-Type' => 'application/json',
-        ])->post($url, [
-            'version' => $model,
-            'input' => $input,
-        ]);
+        ])->post($url, $payload);
 
         return $response->json();
     }
@@ -36,6 +38,7 @@ class ReplicateService
 
         $response = Http::withHeaders([
             'Authorization' => 'Token ' . $this->apiKey,
+            'Content-Type' => 'application/json',
         ])->get($url);
 
         return $response->json();

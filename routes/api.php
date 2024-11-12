@@ -128,7 +128,7 @@ Route::group([
     //AI 
     Route::post("ai", [AIController::class, "ai"]);
     Route::post('prediction', [AIController::class, 'createPrediction']);
-    Route::get('prediction/{id}', [AIController::class, 'getPredictionStatus']);
+    Route::get('getPrediction/{predictionId}', [AIController::class, 'getPredictionResult']);
 
     //Notification
     Route::get("notifications", [NotificationsController::class, "index"]);
