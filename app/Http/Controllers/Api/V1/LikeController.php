@@ -55,7 +55,7 @@ class LikeController extends Controller
         //Notification
         $type = "VOTE";
         $title = "VOTE NOTIFICATION";
-        $message = "A new vote has been cast by " . $user->name . "Your post is booming!";
+        $message = "A new vote has been cast by " . $user->name . " Your post is booming!";
 
         $notification = Notification::create([
             'user_id' => $post->user_id,

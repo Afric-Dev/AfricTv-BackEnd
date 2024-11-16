@@ -8,20 +8,46 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse; 
+use App\Models\Educational;
+use App\Models\Post;
 
 class NotificationsController extends Controller
 {
-    
+        
     public function index(): JsonResponse
     {
         $user = Auth::user();
-        $notifications = Notification::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+
+        // Fetch notifications for the authenticated user
+        $notifications = Notification::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Process notifications to include related post and user data
+        $processedNotifications = $notifications->map(function ($notification) {
+            if ($notification->type === 'BLOG POST' && isset($notification->post_id)) {
+                $post = Post::where('id', $notification->post_id)->first();
+                if ($post) {
+                    $notification->related_post = $post;
+                    $notification->post_user = $post->user; 
+                }
+            } elseif ($notification->type === 'EDUCATIONAL POST' && isset($notification->edu_id)) {
+                $eduPost = Educational::where('id', $notification->edu_id)->first();
+                if ($eduPost) {
+                    $notification->related_post = $eduPost;
+                    $notification->post_user = $eduPost->user;
+                }
+            }
+            return $notification;
+        });
 
         return response()->json([
             'success' => true,
-            'notifications' => $notifications
+            'notifications' => $processedNotifications
         ]);
     }
+
+
 
     // public function store(Request $request)
     // {
