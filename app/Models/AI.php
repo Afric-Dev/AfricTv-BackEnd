@@ -29,7 +29,9 @@ class AI extends Model
 
     protected $fillable = [
         "user_id",
-        "count"
+        "message",
+        "response",
+        "prediction_id"
     ];
 
 }

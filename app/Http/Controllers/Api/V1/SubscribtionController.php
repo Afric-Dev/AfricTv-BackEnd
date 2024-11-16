@@ -133,43 +133,44 @@ class SubscribtionController extends Controller
         {
             // Get the current authenticated user
             $authenticatedUser = Auth::user();
-        
+
             // Find the user based on the unique_id
             $user = User::where('unique_id', $uniqid)->firstOrFail();
-        
-            // Retrieve subscribers to the user identified by $uniqid
+
+            // Retrieve subscribers of the target user
             $targetUserSubscribers = Subscribtion::with('user')
-                                                ->where('user_id', $user->id)
-                                                ->get();
-        
-            // Retrieve subscribers to the authenticated user
+                ->where('user_id', $user->id)
+                ->get();
+
+            // Retrieve subscriber IDs of the authenticated user
             $authenticatedUserSubscribers = Subscribtion::where('user_id', $authenticatedUser->id)
-                                                        ->pluck('subscriber_id'); // Get subscriber IDs only
-        
-            // Find subscribers who have subscribed to both the target user and the authenticated user
-            $commonSubscribers = Subscribtion::with('user')
-                                                ->where('user_id', $user->id)
-                                                ->whereIn('subscriber_id', $authenticatedUserSubscribers)
-                                                ->get();
-        
-            // Check if the user has no subscribers at all
+                ->pluck('subscriber_id');
+
+            // If authenticatedUserSubscribers is empty, commonSubscribers will also be empty
+            $commonSubscribers = $authenticatedUserSubscribers->isNotEmpty()
+                ? Subscribtion::with('user')
+                    ->where('user_id', $user->id)
+                    ->whereIn('subscriber_id', $authenticatedUserSubscribers)
+                    ->get()
+                : collect();
+
+            // Check if the target user has no subscribers at all
             if ($targetUserSubscribers->isEmpty()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Oops! No subscribers found!',
                 ]);
             }
-        
+
             // Return response with both groups of subscribers
             return response()->json([
                 'status' => true,
                 'message' => 'Subscriber data retrieved',
-                'all_subscribers' => $targetUserSubscribers,  
-                'common_auth_subscribers' => $commonSubscribers,  
+                'all_subscribers' => $targetUserSubscribers,
+                'authenticated_subscribers' => $authenticatedUserSubscribers,
+                'common_auth_subscribers' => $commonSubscribers,
             ]);
         }
-        
-        
 
 
         public function subscribers(): JsonResponse

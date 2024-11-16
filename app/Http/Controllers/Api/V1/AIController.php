@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Services\GeminiService;
 use Illuminate\Http\JsonResponse;
 use App\Services\ReplicateService;
+use Illuminate\Support\Facades\Auth;
 
 class AIController extends Controller
 {   
@@ -21,47 +22,148 @@ class AIController extends Controller
             $this->replicateService = $replicateService;
         }
 
+        // public function createPrediction(Request $request)
+        // {
+        //     $model = "meta/llama-2-7b-chat";
+        //     $version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
+
+        //     $input = [
+        //         'prompt' => $request->input('message')
+        //     ];
+
+        //     $result = $this->replicateService->makePrediction($model, $input, $version);
+
+        //     if (isset($result['id'])) {
+        //         return response()->json(['prediction_id' => $result['id']]);
+        //     }
+
+        //     return response()->json($result, 500); // Return an error if no prediction ID is returned
+        // }
+
         public function createPrediction(Request $request)
         {
-            $model = "meta/llama-2-7b-chat";
-            $version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
+            try {
+                $userId = auth()->id();
 
-            $input = [
-                'prompt' => $request->input('message')
-            ];
+                $model = "meta/llama-2-7b-chat";
+                $version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
 
-            $result = $this->replicateService->makePrediction($model, $input, $version);
+                $input = [
+                    'prompt' => $request->input('message')
+                ];
 
-            if (isset($result['id'])) {
-                return response()->json(['prediction_id' => $result['id']]);
+                // Create prediction
+                $result = $this->replicateService->makePrediction($model, $input, $version);
+
+                // Save prediction details to the database
+                $aiRecord = AI::create([
+                    'user_id' => $userId,
+                    'message' => $input['prompt'],
+                    'response' => null, // Initially null until the response is available
+                    'prediction_id' => $result['id'] ?? null
+                ]);
+
+                if (isset($result['id'])) {
+                    // Fetch the result immediately after creating the prediction
+                    $predictionResult = $this->getPredictionResult($result['id'], $aiRecord->id);
+
+                    return $predictionResult;  // Return the AI response immediately
+                }
+
+                // Handle case where no prediction ID is returned
+                return response()->json(['error' => 'Prediction creation failed.'], 400);
+            } catch (\Exception $e) {
+                // Log the error for debugging
+                \Log::error('Prediction Error: ' . $e->getMessage()); // Log the actual error message
+
+                // Return a more specific error message
+                return response()->json(['error' => 'An error occurred while creating the prediction: ' . $e->getMessage()], 500);
             }
-
-            return response()->json($result, 500); // Return an error if no prediction ID is returned
         }
 
-        public function getPredictionResult($predictionId)
+        public function getPredictionResult($predictionId, $aiRecordId)
         {
             $result = $this->replicateService->getPredictionStatus($predictionId);
 
-            // Check if the prediction has completed
-            if ($result['status'] === 'succeeded') {
-                // Combine and clean the output text
-                $output = is_array($result['output']) ? implode(" ", $result['output']) : $result['output'];
-                
-                // Clean up the text:
-                $output = preg_replace('/\s+/', ' ', $output); // Remove multiple spaces
-                $output = preg_replace('/\s([?.!,:;])/', '$1', $output); // Remove space before punctuation
-                $output = preg_replace('/(\d)\s+(\d)/', '$1$2', $output); // Join split numbers
-                $output = trim($output); // Remove any leading/trailing spaces
+            if (!isset($result['status'])) {
+                return response()->json(['error' => 'Invalid prediction response.'], 500);
+            }
 
-                return response()->json(['output' => $output]);
+            if ($result['status'] === 'succeeded') {
+                // Clean the output and update the response in the database
+                $output = $this->cleanOutput($result['output'] ?? '');
+
+                // Update the database with the response
+                AI::where('id', $aiRecordId)->update(['response' => $output]);
+
+                // Log the output for debugging
+                \Log::info("Prediction succeeded for ID: $predictionId: " . $output);
+
+                return response()->json(['output' => $output]);  // Return the AI response immediately
             } elseif ($result['status'] === 'failed') {
-                return response()->json(['error' => $result['error']], 500);
+                \Log::error("Prediction failed for ID: $predictionId - " . ($result['error'] ?? 'Unknown error'));
+                return response()->json(['error' => $result['error'] ?? 'Unknown error'], 500);
             }
 
             // If still processing, return the current status
             return response()->json(['status' => $result['status']]);
         }
+
+
+        private function cleanOutput($output)
+        {
+            if (is_array($output)) {
+                $output = implode(" ", $output);
+            }
+
+            $output = preg_replace('/\s+/', ' ', $output); // Remove multiple spaces
+            $output = preg_replace('/\s([?.!,:;])/', '$1', $output); // Remove space before punctuation
+            $output = preg_replace('/(\d)\s+(\d)/', '$1$2', $output); // Join split numbers
+            return trim($output); // Remove any leading/trailing spaces
+        }
+
+        public function aiChats(): JsonResponse
+        {
+            $user = Auth::user();
+
+            // Corrected query condition
+            $chats = AI::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->whereNotNull('response')
+                ->get();
+
+            if ($chats->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Your chat history is empty',
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'chats' => $chats
+            ]);
+        }
+
+
+
+        public function aiChat($id): JsonResponse
+        {
+            $chat = AI::where('id', $id)->first();
+
+            if (!$chat) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Chat not found',
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'chat' => $chat
+            ]);
+        }
+
 
         // protected $geminiService;
 

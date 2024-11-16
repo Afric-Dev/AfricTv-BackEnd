@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('a_i_s', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
-            $table->integer('count')->default(0); 
+            $table->text('message');
+            $table->text('response')->nullable();
+            $table->string('prediction_id')->nullable();
             $table->timestamps();
 
             //Forign key 
