@@ -7,6 +7,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use App\Models\Post;
+use App\Models\Blogview;
 use App\Models\User;
 use App\Models\Notification;
 use App\Models\Subscribtion;
@@ -424,37 +425,78 @@ class PostController extends Controller
     }
 
 
-        public function postviews(Request $request): JsonResponse
-        {
-            // Validate the incoming request
-            $validatedData = $request->validate([
-                'post_viewed' => 'required|boolean', 
-                'post_id' => 'required|exists:posts,id' 
-            ]);
+    public function postviews(Request $request): JsonResponse
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'session_id' => 'nullable|string',
+            'post_viewed' => 'required|boolean',
+            'post_id' => 'required|exists:posts,id',
+        ]);
 
-            // Get the post based on the validated post_id
-            $post = Post::find($validatedData['post_id']);
-            
-            // Check if the post exists
-            if (!$post) {
+        // Get the post based on the validated post_id
+        $post = Post::find($validatedData['post_id']);
+
+        if (!$post) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Post Not Found',
+            ]);
+        }
+
+        // Check if the post has already been viewed
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $alreadyViewed = Blogview::where('user_id', $userId)
+                ->where('post_id', $validatedData['post_id'])
+                ->exists();
+
+            if ($alreadyViewed) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Post Not Found',
+                    'message' => 'User has viewed this post before',
                 ]);
             }
 
-            // If view is true, Increment the clicks
-            if ($validatedData['post_viewed']) {
-                $post->post_views += 1;
-                $post->save();
+            Blogview::create([
+                'user_id' => $userId,
+                'post_id' => $validatedData['post_id'],
+            ]);
+        } else {
+            $sessionId = $validatedData['session_id'];
+            if (!$sessionId) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Session ID is required for unauthenticated users',
+                ]);
             }
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Post view updated successfully',
-                'post' => $post
+            $alreadyViewed = Blogview::where('session_id', $sessionId)
+                ->where('post_id', $validatedData['post_id'])
+                ->exists();
+
+            if ($alreadyViewed) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Session has viewed this post before',
+                ]);
+            }
+
+            Blogview::create([
+                'session_id' => $sessionId,
+                'post_id' => $validatedData['post_id'],
             ]);
         }
+
+        // Increment the post views count
+        $post->increment('post_views');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Post view updated successfully',
+            // 'post' => $post,
+        ]);
+    }
 
     public function readpost(): JsonResponse
     {

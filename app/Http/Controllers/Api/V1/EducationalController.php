@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Educational;
 use App\Models\User;
+use App\Models\Eduview;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use Illuminate\Support\Facades\Auth;
@@ -266,14 +267,14 @@ class EducationalController extends Controller
         {
             // Validate the incoming request
             $validatedData = $request->validate([
+                'session_id' => 'nullable|string',
                 'edu_viewed' => 'required|boolean',
-                'edu_id' => 'required|regex:/^@\w+$/'
+                'edu_id' => 'required|regex:/^@\w+$/',
             ]);
 
-            // Get the edu based on the validated edu_id
+            // Get the educational record based on the validated edu_id
             $edu = Educational::where('edu_id', $validatedData['edu_id'])->first();
-            
-            // Check if the edu exists
+
             if (!$edu) {
                 return response()->json([
                     'status' => false,
@@ -281,16 +282,57 @@ class EducationalController extends Controller
                 ]);
             }
 
-            // If view is true, increment the views
-            if ($validatedData['edu_viewed']) {
-                $edu->edu_views += 1;
-                $edu->save();
+            // Check if the edu has already been viewed
+            if (Auth::check()) {
+                $userId = Auth::id();
+                $alreadyViewed = Eduview::where('user_id', $userId)
+                    ->where('edu_id', $validatedData['edu_id'])
+                    ->exists();
+
+                if ($alreadyViewed) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'User has viewed this educational content before',
+                    ]);
+                }
+
+                Eduview::create([
+                    'user_id' => $userId,
+                    'edu_id' => $validatedData['edu_id'],
+                ]);
+            } else {
+                $sessionId = $validatedData['session_id'];
+                if (!$sessionId) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Session ID is required for unauthenticated users',
+                    ]);
+                }
+
+                $alreadyViewed = Eduview::where('session_id', $sessionId)
+                    ->where('edu_id', $validatedData['edu_id'])
+                    ->exists();
+
+                if ($alreadyViewed) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Session has viewed this educational content before',
+                    ]);
+                }
+
+                Eduview::create([
+                    'session_id' => $sessionId,
+                    'edu_id' => $validatedData['edu_id'],
+                ]);
             }
+
+            // Increment the edu views count
+            $edu->increment('edu_views');
 
             return response()->json([
                 'status' => true,
                 'message' => 'Edu view updated successfully',
-                'edu' => $edu
+                'edu' => $edu,
             ]);
         }
 
