@@ -51,5 +51,8 @@ return [
         'base_uri' => 'https://api.replicate.com/v1/',
         'key' => env('REPLICATE_API_KEY'),
     ],
-
+    'listenbrainz' => [
+        'api_token' => env('LISTENBRAINZ_API_TOKEN'),
+    ],
+    
 ];

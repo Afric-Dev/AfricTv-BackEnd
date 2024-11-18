@@ -63,8 +63,7 @@ Route::get('readeduthoughts/{eduID}', [EduThoughtsController::class, 'readedutho
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
 //Music
-Route::get('musicSearch', [MusicController::class, 'search']);
-Route::post('getDetails/{trackId}', [MusicController::class, 'artist']);
+Route::get('/search/artist', [MusicController::class, 'searchArtist']);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
