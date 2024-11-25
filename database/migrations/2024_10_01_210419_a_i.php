@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('a_i_s', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
+            $table->uuid('chat_id')->nullable();
             $table->text('message');
             $table->text('response')->nullable();
             $table->string('prediction_id')->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration
 
             //Forign key 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('chat_id')->references('id')->on('a_i_s')->onDelete('cascade'); // Self-referencing foreign key
         });
     }
 

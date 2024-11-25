@@ -60,61 +60,64 @@ class TrendingController extends Controller
 
 
 
-    public function search($searchQuery): JsonResponse
-    {
-        // Search Users by name, unique_id, or email
-        $users = User::where('name', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('unique_id', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('email', 'LIKE', "%{$searchQuery}%")
-            ->get();
+public function search($searchQuery): JsonResponse
+{
+    // Remove any leading # or whitespace from the user's search query
+    $searchQuery = ltrim($searchQuery, '# ');
 
-        // Search and calculate trending score for Educational model
-        $educationals = Educational::where('title', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('description', 'LIKE', "%{$searchQuery}%")
-            ->with('user') 
-            ->get()
-            ->map(function ($edu) {
-                // Trending score formula: edu_views * 2 + vote_count * 1.5 + thoughts_count * 1.5
-                $edu->trending_score = ($edu->edu_views * 2) +
-                                       ($edu->vote_count * 1.5) +
-                                       ($edu->thoughts_count * 1.5);
-                return $edu;
-            })
-            ->sortByDesc('trending_score') // Sort by trending score
-            ->sortByDesc('created_at');    // Then sort by created_at
+    // Search Users by name, unique_id, or email
+    $users = User::where('name', 'LIKE', "%{$searchQuery}%")
+        ->orWhere('unique_id', 'LIKE', "%{$searchQuery}%")
+        ->orWhere('email', 'LIKE', "%{$searchQuery}%")
+        ->get();
 
-        // Search and calculate trending score for Posts
-        $posts = Post::where('post_title', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('PostbodyHtml', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('hashtags', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('category', 'LIKE', "%{$searchQuery}%")
-            ->with('user') 
-            ->get()
-            ->map(function ($post) {
-                // Trending score formula: likes * 1.5 + comments * 1.5 + views * 2
-                $post->trending_score = ($post->likes_count * 1.5) +
-                                        ($post->comments_count * 1.5) +
-                                        ($post->post_views * 2);
-                return $post;
-            })
-            ->sortByDesc('trending_score') // Sort by trending score
-            ->sortByDesc('created_at');    // Then sort by created_at
+    // Search and calculate trending score for Educational model
+    $educationals = Educational::where('title', 'LIKE', "%{$searchQuery}%")
+        ->orWhere('description', 'LIKE', "%{$searchQuery}%")
+        ->with('user')
+        ->get()
+        ->map(function ($edu) {
+            // Trending score formula: edu_views * 2 + vote_count * 1.5 + thoughts_count * 1.5
+            $edu->trending_score = ($edu->edu_views * 2) +
+                                   ($edu->vote_count * 1.5) +
+                                   ($edu->thoughts_count * 1.5);
+            return $edu;
+        })
+        ->sortByDesc('trending_score') // Sort by trending score
+        ->sortByDesc('created_at');    // Then sort by created_at
 
-            // Search ads Posts
-            $ads = Ads::where('title', 'LIKE', "%{$searchQuery}%")
-            ->orWhere('description', 'LIKE', "%{$searchQuery}%")
-            ->get();
+    // Search and calculate trending score for Posts
+    $posts = Post::where('post_title', 'LIKE', "%{$searchQuery}%")
+        ->orWhere('PostbodyHtml', 'LIKE', "%{$searchQuery}%")
+        ->orWhere('category', 'LIKE', "%{$searchQuery}%")
+        ->orWhereRaw("FIND_IN_SET(?, REPLACE(TRIM(LEADING ',' FROM hashtags), ' ', '')) > 0", [$searchQuery])
+        ->with('user')
+        ->get()
+        ->map(function ($post) {
+            // Trending score formula: likes * 1.5 + comments * 1.5 + views * 2
+            $post->trending_score = ($post->likes_count * 1.5) +
+                                    ($post->comments_count * 1.5) +
+                                    ($post->post_views * 2);
+            return $post;
+        })
+        ->sortByDesc('trending_score') // Sort by trending score
+        ->sortByDesc('created_at');    // Then sort by created_at
 
-        return response()->json([
-            "status" => true,
-            "message" => "Search results",
-            "data" => [
-                'users' => $users,
-                'educationals' => $educationals,
-                'posts' => $posts,
-                'ads' => $ads,
-            ],
-        ]);
-    }
+    // Search ads Posts
+    $ads = Ads::where('title', 'LIKE', "%{$searchQuery}%")
+        ->orWhere('description', 'LIKE', "%{$searchQuery}%")
+        ->get();
+
+    return response()->json([
+        "status" => true,
+        "message" => "Search results",
+        "data" => [
+            'users' => $users,
+            'educationals' => $educationals,
+            'posts' => $posts,
+            'ads' => $ads,
+        ],
+    ]);
+}
 
 }

@@ -11,62 +11,191 @@ use Illuminate\Http\JsonResponse;
 class MusicController extends Controller
 {
 
-    protected $listenBrainz;
-
     /**
-     * Inject ListenBrainzService.
-     *
-     * @param ListenBrainzService $listenBrainz
-     */
-    public function __construct(ListenBrainzService $listenBrainz)
-    {
-        $this->listenBrainz = $listenBrainz;
-    }
-
-    /**
-     * Search for artists using ListenBrainz API.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Search for artists by name and return their information.
      */
     public function searchArtist(Request $request)
     {
-        // Validate the query parameter to ensure it's a valid string
-        $validated = $request->validate([
-            'query' => 'required|string|min:1',
+        $query = $request->input('query');
+        
+        // Validate the query
+        if (empty($query)) {
+            return response()->json([
+                'error' => 'Query parameter is required.',
+            ], 400);
+        }
+
+        // Step 1: Search for the artist(s) by name
+        $artistResponse = Http::timeout(30)->get("https://musicbrainz.org/ws/2/artist", [
+            'query' => $query,
+            'fmt' => 'json',
         ]);
 
-        // Retrieve the validated query
-        $query = $validated['query'];
+        if ($artistResponse->failed()) {
+            return response()->json([
+                'error' => 'Failed to fetch artist data from MusicBrainz.',
+                'details' => $artistResponse->body(),  // Add response body for debugging
+            ], $artistResponse->status());
+        }
 
-        try {
-            // Fetch the artist data from ListenBrainz service
-            $data = $this->listenBrainz->searchArtist($query);
+        $artistData = $artistResponse->json();
 
-            // If no data is returned, respond with the exact error from ListenBrainz
-            if (!$data) {
-                \Log::error('Failed to fetch artist search results.');
-                
-                // Get the raw error message from ListenBrainz response
-                $errorMessage = $this->listenBrainz->getLastErrorMessage();
-                
-                // Return the raw error message from ListenBrainz
-                return response()->json(['error' => $errorMessage], 500);
+        // If no artists found
+        if (empty($artistData['artists'])) {
+            return response()->json([
+                'error' => 'No artists found matching the name.',
+            ], 404);
+        }
+
+        // Step 2: Return the list of artists with their MusicBrainz ID
+        $artists = array_map(function ($artist) {
+            // Only include available fields and avoid the 'type' key if it doesn't exist
+            $type = $artist['type'] ?? 'Unknown'; // Default to 'Unknown' if 'type' is not set
+
+            return [
+                'id' => $artist['id'],
+                'name' => $artist['name'],
+                'type' => $type, // Use the 'type' field only if it exists
+            ];
+        }, $artistData['artists']);
+
+        return response()->json([
+            'query' => $query,
+            'artists' => $artists,
+        ]);
+    }
+
+    /**
+     * Get the cover image for an artist.
+     */
+    private function getArtistCoverImage($artistId)
+    {
+        // Step 3: Fetch the artist's cover image using their MusicBrainz ID from the Cover Art Archive
+        $coverImage = null;
+        $coverResponse = Http::get("https://coverartarchive.org/artist/{$artistId}");
+
+        if ($coverResponse->successful()) {
+            $coverData = $coverResponse->json();
+            if (!empty($coverData['images'])) {
+                $coverImage = $coverData['images'][0]['thumbnails']['large'] ?? null;
+            }
+        }
+
+        return $coverImage;
+    }
+    /**
+     * Search for songs by artist ID.
+     */
+        /**
+     * Get songs by Artist ID, including all raw data returned by MusicBrainz.
+     */
+    public function searchSongsByArtistId($artistId)
+    {
+        // Step 1: Search for recordings (songs) for the artist by MusicBrainz artist ID
+        $songsResponse = Http::timeout(30)->get("https://musicbrainz.org/ws/2/recording", [
+            'artist' => $artistId,  // Filter by artist ID
+            'fmt' => 'json',
+            'limit' => 100, // Limit for testing
+        ]);
+
+        if ($songsResponse->failed()) {
+            return response()->json([
+                'error' => 'Failed to fetch songs from MusicBrainz.',
+                'details' => $songsResponse->body(),  // Add response body for debugging
+            ], $songsResponse->status());
+        }
+
+        $songsData = $songsResponse->json();
+
+        if (empty($songsData['recordings'])) {
+            return response()->json([
+                'error' => 'No songs found for this artist.',
+            ], 404);
+        }
+
+        // Step 2: Extract song details and fetch cover image URLs
+        $songs = array_map(function ($song) {
+            // Extract basic song details
+            $songDetails = [
+                'title' => $song['title'],
+                'id' => $song['id'],
+                'first-release-date' => $song['first-release-date'] ?? null,
+                'length' => $song['length'] ?? null,
+                'video' => $song['video'] ?? false,
+                'disambiguation' => $song['disambiguation'] ?? '',
+                'url' => "https://listenbrainz.org/player/?recording_mbids={$song['id']}",
+            ];
+
+            // Fetch release-group details for the cover image
+            $releaseGroup = $song['releases'][0]['release-group'] ?? null;
+            if ($releaseGroup && isset($releaseGroup['id'])) {
+                $coverImageUrl = "https://coverartarchive.org/release-group/{$releaseGroup['id']}/front";
+                $songDetails['cover_image'] = $coverImageUrl;
+            } else {
+                $songDetails['cover_image'] = null; // No cover image available
             }
 
-            // Return the successful response with the data
-            return response()->json($data, 200);
-        } catch (\Exception $e) {
-            // Log any exceptions for debugging
-            \Log::error('Error searching artists:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            return $songDetails;
+        }, $songsData['recordings']);
 
-            // Return the raw error message from ListenBrainz (if available)
-            return response()->json(['error' => $e->getMessage()], 500);
+        // Step 3: Return the enriched song data
+        return response()->json([
+            'songs' => $songs,
+        ]);
+    }
+
+    public function searchMusicByTitle(Request $request)
+    {
+        // Get the 'query' parameter from the request
+        $query = $request->input('query');
+
+        // Check if the 'query' parameter is missing or empty
+        if (!$query || strlen($query) > 255) {
+            return response()->json([
+                'error' => 'The "query" parameter is required and must not exceed 255 characters.',
+            ], 400);
         }
-    }    // public function search(Request $request): JsonResponse
+
+        // Step 1: Search for recordings by query
+        $recordingsResponse = Http::timeout(30)->get("https://musicbrainz.org/ws/2/recording", [
+            'query' => $query,  // Search for the music title
+            'fmt' => 'json',
+            'limit' => 10,  // Limit the results
+        ]);
+
+        if ($recordingsResponse->failed()) {
+            return response()->json([
+                'error' => 'Failed to fetch music recordings from MusicBrainz.',
+                'details' => $recordingsResponse->body(),  // Include response body for debugging
+            ], $recordingsResponse->status());
+        }
+
+        $recordingsData = $recordingsResponse->json();
+
+        if (empty($recordingsData['recordings'])) {
+            return response()->json(['error' => 'No recordings found for this query.'], 404);
+        }
+
+        // Step 2: Process recordings
+        $songs = array_map(function ($recording) {
+            return [
+                'title' => $recording['title'],
+                'id' => $recording['id'],
+                'first-release-date' => $recording['first-release-date'] ?? null,
+                'length' => $recording['length'] ?? null,
+                'video' => $recording['video'] ?? false,
+                'disambiguation' => $recording['disambiguation'] ?? '',
+                'description' => $recording['disambiguation'] ?? 'No additional details available.', // Explicit descriptive text
+                'url' => "https://listenbrainz.org/player/?recording_mbids={$recording['id']}",
+            ];
+        }, $recordingsData['recordings']);
+
+        return response()->json(['songs' => $songs]);
+    }
+
+
+
+   // public function search(Request $request): JsonResponse
     // {   
 
     //     $request->validate([

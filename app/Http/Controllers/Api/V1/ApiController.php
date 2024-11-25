@@ -177,7 +177,7 @@ class ApiController extends Controller
                 $accessToken = $user->createToken('myToken')->plainTextToken;
 
                 //To send email after user login in successfully
-                Mail::to($user->email)->send(new LoginMail($user));
+                //Mail::to($user->email)->send(new LoginMail($user));
 
                 //Notification
                 $type = "LOGIN";

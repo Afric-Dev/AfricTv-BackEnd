@@ -31,7 +31,18 @@ class AI extends Model
         "user_id",
         "message",
         "response",
-        "prediction_id"
+        "prediction_id",
+        "chat_id",
     ];
+
+    public function user()
+    {
+       return $this->belongsTo(User::class);
+    }
+
+    public function responses()
+    {
+        return $this->hasMany(AI::class, 'chat_id')->with('responses');
+    }
 
 }

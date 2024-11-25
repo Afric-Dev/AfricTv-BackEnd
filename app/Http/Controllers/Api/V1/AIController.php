@@ -48,8 +48,12 @@ class AIController extends Controller
                 $model = "meta/llama-2-7b-chat";
                 $version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
 
+                $request->validate([
+                    "chat_id" => "nullable", 
+                ]);
+
                 $input = [
-                    'prompt' => $request->input('message')
+                    'prompt' => $request->input('message'),
                 ];
 
                 // Create prediction
@@ -59,6 +63,7 @@ class AIController extends Controller
                 $aiRecord = AI::create([
                     'user_id' => $userId,
                     'message' => $input['prompt'],
+                    "chat_id" => $request->chat_id, 
                     'response' => null, // Initially null until the response is available
                     'prediction_id' => $result['id'] ?? null
                 ]);
@@ -88,7 +93,7 @@ class AIController extends Controller
             if (!isset($result['status'])) {
                 return response()->json(['error' => 'Invalid prediction response.'], 500);
             }
-
+ 
             if ($result['status'] === 'succeeded') {
                 // Clean the output and update the response in the database
                 $output = $this->cleanOutput($result['output'] ?? '');
@@ -113,12 +118,12 @@ class AIController extends Controller
         private function cleanOutput($output)
         {
             if (is_array($output)) {
-                $output = implode(" ", $output);
+                $output = implode('', $output);
             }
 
-            $output = preg_replace('/\s+/', ' ', $output); // Remove multiple spaces
-            $output = preg_replace('/\s([?.!,:;])/', '$1', $output); // Remove space before punctuation
-            $output = preg_replace('/(\d)\s+(\d)/', '$1$2', $output); // Join split numbers
+            //$output = preg_replace('/\s+/', ' ', $output); // Remove multiple spaces
+            //$output = preg_replace('/\s([?.!,:;])/', '$1', $output); // Remove space before punctuation
+            //$output = preg_replace('/(\d)\s+(\d)/', '$1$2', $output); // Join split numbers
             return trim($output); // Remove any leading/trailing spaces
         }
 
@@ -129,6 +134,7 @@ class AIController extends Controller
             // Corrected query condition
             $chats = AI::where('user_id', $user->id)
                 ->orderBy('created_at', 'desc')
+                ->whereNull('chat_id')
                 ->whereNotNull('response')
                 ->get();
 
@@ -149,7 +155,9 @@ class AIController extends Controller
 
         public function aiChat($id): JsonResponse
         {
-            $chat = AI::where('id', $id)->first();
+            $chat = AI::where('id', $id)
+                    ->with('responses')
+                    ->first();
 
             if (!$chat) {
                 return response()->json([

@@ -9,6 +9,7 @@ use Intervention\Image\Facades\Image;
 use App\Models\Post;
 use App\Models\Blogview;
 use App\Models\User;
+use App\Models\Likes;
 use App\Models\Notification;
 use App\Models\Subscribtion;
 use Illuminate\Support\Facades\Auth;
@@ -500,43 +501,86 @@ class PostController extends Controller
 
     public function readpost(): JsonResponse
     {
-        // Timeframe 
-        $timeframe = 'desc';
+        // Get the authenticated user
+        $user = auth()->user();
 
-        // Fetch posts within the specified timeframe
-        $posts = Post::with('user')
-            ->where('created_at', '>=', $timeframe)
-            ->where('is_status', 'ACTIVE')
-            ->withCount(['likes', 'comments']) 
-            ->get();
+        // Define a static cache key for the session
+        $cacheKey = $user ? "user_posts_{$user->id}" : "guest_posts";
 
-        // Calculate a trending score for each post
-        $posts->map(function ($post) {
-            // Formula for trending score
-            $post->post_score = ($post->likes_count * 1.5) + 
-                                ($post->post_views * 1);
-                                ($post->bookmark_count * 0.3);
-            return $post;
-        });
+        // Check if posts are already cached for this session
+        if (session()->has($cacheKey)) {
+            // Retrieve cached posts
+            $posts = session($cacheKey);
+        } else {
+            // Initialize the query for posts
+            $query = Post::with('user')
+                ->where('is_status', 'ACTIVE')
+                ->withCount(['likes', 'comments']);
 
-        // Sort posts by their trending score in descending order
-        $posts = $posts->sortByDesc('post_score');
+            $otherPosts = collect(); // Initialize for non-subscribed posts
 
-        // Introduce randomness: Shuffle the posts, but prioritize higher-scoring ones
-        $shuffledPosts = $posts->shuffle()->sortByDesc(function ($post) {
-            // Combine score priority and recency
-            return $post->post_score + (strtotime($post->created_at) / 1000000); 
-        });
+            if ($user) {
+                // Posts from users the authenticated user is subscribed to
+                $subscriptions = $user->subscriptions()->pluck('subscribed_to_id');
 
-        $postCount = $shuffledPosts->count();
+                // Posts liked by the authenticated user
+                $likedPostIds = $user->likes()->pluck('post_id');
 
+                // Add conditions for subscriptions and liked posts
+                $query->where(function ($q) use ($subscriptions, $likedPostIds) {
+                    $q->whereIn('user_id', $subscriptions)
+                      ->orWhereIn('id', $likedPostIds);
+                });
+
+                // Fetch a few posts from users the user is not subscribed to
+                $otherPosts = Post::whereNotIn('user_id', $subscriptions)
+                    ->where('is_status', 'ACTIVE')
+                    ->withCount(['likes', 'comments'])
+                    ->inRandomOrder()
+                    ->limit(5)
+                    ->get();
+            } else {
+                // For unauthenticated users or users following no one, randomize posts
+                $query->inRandomOrder()->limit(20); // Adjust limit as needed
+            }
+
+            // Get the main posts
+            $posts = $query->get();
+
+            // Calculate trending score for the posts
+            $posts->map(function ($post) {
+                $post->post_score = ($post->likes_count * 1.5) +
+                                    ($post->post_views * 1) +
+                                    ($post->bookmark_count * 0.3);
+                return $post;
+            });
+
+            // Sort posts by trending score in descending order
+            $posts = $posts->sortByDesc('post_score');
+
+            // Add randomization and mix with other posts (if available)
+            if ($otherPosts->isNotEmpty()) {
+                $posts = $posts->merge($otherPosts->shuffle());
+            }
+
+            // Shuffle the posts for variety
+            $posts = $posts->shuffle();
+
+            // Cache the posts in the session
+            session([$cacheKey => $posts]);
+        }
+
+        // Count total posts after processing
+        $postCount = $posts->count();
+
+        // Prepare the response
         return response()->json([
             'status' => true,
             'message' => 'Post data',
-            'data' => $shuffledPosts->values()->all(),
+            'data' => $posts->values()->all(),
             'count' => $postCount,
         ]);
-    } 
+    }
 
 
       public function toppost(): JsonResponse
