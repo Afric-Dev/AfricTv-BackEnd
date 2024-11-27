@@ -64,10 +64,11 @@ Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
 //Music
 // Route::get('/search/artist', [MusicController::class, 'searchArtist']);
-Route::get('music/searchArtist', [MusicController::class, 'searchArtist']);
-Route::get('music/searchSongsByArtistId/{artistId}', [MusicController::class, 'searchSongsByArtistId']);
-Route::get('music/getSongById/{songId}', [MusicController::class, 'getSongById']);
-Route::get('music/search', [MusicController::class, 'searchMusicByTitle']);
+// Route::get('music/searchArtist', [MusicController::class, 'searchArtist']);
+// Route::get('music/searchSongsByArtistId/{artistId}', [MusicController::class, 'searchSongsByArtistId']);
+// Route::get('music/getSongById/{songId}', [MusicController::class, 'getSongById']);
+//Route::get('music/search', [MusicController::class, 'searchMusicByTitle']);
+Route::get('music-search', [MusicController::class, 'search']);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);

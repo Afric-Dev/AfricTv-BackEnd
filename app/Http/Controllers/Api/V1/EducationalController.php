@@ -130,9 +130,9 @@ class EducationalController extends Controller
         $subscribers = Subscribtion::where('subscriber_id', $user->id)->get();
 
         // Define notification details
-        $type = "EDUCATIONAL POST";
-        $title = "EDUCATIONAL POST UPLOAD NOTIFICATION";
-        $message = "A new educational post has been uploaded by " . $user->name . ". Check it out now!";
+        $type = "VIDEO POST";
+        $title = "VIDEO POST UPLOAD NOTIFICATION";
+        $message = "A new video has been uploaded by " . $user->name . ". Check it out now!";
 
         // Loop through subscribers and send notifications
         foreach ($subscribers as $subscriber) {
@@ -149,7 +149,7 @@ class EducationalController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Educational Post Uploaded Successfully'
+                'message' => 'Video Post Uploaded Successfully'
             ]);
         }
 
