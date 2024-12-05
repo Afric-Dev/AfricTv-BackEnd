@@ -12,36 +12,35 @@ use Illuminate\Http\JsonResponse;
 class BookmarkController extends Controller
 {
     public function bookmark(Request $request): JsonResponse
-     {
+    {
         // Validate the incoming request
         $request->validate([
             "post_id" => "required|regex:/^@\w+$/", 
         ]);
 
-        // Find the post based on the post_id format
+        // Find the post based on the post_id
         $post = Post::where('post_id', $request->post_id)->firstOrFail();
-        $bookmarkBefore = Bookmark::where('user_id', Auth::user()->id)
-        ->where('post_id', $request->post_id)
-        ->firstOrFail();
 
-        if($bookmarkBefore) {
+        // Check if the bookmark already exists
+        $bookmarkBefore = Bookmark::where('user_id', Auth::id())
+            ->where('post_id', $post->id) // Match with the post's numeric ID
+            ->first();
+
+        if ($bookmarkBefore) {
             return response()->json([
                 "status" => false,
                 "message" => "You've added this blog to bookmark before",
-               ]);
+            ]);
         }
 
         // Create the Bookmark
-        $bookmark = Bookmark::Create(
-            [
-                "user_id" => Auth::user()->id,
-                "post_id" => $post->id,
-            ],
-        );
+        $bookmark = Bookmark::create([
+            "user_id" => Auth::id(),
+            "post_id" => $post->id,
+        ]);
 
         // Increment the bookmarks count
         $post->increment('bookmark_count');
-        $post->save();
 
         return response()->json([
             "status" => true,

@@ -22,12 +22,12 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'currency' => 'required|string', 
+            'currency' => 'nullable|string', 
             'amount' => ['required'],
             'ads_type' => 'required|in:PIC,VID,LINK', 
             'is_ads_type_sec' => 'required|in:FEED,BANNER,SIDE', 
             //'status' => 'required|in:PENDING,PAID,FAILED',
-            'method' => 'required|in:PAYSTACK',
+            'method' => 'nullable|in:PAYSTACK',
         ];
     }
 

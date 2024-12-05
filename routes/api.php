@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\LikeController;
 use App\Http\Controllers\Api\V1\EducationalController;
 use App\Http\Controllers\Api\V1\TrendingController;
 use App\Http\Controllers\Api\V1\BookmarkController;
+use App\Http\Controllers\Api\V1\FavouriteController;
 use App\Http\Controllers\Api\V1\EduVoteController;
 use App\Http\Controllers\Api\V1\EduThoughtsController;
 use App\Http\Controllers\Api\V1\SearchController;
@@ -74,6 +75,8 @@ Route::get("trending", [TrendingController::class, "trending"]);
 Route::get("search/{searchQuery}", [TrendingController::class, "search"]);
 //Bookmark
 Route::get("readbookmarkspost/{postID}", [BookmarkController::class, "readbookmarkspost"]);
+//Favourite
+Route::get("readfavouritespost/{postID}", [FavouriteController::class, "readfavouritespost"]);
 //Paystack Callback
 Route::get('payment/callback', [AdsPaymentController::class, 'callback'])->name('adspayment.callback');
 
@@ -95,7 +98,8 @@ Route::group([
     Route::post("UserSetAdsActive", [AdsController::class, "UserSetAdsActive"]);
     Route::post("adInactive", [AdsController::class, "adInactive"]);
     Route::post("deleteads", [AdsController::class, "deleteads"]); 
-    Route::post('updateAd/{adId}', [AdsController::class, 'updateAd']);
+    Route::post('updateAd/{adId}', [AdsController::class, 'updateAd']); 
+    Route::get('userAds', [AdsController::class, 'userAds']); 
     //BlogPost
     Route::post("uploadpost", [PostController::class, "uploadpost"]);
     //Route::post("updateposts/{id}", [PostController::class, "updateposts"]);
@@ -125,6 +129,10 @@ Route::group([
     Route::post("uneduvote", [EduVoteController::class, "uneduvote"]); 
     Route::post("eduthoughts", [EduThoughtsController::class, "eduthoughts"]); 
     Route::post("deleteeduthoughts", [EduThoughtsController::class, "deleteeduthoughts"]); 
+    //Favorite
+    Route::post("favourite", [FavouriteController::class, "favourite"]);
+    Route::post("deletefavourite", [FavouriteController::class, "deletefavourite"]);
+    Route::get("readfavourites", [FavouriteController::class, "readfavourites"]);
     //Bookmark 
     Route::post("bookmark", [BookmarkController::class, "bookmark"]);
     Route::post("deletebookmark", [BookmarkController::class, "deletebookmark"]);

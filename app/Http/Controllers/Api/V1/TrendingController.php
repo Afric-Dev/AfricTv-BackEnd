@@ -60,64 +60,94 @@ class TrendingController extends Controller
 
 
 
-public function search($searchQuery): JsonResponse
-{
-    // Remove any leading # or whitespace from the user's search query
-    $searchQuery = ltrim($searchQuery, '# ');
+    public function search($searchQuery): JsonResponse
+    {
+        // Remove any leading # or whitespace from the user's search query
+        $searchQuery = ltrim($searchQuery, '# ');
 
-    // Search Users by name, unique_id, or email
-    $users = User::where('name', 'LIKE', "%{$searchQuery}%")
-        ->orWhere('unique_id', 'LIKE', "%{$searchQuery}%")
-        ->orWhere('email', 'LIKE', "%{$searchQuery}%")
-        ->get();
+        // Search Users by name, unique_id, or email
+        $users = User::where('name', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('unique_id', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('email', 'LIKE', "%{$searchQuery}%")
+            ->get();
 
-    // Search and calculate trending score for Educational model
-    $educationals = Educational::where('title', 'LIKE', "%{$searchQuery}%")
-        ->orWhere('description', 'LIKE', "%{$searchQuery}%")
-        ->with('user')
-        ->get()
-        ->map(function ($edu) {
-            // Trending score formula: edu_views * 2 + vote_count * 1.5 + thoughts_count * 1.5
-            $edu->trending_score = ($edu->edu_views * 2) +
-                                   ($edu->vote_count * 1.5) +
-                                   ($edu->thoughts_count * 1.5);
-            return $edu;
-        })
-        ->sortByDesc('trending_score') // Sort by trending score
-        ->sortByDesc('created_at');    // Then sort by created_at
+        // Search and calculate trending score for Educational model
+        $educationals = Educational::where('title', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('description', 'LIKE', "%{$searchQuery}%")
+            ->with('user')
+            ->get()
+            ->map(function ($edu) {
+                // Trending score formula: edu_views * 2 + vote_count * 1.5 + thoughts_count * 1.5
+                $edu->trending_score = ($edu->edu_views * 2) +
+                                       ($edu->vote_count * 1.5) +
+                                       ($edu->thoughts_count * 1.5);
+                return $edu;
+            })
+            ->sortByDesc('trending_score') // Sort by trending score
+            ->sortByDesc('created_at');    // Then sort by created_at
 
-    // Search and calculate trending score for Posts
-    $posts = Post::where('post_title', 'LIKE', "%{$searchQuery}%")
-        ->orWhere('PostbodyHtml', 'LIKE', "%{$searchQuery}%")
-        ->orWhere('category', 'LIKE', "%{$searchQuery}%")
-        ->orWhereRaw("FIND_IN_SET(?, REPLACE(TRIM(LEADING ',' FROM hashtags), ' ', '')) > 0", [$searchQuery])
-        ->with('user')
-        ->get()
-        ->map(function ($post) {
-            // Trending score formula: likes * 1.5 + comments * 1.5 + views * 2
-            $post->trending_score = ($post->likes_count * 1.5) +
-                                    ($post->comments_count * 1.5) +
-                                    ($post->post_views * 2);
-            return $post;
-        })
-        ->sortByDesc('trending_score') // Sort by trending score
-        ->sortByDesc('created_at');    // Then sort by created_at
+        // Fetch Ads for Educational items (type 'VID')
+        $adsEdu = Ads::where('ads_type', 'VID')->where('status', 'ACTIVE')->inRandomOrder()->limit(5)->get();
 
-    // Search ads Posts
-    $ads = Ads::where('title', 'LIKE', "%{$searchQuery}%")
-        ->orWhere('description', 'LIKE', "%{$searchQuery}%")
-        ->get();
+        // Inject ads into the educational posts list after every 3rd post
+        $finalEducationals = collect();
+        $educationals->values()->each(function ($edu, $index) use ($adsEdu, &$finalEducationals) {
+            $finalEducationals->push($edu);
+            // Add an ad after every 3rd post
+            if (($index + 1) % 3 === 0 && $adsEdu->isNotEmpty()) {
+                $finalEducationals->push($adsEdu->shift()); // Take the next ad
+            }
+        });
 
-    return response()->json([
-        "status" => true,
-        "message" => "Search results",
-        "data" => [
-            'users' => $users,
-            'educationals' => $educationals,
-            'posts' => $posts,
-            'ads' => $ads,
-        ],
-    ]);
-}
+        // Search and calculate trending score for Posts
+        $posts = Post::where('post_title', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('PostbodyHtml', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('category', 'LIKE', "%{$searchQuery}%")
+            ->orWhereRaw("FIND_IN_SET(?, REPLACE(TRIM(LEADING ',' FROM hashtags), ' ', '')) > 0", [$searchQuery])
+            ->with('user')
+            ->get()
+            ->map(function ($post) {
+                // Trending score formula: likes * 1.5 + comments * 1.5 + views * 2
+                $post->trending_score = ($post->likes_count * 1.5) +
+                                        ($post->comments_count * 1.5) +
+                                        ($post->post_views * 2);
+                return $post;
+            })
+            ->sortByDesc('trending_score') // Sort by trending score
+            ->sortByDesc('created_at');    // Then sort by created_at
+
+        // Fetch Ads for Posts (type 'PIC' or 'LINK')
+        $adsPost = Ads::where(function ($query) {
+            $query->where('ads_type', 'PIC')
+                  ->orWhere('ads_type', 'LINK');
+        })->where('status', 'ACTIVE')->inRandomOrder()->limit(5)->get();
+
+        // Inject ads into the post list after every 5th post
+        $finalPosts = collect();
+        $posts->values()->each(function ($post, $index) use ($adsPost, &$finalPosts) {
+            $finalPosts->push($post);
+            // Add an ad after every 5th post
+            if (($index + 1) % 5 === 0 && $adsPost->isNotEmpty()) {
+                $finalPosts->push($adsPost->shift()); // Take the next ad
+            }
+        });
+
+        // Search ads Posts (if needed)
+        $ads = Ads::where('title', 'LIKE', "%{$searchQuery}%")
+            ->orWhere('description', 'LIKE', "%{$searchQuery}%")
+            ->get();
+
+        return response()->json([
+            "status" => true,
+            "message" => "Search results",
+            "data" => [
+                'users' => $users,
+                'educationals' => $finalEducationals,
+                'posts' => $finalPosts,
+                'ads' => $ads,
+            ],
+        ]);
+    }
+
 
 }

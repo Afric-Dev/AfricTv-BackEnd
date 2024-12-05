@@ -37,6 +37,11 @@ class Favourite extends Model
 
     public function educational()
     {
-        return $this->hasMany(Educational::class, 'edu_id');
+        return $this->belongsTo(Educational::class, 'edu_id');
+    }
+    
+    public function user()
+    {
+       return $this->belongsTo(User::class, 'user_id');
     }
 }

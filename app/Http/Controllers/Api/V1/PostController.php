@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Models\Blogview;
 use App\Models\User;
 use App\Models\Likes;
+use App\Models\Ads;
 use App\Models\Notification;
 use App\Models\Subscribtion;
 use Illuminate\Support\Facades\Auth;
@@ -536,12 +537,12 @@ class PostController extends Controller
                 $otherPosts = Post::whereNotIn('user_id', $subscriptions)
                     ->where('is_status', 'ACTIVE')
                     ->withCount(['likes', 'comments'])
-                    ->inRandomOrder()
+                    ->orderBy('created_at', 'desc') // Sort by latest
                     ->limit(5)
                     ->get();
             } else {
-                // For unauthenticated users or users following no one, randomize posts
-                $query->inRandomOrder()->limit(20); // Adjust limit as needed
+                // For unauthenticated users or users following no one, fetch posts randomly
+                $query->inRandomOrder(); // Randomize the order
             }
 
             // Get the main posts
@@ -555,12 +556,22 @@ class PostController extends Controller
                 return $post;
             });
 
-            // Sort posts by trending score in descending order
-            $posts = $posts->sortByDesc('post_score');
+            // Sort posts based on user authentication
+            if ($user) {
+                // Logged-in users: Sort by trending score and `created_at`
+                $posts = $posts->sortByDesc(function ($post) {
+                    return $post->post_score + (strtotime($post->created_at) / 1000000);
+                });
+            } else {
+                // Guests: Randomly shuffle posts and use `created_at` for slight ordering
+                $posts = $posts->shuffle()->sortByDesc(function ($post) {
+                    return rand(0, 100) + (strtotime($post->created_at) / 1000000);
+                });
+            }
 
             // Add randomization and mix with other posts (if available)
             if ($otherPosts->isNotEmpty()) {
-                $posts = $posts->merge($otherPosts->shuffle());
+                $posts = $posts->merge($otherPosts);
             }
 
             // Shuffle the posts for variety
@@ -570,17 +581,36 @@ class PostController extends Controller
             session([$cacheKey => $posts]);
         }
 
+        // Fetch ads from the Ads model, filtering by ads_type = 'PIC' or 'LINK'
+        $ads = Ads::whereIn('ads_type', ['PIC', 'LINK'])
+                  ->where('status', 'ACTIVE')
+                  ->inRandomOrder()
+                  ->limit(5)
+                  ->get();
+
+        // Inject ads into the posts list after every 5 posts
+        $finalPosts = collect();
+        $posts->values()->each(function ($post, $index) use ($ads, &$finalPosts) {
+            $finalPosts->push($post);
+            // Add an ad after every 5th post
+            if (($index + 1) % 5 === 0 && $ads->isNotEmpty()) {
+                $finalPosts->push($ads->shift()); // Take the next ad
+            }
+        });
+
         // Count total posts after processing
-        $postCount = $posts->count();
+        $postCount = $finalPosts->count();
 
         // Prepare the response
         return response()->json([
             'status' => true,
-            'message' => 'Post data',
-            'data' => $posts->values()->all(),
+            'message' => 'Post data with ads',
+            'data' => $finalPosts->values()->all(),
             'count' => $postCount,
         ]);
     }
+
+
 
 
       public function toppost(): JsonResponse

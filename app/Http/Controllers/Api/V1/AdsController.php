@@ -31,6 +31,14 @@ class AdsController extends Controller
         $adPayment = AdsPayment::where('user_id', $userId)
                               ->where('taken', 'NO')
                               ->first();
+
+        if (!$adPayment) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You have paid for no ad! something seems wrong',
+            ]);  
+        }                      
+
         if ($adPayment->status === "PENDING") {
             return response()->json([
                 'status' => false,
@@ -481,6 +489,24 @@ class AdsController extends Controller
                 'message' => 'Ads data',
                 'data' => $ads,
             ]);
+    }
+
+    public function userAds(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $ads = Ads::where('user_id', $user->id)->get();
+
+        if (!$ads) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User has place no ads'
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $ads
+        ]);
     }
 
     public function deleteads(Request $request): JsonResponse

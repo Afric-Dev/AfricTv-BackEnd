@@ -18,29 +18,29 @@ class FavouriteController extends Controller
             "edu_id" => "required|regex:/^@\w+$/", 
         ]);
 
-        // Find the edu based on the edu_id format
+        // Find the educational record by edu_id
         $edu = Educational::where('edu_id', $request->edu_id)->firstOrFail();
-        $favouriteBefore = Favourite::where('user_id', Auth::user()->id)
-        ->where('edu_id', $request->edu_id)
-        ->firstOrFail();
 
-        if($favouriteBefore) {
+        // Check if the favourite already exists
+        $favouriteBefore = Favourite::where('user_id', Auth::id())
+            ->where('edu_id', $edu->id) // Match with the edu's numeric ID
+            ->first();
+
+        if ($favouriteBefore) {
             return response()->json([
                 "status" => false,
                 "message" => "You've added this post to favourite before",
-               ]);
+            ]);
         }
-        // Create the Bookmark
-        $favourite = Favourite::Create(
-            [
-                "user_id" => Auth::user()->id,
-                "edu_id" => $edu->id,
-            ],
-        );
 
-        // Increment the bookmarks count
+        // Create the Favourite
+        $favourite = Favourite::create([
+            "user_id" => Auth::id(),
+            "edu_id" => $edu->id,
+        ]);
+
+        // Increment the favourites count
         $edu->increment('favourites_count');
-        $edu->save();
 
         return response()->json([
             "status" => true,
@@ -64,7 +64,7 @@ class FavouriteController extends Controller
 
             if ($edu) {
                 // Decrement the likes count
-                $edu->decrement('favmark_count');
+                $edu->decrement('favourites_count');
                 $edu->save();
             }
 
@@ -81,44 +81,52 @@ class FavouriteController extends Controller
                 "message" => "Favourite not found"
             ]);
         }
-    }
+    } 
 
     public function readfavourites(Request $request): JsonResponse
     {
         $userId = Auth::user()->id;
 
-        // Find all favourites associated with the educational ID
+        // Retrieve all favourites with related educational data
         $favourites = Favourite::with('educational')
-                    ->where('user_id', $userId)
-                    ->get();
+                        ->where('user_id', $userId)
+                        ->get();
 
-        // Return the favourites in a JSON response
+        // Debugging: Check if educational data is being loaded
+        foreach ($favourites as $favourite) {
+            if (!$favourite->educational) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This video might have been deleted or moved',
+                ]);
+            }
+        }
+
+        // Return the favourites with educational data in a JSON response
         return response()->json([
             'status' => true,
             'message' => 'Favourite data',
             'data' => $favourites,
         ]);
     }
+
     public function readfavouritespost($postID): JsonResponse
     {
         // Find the post by post_id
         $post = Educational::where('edu_id', $postID)->first();
 
-        // Ensure the post exists before proceeding
         if (!$post) {
-            // Handle the case where the post is not found
             return response()->json([
                 'status' => false,
-                'message' => 'Post Not Found',
+                'message' => 'Video Post Not Found',
             ], 404);
         }
 
-        // Find all favourites associated with the post ID
+        // Retrieve favourites associated with the educational post
         $favourites = Favourite::with('user')
-                      ->where('edu_id', $post->id)
-                      ->get();
+                        ->where('edu_id', $post->id) 
+                        ->get();
 
-        // Check if favourites exist
         if ($favourites->isEmpty()) {
             return response()->json([
                 'status' => false,
@@ -126,11 +134,12 @@ class FavouriteController extends Controller
             ]);
         }
 
-        // Return the favourites in a JSON response
+        // Return the favourites
         return response()->json([
             'status' => true,
-            'message' => 'Like data',
+            'message' => 'Favourite data',
             'data' => $favourites,
         ]);
     }
+
 }

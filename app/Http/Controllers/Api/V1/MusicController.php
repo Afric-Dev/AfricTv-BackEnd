@@ -25,7 +25,7 @@ class MusicController extends Controller
             return response()->json(['error' => 'Query parameter is required.'], 400);
         }
 
-        // Mock YouTube Music search endpoint (Replace this with actual endpoint if available)
+        // Mock YouTube Music search endpoint
         $url = 'https://www.googleapis.com/youtube/v3/search';
 
         // Your YouTube API Key

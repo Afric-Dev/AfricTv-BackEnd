@@ -39,5 +39,11 @@ class Bookmark extends Model
     {
         return $this->hasMany(Educational::class);
     }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 
 }
