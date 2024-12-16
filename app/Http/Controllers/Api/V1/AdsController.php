@@ -24,13 +24,20 @@ class AdsController extends Controller
             "title" => 'required|string|max:255',
             "description" => 'required|string',
             "link" => 'required|string|max:255',
-            // "ads_type" => 'required|in:PIC,VID,LINK'
+            "ads_id" => 'nullable'
         ]);
 
         $userId = Auth::user()->id;
-        $adPayment = AdsPayment::where('user_id', $userId)
-                              ->where('taken', 'NO')
-                              ->first();
+
+        if (isset($validatedData['ads_id']) && $validatedData['ads_id']) {
+            $adPayment = AdsPayment::where('ads_id', $validatedData['ads_id'])
+                                  ->where('taken', 'NO')
+                                  ->first();
+        } else {
+            $adPayment = AdsPayment::where('user_id', $userId)
+                                  ->where('taken', 'NO')
+                                  ->first();
+        }
 
         if (!$adPayment) {
             return response()->json([
@@ -46,7 +53,7 @@ class AdsController extends Controller
             ]);
         } 
 
-        if ($adPayment->status === "FAILED") { // Updated condition
+        if ($adPayment->status === "FAILED") {
             return response()->json([
                 'status' => false,
                 'message' => 'Your ads payment FAILED.',

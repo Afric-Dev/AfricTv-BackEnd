@@ -37,7 +37,8 @@ class Ads extends Model
         'status',
         'clicks',
         'ads_id',
-        'ads_type'
+        'ads_type',
+        'is_ads_type_sec',
     ];
 
      public function user()

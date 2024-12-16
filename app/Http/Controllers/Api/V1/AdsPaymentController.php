@@ -22,13 +22,13 @@ class AdsPaymentController extends Controller
         $amount = str_replace(',', '', $validatedData['amount']);
         switch ($validatedData['ads_type']) {
             case 'VID':
-                $clicksNumber = (float)$amount / 0.20;
+                $clicksNumber = (float)$amount / 0.50;
                 break;
             case 'PIC':
-                $clicksNumber = (float)$amount / 0.15;
+                $clicksNumber = (float)$amount / 0.30;
                 break;
             case 'LINK':
-                $clicksNumber = (float)$amount / 0.10;
+                $clicksNumber = (float)$amount / 0.20;
                 break;
             default:
                 return response()->json([
@@ -229,5 +229,23 @@ class AdsPaymentController extends Controller
             ", 200)
             ->header('Content-Type', 'text/html');
     }
+
+        public function userPayments(Request $request): JsonResponse
+        {
+            $user = Auth::user();
+            $payments = AdsPayment::where('user_id', $user->id)->get();
+
+            if (!$payments) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User have made no payment yet'
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $payments
+            ]);
+        }
 
 }

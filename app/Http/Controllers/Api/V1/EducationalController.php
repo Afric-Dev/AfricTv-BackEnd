@@ -339,98 +339,75 @@ class EducationalController extends Controller
 
     public function readedu(): JsonResponse
     {
-        // Get the authenticated user
         $user = auth()->user();
-
-        // Define a static cache key for the session
         $cacheKey = $user ? "user_educational_{$user->id}" : "guest_educational";
 
-        // Check if educational data is already cached for this session
         if (session()->has($cacheKey)) {
-            // Retrieve cached educational records
             $edus = session($cacheKey);
         } else {
-            // Initialize the query for educational records
             $query = Educational::with('user')
                 ->where('is_status', 'ACTIVE')
-                ->orderBy('created_at', 'desc') // Sort by creation date (latest first)
-                ->orderBy('edu_views', 'desc'); // Then by views (most viewed)
+                ->orderBy('created_at', 'desc')
+                ->orderBy('edu_views', 'desc');
 
-            $otherEdus = collect(); // Initialize for non-subscribed educational posts
+            $otherEdus = collect();
 
             if ($user) {
-                // Posts from users the authenticated user is subscribed to
-                $subscriptions = $user->subscriptions()->pluck('subscribed_to_id');
+                $subscriptions = Subscribtion::where('subscriber_id', $user->id)
+                    ->pluck('user_id');
 
-                // Add condition for subscriptions
                 $query->whereIn('user_id', $subscriptions);
 
-                // Fetch a few posts from users the user is not subscribed to
                 $otherEdus = Educational::whereNotIn('user_id', $subscriptions)
                     ->where('is_status', 'ACTIVE')
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->get();
             } else {
-                // For unauthenticated users or users following no one, fetch posts randomly
-                $query->inRandomOrder()->limit(20); // Adjust limit as needed
+                $query->inRandomOrder()->limit(20);
             }
 
-            // Get the main educational posts
             $edus = $query->get();
 
-            // Calculate trending score for the educational posts
             $edus->map(function ($edu) {
-                $edu->edu_score = ($edu->edu_views * 1.5) + ($edu->bookmark_count * 0.3);
+                $edu->edu_score = ($edu->edu_views * 1.0) + ($edu->thoughts_count * 1.5);
                 return $edu;
             });
 
-            // Sort posts based on user authentication
             if ($user) {
-                // Logged-in users: Sort by trending score and created_at
                 $edus = $edus->sortByDesc(function ($edu) {
                     return $edu->edu_score + (strtotime($edu->created_at) / 1000000);
                 });
             } else {
-                // Guests: Randomly shuffle posts and use created_at for slight ordering
                 $edus = $edus->shuffle()->sortByDesc(function ($edu) {
                     return rand(0, 100) + (strtotime($edu->created_at) / 1000000);
                 });
             }
 
-            // Add randomization and mix with other posts (if available)
             if ($otherEdus->isNotEmpty()) {
                 $edus = $edus->merge($otherEdus);
             }
 
-            // Shuffle the educational posts for variety
             $edus = $edus->shuffle();
-
-            // Cache the educational posts in the session
             session([$cacheKey => $edus]);
         }
 
-        // Fetch ads from the Ads model where ads_type = 'VID'
         $ads = Ads::where('ads_type', 'VID')
                   ->where('status', 'ACTIVE')
                   ->inRandomOrder()
                   ->limit(5)
                   ->get();
 
-        // Inject ads into the educational posts list after every 5th post
         $finalEdus = collect();
         $edus->values()->each(function ($edu, $index) use ($ads, &$finalEdus) {
             $finalEdus->push($edu);
-            // Add an ad after every 5th post
-            if (($index + 1) % 3 === 0 && $ads->isNotEmpty()) {
-                $finalEdus->push($ads->shift()); // Take the next ad
+            if (($index + 1) % 5 === 0 && $ads->isNotEmpty()) {
+                $finalEdus->push($ads->shift());
             }
         });
 
-        // Count total educational posts after processing
         $eduCount = $finalEdus->count();
 
-        // Prepare the response
         return response()->json([
             'status' => true,
             'message' => 'Educational data with ads',

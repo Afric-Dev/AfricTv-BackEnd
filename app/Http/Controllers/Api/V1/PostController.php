@@ -502,53 +502,40 @@ class PostController extends Controller
 
     public function readpost(): JsonResponse
     {
-        // Get the authenticated user
         $user = auth()->user();
-
-        // Define a static cache key for the session
         $cacheKey = $user ? "user_posts_{$user->id}" : "guest_posts";
 
-        // Check if posts are already cached for this session
         if (session()->has($cacheKey)) {
-            // Retrieve cached posts
             $posts = session($cacheKey);
         } else {
-            // Initialize the query for posts
             $query = Post::with('user')
                 ->where('is_status', 'ACTIVE')
                 ->withCount(['likes', 'comments']);
 
-            $otherPosts = collect(); // Initialize for non-subscribed posts
+            $otherPosts = collect();
 
             if ($user) {
-                // Posts from users the authenticated user is subscribed to
-                $subscriptions = $user->subscriptions()->pluck('subscribed_to_id');
+                // Get IDs of users the authenticated user is subscribed to
+                $subscriptions = Subscribtion::where('subscriber_id', $user->id)
+                    ->pluck('user_id');
 
-                // Posts liked by the authenticated user
-                $likedPostIds = $user->likes()->pluck('post_id');
+                // Add subscription condition to the query
+                $query->whereIn('user_id', $subscriptions);
 
-                // Add conditions for subscriptions and liked posts
-                $query->where(function ($q) use ($subscriptions, $likedPostIds) {
-                    $q->whereIn('user_id', $subscriptions)
-                      ->orWhereIn('id', $likedPostIds);
-                });
-
-                // Fetch a few posts from users the user is not subscribed to
+                // Fetch posts from non-subscribed users
                 $otherPosts = Post::whereNotIn('user_id', $subscriptions)
                     ->where('is_status', 'ACTIVE')
                     ->withCount(['likes', 'comments'])
-                    ->orderBy('created_at', 'desc') // Sort by latest
+                    ->inRandomOrder()
                     ->limit(5)
                     ->get();
             } else {
-                // For unauthenticated users or users following no one, fetch posts randomly
-                $query->inRandomOrder(); // Randomize the order
+                // For unauthenticated users, randomize posts
+                $query->inRandomOrder()->limit(20);
             }
 
-            // Get the main posts
             $posts = $query->get();
 
-            // Calculate trending score for the posts
             $posts->map(function ($post) {
                 $post->post_score = ($post->likes_count * 1.5) +
                                     ($post->post_views * 1) +
@@ -556,52 +543,43 @@ class PostController extends Controller
                 return $post;
             });
 
-            // Sort posts based on user authentication
             if ($user) {
-                // Logged-in users: Sort by trending score and `created_at`
-                $posts = $posts->sortByDesc(function ($post) {
+                $posts = $posts->shuffle()->sortByDesc(function ($post) {
                     return $post->post_score + (strtotime($post->created_at) / 1000000);
                 });
             } else {
-                // Guests: Randomly shuffle posts and use `created_at` for slight ordering
                 $posts = $posts->shuffle()->sortByDesc(function ($post) {
                     return rand(0, 100) + (strtotime($post->created_at) / 1000000);
                 });
             }
 
-            // Add randomization and mix with other posts (if available)
             if ($otherPosts->isNotEmpty()) {
                 $posts = $posts->merge($otherPosts);
             }
 
-            // Shuffle the posts for variety
             $posts = $posts->shuffle();
-
-            // Cache the posts in the session
             session([$cacheKey => $posts]);
         }
 
-        // Fetch ads from the Ads model, filtering by ads_type = 'PIC' or 'LINK'
-        $ads = Ads::whereIn('ads_type', ['PIC', 'LINK'])
+     $ads = Ads::where(function($query) {
+                      $query->where('ads_type', 'PIC')
+                            ->orWhere('ads_type', 'LINK');
+                  })
                   ->where('status', 'ACTIVE')
                   ->inRandomOrder()
                   ->limit(5)
                   ->get();
 
-        // Inject ads into the posts list after every 5 posts
         $finalPosts = collect();
         $posts->values()->each(function ($post, $index) use ($ads, &$finalPosts) {
             $finalPosts->push($post);
-            // Add an ad after every 5th post
             if (($index + 1) % 5 === 0 && $ads->isNotEmpty()) {
-                $finalPosts->push($ads->shift()); // Take the next ad
+                $finalPosts->push($ads->shift());
             }
         });
 
-        // Count total posts after processing
         $postCount = $finalPosts->count();
 
-        // Prepare the response
         return response()->json([
             'status' => true,
             'message' => 'Post data with ads',
@@ -609,7 +587,6 @@ class PostController extends Controller
             'count' => $postCount,
         ]);
     }
-
 
 
 

@@ -88,9 +88,8 @@ Route::group([
     Route::get("profile", [ApiController::class, "profile"]);
     Route::post("logout", [ApiController::class, "logout"]);
     Route::post("updateprofile", [ApiController::class, "updateprofile"]);
-    //Payments (Ads)
-    Route::post("payment", [ApiController::class, "payment"]);
-    Route::post("carddetails", [UserCardDetails::class, "carddetails"]);
+    //Payments (Ads) 
+    Route::get("userPayments", [AdsPaymentController::class, "userPayments"]);
     Route::post("adsPayment", [AdsPaymentController::class, "adsPayment"]);
     //Ads
     Route::post("adActive", [AdsController::class, "adActive"]);
