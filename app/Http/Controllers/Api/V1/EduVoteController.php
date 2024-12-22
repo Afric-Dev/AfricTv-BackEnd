@@ -60,7 +60,8 @@ class EduVoteController extends Controller
         $message = "A new vote has been cast by " . $user->name . " Your post is booming!";
 
         $notification = Notification::create([
-            'user_id' => $educational->user_id,
+            'user_id' => Auth::user()->id,
+            'receiver_id' => $educational->user_id, 
             'edu_id' => $educational->edu_id,
             'type' => $type,
             'title' => $title,

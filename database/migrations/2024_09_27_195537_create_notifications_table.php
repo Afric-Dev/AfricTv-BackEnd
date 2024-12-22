@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id'); 
+            $table->uuid('user_id')->nullable();
+            $table->uuid('receiver_id')->nullable(); 
             $table->string('post_id')->nullable(); 
             $table->string('edu_id')->nullable(); 
             $table->string('subscriber_unique_id')->nullable(); 

@@ -501,7 +501,9 @@ class AdsController extends Controller
     public function userAds(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $ads = Ads::where('user_id', $user->id)->get();
+        $ads = Ads::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         if (!$ads) {
             return response()->json([

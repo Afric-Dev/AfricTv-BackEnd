@@ -64,8 +64,9 @@ class SubscribtionController extends Controller
                 $message ="Great news! " .  $user->name . " just subscribe to your account. Keep creating awesome blogs!!";
 
 
-                $notification = Notification::create([
-                    'user_id' => $subscribtion->subscriber_id,
+                $notification = Notification::create([ 
+                    'user_id' => Auth::user()->id,
+                    'receiver_id' => $subscribtion->subscriber_id,
                     'subscriber_unique_id' => $user->unique_id,
                     'type' => $type,
                     'title' => $title,
@@ -154,6 +155,7 @@ class SubscribtionController extends Controller
                     ->get()
                 : collect();
 
+
             // Check if the target user has no subscribers at all
             if ($targetUserSubscribers->isEmpty()) {
                 return response()->json([
@@ -167,7 +169,7 @@ class SubscribtionController extends Controller
                 'status' => true,
                 'message' => 'Subscriber data retrieved',
                 'all_subscribers' => $targetUserSubscribers,
-                'authenticated_subscribers' => $authenticatedUserSubscribers,
+                //'authenticated_subscribers' => $authenticatedUserSubscribers,
                 'common_auth_subscribers' => $commonSubscribers,
             ]);
         }

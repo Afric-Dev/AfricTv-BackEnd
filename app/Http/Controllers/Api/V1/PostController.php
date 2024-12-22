@@ -190,7 +190,8 @@ class PostController extends Controller
         // Loop through subscribers and send notifications
         foreach ($subscribers as $subscriber) {
             Notification::create([
-                'user_id' => $subscriber->user_id, // The ID of the subscriber
+                'receiver_id' => $subscriber->user_id, // The ID of the subscriber
+                'user_id' => Auth::user()->id,
                 'post_id' => $post->post_id,
                 'type' => $type,
                 'title' => $title,

@@ -30,6 +30,7 @@ class Notification extends Model
     protected $fillable = [
         'uuid',
         'user_id',
+        'receiver_id',
         'post_id',
         'subscriber_unique_id',
         'edu_id',
@@ -44,6 +45,16 @@ class Notification extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'post_id', 'post_id');
+    }
+
+    public function educationals()
+    {
+        return $this->belongsTo(Educational::class, 'edu_id', 'edu_id');
     }
 
     /**

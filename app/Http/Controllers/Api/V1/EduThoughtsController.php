@@ -122,7 +122,8 @@ class EduThoughtsController extends Controller
 
 
         $notification = Notification::create([
-            'user_id' => $edu->user_id,
+            'user_id' => Auth::user()->id,
+            'receiver_id' => $edu->user_id,
             'edu_id' => $edu->edu_id,
             'type' => $type,
             'title' => $title,

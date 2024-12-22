@@ -135,7 +135,8 @@ class CommentsController extends Controller
 
 
         $notification = Notification::create([
-            'user_id' => $post->user_id,
+            'user_id' => Auth::user()->id,
+            'receiver_id' => $post->user_id,
             'post_id' => $post->post_id,
             'type' => $type,
             'title' => $title,

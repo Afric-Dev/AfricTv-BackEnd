@@ -26,6 +26,13 @@ class LikeController extends Controller
         // Find the post based on the post_id format
         $post = Post::where('post_id', $request->post_id)->firstOrFail();
 
+        if (!$post) {
+            return response()->json([
+                "status" => false,
+                "message" => "Post not found",
+            ], 401); 
+        }
+
         // Check if the user has already liked this post
         $existingLike = Likes::where('user_id', Auth::user()->id)
                               ->where('post_id', $post->id)
@@ -58,8 +65,9 @@ class LikeController extends Controller
         $message = "A new vote has been cast by " . $user->name . " Your post is booming!";
 
         $notification = Notification::create([
-            'user_id' => $post->user_id,
-            'post_id' => $like->post_id,
+            'user_id' => Auth::user()->id,
+            'receiver_id' => $post->user_id,
+            'post_id' => $post->post_id,
             'type' => $type,
             'title' => $title,
             'message' => $message,

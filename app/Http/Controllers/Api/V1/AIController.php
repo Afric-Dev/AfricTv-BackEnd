@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use OpenAI\Laravel\Facades\OpenAI;
 use App\Models\AI;
-use Carbon\Carbon;
+use Carbon\Carbon; 
 use App\Services\GeminiService;
 use Illuminate\Http\JsonResponse;
 use App\Services\ReplicateService;

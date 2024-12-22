@@ -138,7 +138,8 @@ class EducationalController extends Controller
         // Loop through subscribers and send notifications
         foreach ($subscribers as $subscriber) {
             Notification::create([
-                'user_id' => $subscriber->user_id, // The ID of the subscriber
+                'receiver_id' => $subscriber->user_id, // The ID of the subscriber
+                'user_id' => Auth::user()->id,
                 'edu_id' => $edu->edu_id,
                 'type' => $type,
                 'title' => $title,

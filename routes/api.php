@@ -79,6 +79,8 @@ Route::get("readbookmarkspost/{postID}", [BookmarkController::class, "readbookma
 Route::get("readfavouritespost/{postID}", [FavouriteController::class, "readfavouritespost"]);
 //Paystack Callback
 Route::get('payment/callback', [AdsPaymentController::class, 'callback'])->name('adspayment.callback');
+//Predicted
+Route::get('getPrediction/{predictionId}', [AIController::class, 'getPredictionResult']);
 
 //Protected Route  
 Route::group([
@@ -107,7 +109,7 @@ Route::group([
     Route::post("subscribe", [SubscribtionController::class, "subscribe"]);
     Route::post("unsubscribe", [SubscribtionController::class, "unsubscribe"]);
     Route::get("subscribers", [SubscribtionController::class, "subscribers"]);
-    Route::get("viewsubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
+    Route::get("vewmysubscribers/{uniqid}", [SubscribtionController::class, "viewsubscribers"]);
     //THis is the FeedPost EndPoint
     // Route::post("feedposts", [FeedPostController::class, "feedposts"]);
     // Route::post("updatefeedposts/{id}", [FeedPostController::class, "updatefeedposts"]);
@@ -139,15 +141,15 @@ Route::group([
     //AI 
     Route::post("ai", [AIController::class, "ai"]);
     Route::post('prediction', [AIController::class, 'createPrediction']);
-    Route::get('getPrediction/{predictionId}', [AIController::class, 'getPredictionResult']);
+    
     Route::get('aiChats', [AIController::class, 'aiChats']);
     Route::get('aiChat/{id}', [AIController::class, 'aiChat']);
 
     //Notification
     Route::get("notifications", [NotificationsController::class, "index"]);
-    Route::get("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);
-    Route::get("markAsUnRead/{id}", [NotificationsController::class, "markAsUnRead"]);
-    Route::get("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
+    Route::post("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);
+    Route::post("markAsUnRead/{id}", [NotificationsController::class, "markAsUnRead"]);
+    Route::post("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
     //Media's (Blogs and Educational)
     Route::post("uploadImage", [UploadMediaController::class, "uploadImages"]);
     Route::post("uploadVideo", [UploadMediaController::class, "uploadVideos"]);

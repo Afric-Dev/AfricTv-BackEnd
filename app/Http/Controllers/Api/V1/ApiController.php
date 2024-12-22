@@ -185,7 +185,7 @@ class ApiController extends Controller
                 $message = "We noticed a new login to your account. If this was you, no further action is needed. However, if you did not authorize this login, please secure your account immediately by resetting your password and reviewing your account activity.";
 
                 $notification = Notification::create([
-                    'user_id' => $user->id,
+                    'receiver_id' => $user->id,
                     'type' => $type,
                     'title' => $title,
                     'message' => $message,
@@ -286,8 +286,12 @@ class ApiController extends Controller
         public function profile()
         {
             $user = auth()->user();
-            $userPosts = Post::where('user_id', $user->id)->get();
-            $eduPosts = Educational::where('user_id', $user->id)->get();
+            $userPosts = Post::where('user_id', $user->id)
+                         ->orderBy('created_at', 'desc')
+                         ->get();
+            $eduPosts = Educational::where('user_id', $user->id)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
             $postCount = $userPosts->count();
             $noofeduposts = $eduPosts->count();
 

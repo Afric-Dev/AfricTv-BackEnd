@@ -12,41 +12,23 @@ use App\Models\Educational;
 use App\Models\Post;
 
 class NotificationsController extends Controller
-{
+{ 
         
     public function index(): JsonResponse
     {
         $user = Auth::user();
 
         // Fetch notifications for the authenticated user
-        $notifications = Notification::where('user_id', $user->id)
+        $notifications = Notification::where('receiver_id', $user->id)
             ->orderBy('created_at', 'desc')
+            ->with('user')
+            ->with('posts')
+            ->with('educationals')
             ->get();
-
-        // Process notifications to include related post and user data
-        $processedNotifications = $notifications->map(function ($notification) {
-            $relatedPost = null;
-            $relatedUser = null;
-
-            if (in_array($notification->type, ['BLOG POST', 'VOTE', 'THOUGHT']) && isset($notification->post_id)) {
-                $relatedPost = Post::where('id', $notification->post_id)->first();
-                $relatedUser = $relatedPost?->user;
-            } elseif (in_array($notification->type, ['EDUCATIONAL POST', 'VOTE', 'THOUGHT']) && isset($notification->edu_id)) {
-                $relatedPost = Educational::where('id', $notification->edu_id)->first();
-                $relatedUser = $relatedPost?->user;
-            }
-
-            if ($relatedPost) {
-                $notification->related_post = $relatedPost;
-                $notification->post_user = $relatedUser;
-            }
-
-            return $notification;
-        });
 
         return response()->json([
             'success' => true,
-            'notifications' => $processedNotifications
+            'notifications' => $notifications
         ]);
     }
 
