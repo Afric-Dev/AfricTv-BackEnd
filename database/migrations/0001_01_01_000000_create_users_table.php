@@ -20,11 +20,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone_number')->nullable();
-            $table->string('subscribtion_status')->nullable();
-            $table->string('verification_status')->nullable();
+            $table->enum('subscribtion_status', ['FREE', 'MEDUIM', 'PREMUIM'])->default('FREE')->nullable();
+            $table->enum('verification_status', ['NON', 'VERIFIED', 'SUPER VERIFIED', 'TOP VERIFIED'])->default('NON')->nullable();
             $table->string('subscribers_number');
             $table->string('bio')->nullable();
             $table->string('link')->nullable();
+            $table->enum('status', ['ACTIVE', 'BANNED'])->default('ACTIVE');
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

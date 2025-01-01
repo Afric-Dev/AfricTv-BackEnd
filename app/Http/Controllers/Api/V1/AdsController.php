@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Mail\AdInactiveNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\JsonResponse;
-
+ 
 class AdsController extends Controller
 {
       public function adActive(Request $request): JsonResponse

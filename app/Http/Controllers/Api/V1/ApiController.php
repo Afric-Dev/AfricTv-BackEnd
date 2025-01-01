@@ -57,12 +57,29 @@ class ApiController extends Controller
             }
 
             //Generating unique_id
-            // Extract the first word from the name
-            $firstWord = strtok($request->name, ' ');
-            // Generate a random four-digit number
-            $randomNumber = rand(1000, 9999);
+            // Extract the first and last words from the name
+            $nameParts = explode(' ', trim($request->name));
+            $firstWord = $nameParts[0] ?? '';
+            $lastWord = $nameParts[count($nameParts) - 1] ?? '';
+            $baseId = "@{$firstWord}{$lastWord}";
 
-            $unique_id = '@' .$firstWord . $randomNumber;
+            // Initialize unique_id with baseId
+            $uniqueId = $baseId;
+
+            // Check if the unique_id is taken using the User model
+            $count = 0;
+            while (\App\Models\User::where('unique_id', $uniqueId)->exists()) {
+                $count++;
+
+                if ($count == 1) {
+                    // If first attempt, add an underscore between the words
+                    $uniqueId = "@{$firstWord}_{$lastWord}";
+                } else {
+                    // If still taken, append a random 4-digit number
+                    $uniqueId = "@{$firstWord}" . rand(1000, 9999);
+                }
+            }
+
 
             //Auto giving the user 0 subscribers
             $subscribers_number = "0";
@@ -72,7 +89,7 @@ class ApiController extends Controller
                 "avatar" => $imageUrl,
                 "imageId" => $imageId,
                 "name" => $request->name,
-                "unique_id" => $unique_id,
+                "unique_id" => $uniqueId,
                 "email" => $request->email,
                 "phone_number" => $request->phone_number,
                 "subscribers_number" => $subscribers_number,
@@ -176,8 +193,17 @@ class ApiController extends Controller
                 // Create a new token for the user
                 $accessToken = $user->createToken('myToken')->plainTextToken;
 
+                if ($user->status == 'BANNED') {
+                        $user->tokens()->delete();
+                        return response()->json([
+                            "status" => false,
+                            "message" => "We have observed a violation of our Terms and Conditions. Unfortunately, your account has been BANNED. This process may take up to 24 hours."
+                        ]);
+                }
+
+
                 //To send email after user login in successfully
-                //Mail::to($user->email)->send(new LoginMail($user));
+                Mail::to($user->email)->send(new LoginMail($user));
 
                 //Notification
                 $type = "LOGIN";

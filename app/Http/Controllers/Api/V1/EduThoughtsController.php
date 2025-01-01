@@ -115,22 +115,40 @@ class EduThoughtsController extends Controller
         $edu->increment('thoughts_count');
 
         $user = Auth::user();
-        //Notification
-        $type = "THOUGHT";
-        $title = "THOUGHT NOTIFICATION";
-        $message = $user->name . " has just shared their thoughts on your educational post!";
+
+        if (empty($request->parent_id)) {
+            //Notification
+            $type = "THOUGHT";
+            $title = "THOUGHT NOTIFICATION";
+            $message = $user->name . " has just shared their thoughts on your video!";
 
 
-        $notification = Notification::create([
-            'user_id' => Auth::user()->id,
-            'receiver_id' => $edu->user_id,
-            'edu_id' => $edu->edu_id,
-            'type' => $type,
-            'title' => $title,
-            'message' => $message,
-            'is_read' => false,
-        ]); 
+            $notification = Notification::create([
+                'user_id' => Auth::user()->id,
+                'receiver_id' => $edu->user_id,
+                'edu_id' => $edu->edu_id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'is_read' => false,
+            ]); 
+        } else {
+            //Notification
+            $type = "THOUGHT";
+            $title = "THOUGHT NOTIFICATION";
+            $message = $user->name . " has just replied to you thoughts on a video!";
 
+
+            $notification = Notification::create([
+                'user_id' => Auth::user()->id,
+                'receiver_id' => $edu->user_id,
+                'edu_id' => $edu->edu_id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'is_read' => false,
+            ]); 
+        }
 
         return response()->json([
             "status" => true,

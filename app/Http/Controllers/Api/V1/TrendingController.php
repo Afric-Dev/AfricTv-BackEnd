@@ -23,38 +23,65 @@ class TrendingController extends Controller
         // Fetch posts within the specified timeframe
         $posts = Post::where('created_at', '>=', $timeframe)->get();
 
-        // Collection to store hashtag counts with category
+        // Collection to store hashtag counts grouped by category
         $hashtagCounts = collect();
 
-        // Count occurrences of each hashtag and associate with category
         foreach ($posts as $post) {
             // Split hashtags by spaces or commas
-            $trendings = preg_split('/[\s,]+/', $post->hashtags);
+            $hashtags = preg_split('/[\s,]+/', $post->hashtags);
 
             // Extract the first word of the category
-            $categoryFirstWord = strtok($post->category, ' '); // Get the first word of the category
+            $categoryFirstWord = strtok($post->category, ' ');
 
-            foreach ($trendings as $hashtag) {
-                // Remove the # symbol and trim spaces
-                $hashtag = ltrim(trim($hashtag), '#');
+            foreach ($hashtags as $hashtag) {
+                // Normalize the hashtag
+                $normalizedHashtag = strtolower(ltrim(trim($hashtag), '#'));
 
-                if ($hashtag !== '') {
-                    // Create the key with category and hashtag divided by ":"
-                    $categoryAndHashtag = "{$categoryFirstWord} : {$hashtag}";
-                    
+                if ($normalizedHashtag !== '') {
+                    // Create the key combining category and normalized hashtag
+                    $categoryAndHashtag = "{$categoryFirstWord} : {$normalizedHashtag}";
+
                     // Increment the count of the hashtag
                     $hashtagCounts->put($categoryAndHashtag, $hashtagCounts->get($categoryAndHashtag, 0) + 1);
                 }
             }
         }
 
-        // Sort hashtags by their count in descending order
-        $trendingHashtags = $hashtagCounts->sortDesc()->take(20);
+        // Group by hashtags (ignoring category) and sum counts
+        $aggregatedCounts = $hashtagCounts
+            ->keys()
+            ->groupBy(function ($key) {
+                return explode(' : ', $key)[1]; // Group by hashtag only
+            })
+            ->map(function ($group) use ($hashtagCounts) {
+                return $group->reduce(function ($carry, $key) use ($hashtagCounts) {
+                    return $carry + $hashtagCounts[$key];
+                }, 0);
+            });
+
+        // Sort aggregated hashtags by count in descending order
+        $sortedHashtags = $aggregatedCounts->sortDesc()->take(20);
+
+        // Format output with counts and categories
+        $trendingHashtags = $sortedHashtags->map(function ($count, $hashtag) use ($hashtagCounts) {
+            // Collect associated categories
+            $categories = $hashtagCounts
+                ->keys()
+                ->filter(fn($key) => str_contains($key, " : {$hashtag}"))
+                ->map(fn($key) => explode(' : ', $key)[0])
+                ->unique();
+
+            return [
+                'hashtag' => $hashtag,
+                'count' => $count,
+                'categories' => $categories->values(),
+            ];
+        });
 
         return response()->json([
             "status" => true,
             "message" => "Trending",
-            "data" => $trendingHashtags,
+            "data" => $trendingHashtags->values(),
         ]);
     }
 

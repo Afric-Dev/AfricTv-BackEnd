@@ -129,7 +129,7 @@ class SubscribtionController extends Controller
             ]);
 
         }
-
+ 
         public function viewsubscribers($uniqid): JsonResponse
         {
             // Get the current authenticated user
@@ -182,7 +182,7 @@ class SubscribtionController extends Controller
 
             // Retrieve subscriptions for the user
             $subscriptions = Subscribtion::with('user')
-                                            ->where('subscriber_id', $user)
+                                            ->where('user_id', $user)
                                             ->get();
 
             // Check if the user has no subscriptions

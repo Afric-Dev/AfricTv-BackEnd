@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Str;
 
-class Subscribtion extends Model
+class Socket extends Model
 {
     use HasFactory;
-
+ 
     protected $keyType = 'uuid';
 
     public $incrementing = false;
@@ -23,17 +23,15 @@ class Subscribtion extends Model
             $customer->{$customer->getKeyName()} = (string) Str::uuid();
         });
     }
-    
+
      protected $fillable = [
         'user_id',
-        'user_email',
-        'subscriber_id',
-        'subscriber_email',
+        'socket_id',
     ];
 
     public function user()
    {
-       return $this->belongsTo(User::class, 'subscriber_id');
+       return $this->belongsTo(User::class, 'user_id');
    }
 
 }

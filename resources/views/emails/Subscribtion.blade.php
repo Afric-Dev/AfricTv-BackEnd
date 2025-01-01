@@ -1,69 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Subscriber Notification</title>
     <style>
+        /* General Styles */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f4f8;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: #f5f8fa;
+            color: #333;
         }
-        .container {
+
+        .email-wrapper {
+            width: 100%;
+            padding: 20px 0;
+            background-color: #f5f8fa;
+        }
+
+        .email-content {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 20px;
+            border: 1px solid #e8e8e8;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
-        .header {
+
+        /* Header */
+        .email-header {
+            background-color: #008000; /* Green */
+            padding: 20px;
             text-align: center;
-            padding: 10px 0;
-        }
-        .header h1 {
-            margin: 0;
-            color: #333;
-        }
-        .content {
-            text-align: center;
-            padding: 20px 0;
-        }
-        .content p {
-            margin: 10px 0;
-            color: #666;
-        }
-        .button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
             color: #ffffff;
-            background-color: #007bff;
-            border-radius: 5px;
-            text-decoration: none;
         }
-        .footer {
-            text-align: center;
+
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        /* Body */
+        .email-body {
+            padding: 20px;
+        }
+
+        .email-body p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .email-button {
+            display: inline-block;
+            padding: 12px 24px;
             margin-top: 20px;
-            color: #aaa;
-            font-size: 12px;
+            color: #ffffff;
+            background-color: #008000; /* Green */
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .email-button:hover {
+            background-color: #006400; /* Darker Green */
+        }
+
+        /* Footer */
+        .email-footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            background-color: #f9f9f9;
+        }
+
+        .email-footer a {
+            color: #008000;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Congratulations!</h1>
-        </div>
-        <div class="content">
-            <p>You have a new subscriber.</p>
-            <p>Subscriber Email: {{ $subscribtion->subscriber_unique_id }}</p>
-            <a href="{{ url('/') }}" class="button">Login</a>
-        </div>
-        <div class="footer">
-            <p>&copy; {{ date('Y') }} AfricTv. All rights reserved.</p>
+    <div class="email-wrapper">
+        <div class="email-content">
+            <!-- Header -->
+            <div class="email-header">
+                <h1>Congratulations!</h1>
+            </div>
+
+            <!-- Body -->
+            <div class="email-body">
+                <p>You have a new subscriber.</p>
+                <p>Subscriber Email: <strong>{{ $subscribtion->subscriber_unique_id }}</strong></p>
+                <a href="{{ url('/') }}" class="email-button">Login</a>
+            </div>
+
+            <!-- Footer -->
+            <div class="email-footer">
+                <p>&copy; {{ date('Y') }} AfricTv. All rights reserved.</p>
+            </div>
         </div>
     </div>
 </body>

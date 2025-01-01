@@ -34,7 +34,7 @@ class StorePostRequest extends FormRequest
             'postbodyJson' => 'nullable',
             'postBodytext' => 'required',
             'link' => 'nullable|url',
-            'hashtags' => 'required|max:155',
+            'hashtags' => 'nullable|max:155',
         ];
     }
 

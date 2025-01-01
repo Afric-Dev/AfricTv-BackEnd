@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\NotificationsController;
 use App\Http\Controllers\Api\V1\MusicController;
 use App\Http\Controllers\Api\V1\UploadMediaController;
+use App\Http\Controllers\Api\V1\SocketServerController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
@@ -81,6 +82,10 @@ Route::get("readfavouritespost/{postID}", [FavouriteController::class, "readfavo
 Route::get('payment/callback', [AdsPaymentController::class, 'callback'])->name('adspayment.callback');
 //Predicted
 Route::get('getPrediction/{predictionId}', [AIController::class, 'getPredictionResult']);
+//Socket
+Route::post('socket', [SocketServerController::class, 'socket']);
+Route::get('getSocket', [SocketServerController::class, 'getSocket']);
+Route::post('deleteSocket', [SocketServerController::class, 'delete']);
 
 //Protected Route  
 Route::group([
