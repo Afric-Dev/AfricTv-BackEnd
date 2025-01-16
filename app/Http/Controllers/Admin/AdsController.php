@@ -20,7 +20,7 @@ class AdsController extends Controller
 
         return view('admin.ads', compact('ads'));
     }  
-
+    
     public function updateAdsInactive()
     {
         // Fetch ads with zero clicks and status 'ACTIVE'
