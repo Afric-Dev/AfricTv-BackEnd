@@ -31,7 +31,7 @@ class AdsController extends Controller
                   })
                   ->get();
 
-   
+    
         // Check if there are any ads to update
         if ($ads->isNotEmpty()) {
             // Loop through each ad and update its status to 'INACTIVE'
