@@ -142,7 +142,7 @@ class AdsPaymentController extends Controller
                 <head>
                     <meta charset='UTF-8'>
                     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                    <meta http-equiv='refresh' content='3;http://localhost:5173/'>
+                    <meta http-equiv='refresh' content='3;https://africtv.com.ng/ads/create-ads'>
                     <title>Redirecting...</title>
                     <style>
                         body {
@@ -222,7 +222,7 @@ class AdsPaymentController extends Controller
                 <body>
                     <div class='popup'>
                         <h2>Payment Failed! APAY could not get a success message from Paystack</h2>
-                        <p>YKindly go back and try again</p>
+                        <p>Kindly go back and try again</p>
                     </div>
                 </body>
                 </html>
