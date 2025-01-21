@@ -149,7 +149,7 @@ class CommentsController extends Controller
             //Notification
             $type = "THOUGHT";
             $title = "THOUGHT NOTIFICATION";
-            $message = $user->name . " has just replied to you thoughts on a blog post!";
+            $message = $user->name . " has just replied to your thoughts on a blog post!";
 
 
             $notification = Notification::create([

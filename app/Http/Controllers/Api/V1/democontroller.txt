@@ -79,15 +79,7 @@ class AIController extends Controller
 
                 // Handle case where no prediction ID is returned
                 return response()->json(['error' => 'Prediction creation failed.'], 400);
-            //     return response()->json([
-            //     'error' => 'Prediction creation failed.',
-            //     'details' => [
-            //         'response' => $result,
-            //         'model' => $model,
-            //         'version' => $version,
-            //         'input' => $input,
-            //     ],
-            // ], 400);
+        
             } catch (\Exception $e) {
                 // Log the error for debugging
                 \Log::error('Prediction Error: ' . $e->getMessage()); // Log the actual error message
@@ -131,6 +123,7 @@ class AIController extends Controller
 
             return response()->json(['status' => 'processing']);  // Return "processing" after max retries
         }
+
 
 
 
@@ -187,6 +180,18 @@ class AIController extends Controller
                 'chat' => $chat
             ]);
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         // protected $geminiService;

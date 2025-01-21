@@ -144,7 +144,7 @@ Route::group([
     Route::post("deletebookmark", [BookmarkController::class, "deletebookmark"]);
     Route::get("readbookmarks", [BookmarkController::class, "readbookmarks"]);
     //AI 
-    Route::post("ai", [AIController::class, "ai"]);
+    Route::post("imagePrediction", [AIController::class, "imagePrediction"]);
     Route::post('prediction', [AIController::class, 'createPrediction']);
     
     Route::get('aiChats', [AIController::class, 'aiChats']);

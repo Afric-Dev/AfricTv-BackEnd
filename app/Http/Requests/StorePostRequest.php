@@ -22,7 +22,7 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'post_img_path' => 'array',
             'post_img_path.*' => 'nullable|image|max:2048',
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',

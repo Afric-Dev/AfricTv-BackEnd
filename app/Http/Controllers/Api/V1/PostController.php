@@ -81,11 +81,9 @@ class PostController extends Controller
                 $coverimagePath = $uploadCloudinary->getSecurePath();
                 $coverimageId = $uploadCloudinary->getPublicId();
              } else {
-                    return response()->json([
-                        "status" => false,
-                        "message" => "Cover Image Required"
-                    ], 400);
-                }
+                $coverimagePath = "No images uploaded";
+                $coverimageId = "No images uploaded";
+            }
 
 
         // Function to get video duration
@@ -154,8 +152,8 @@ class PostController extends Controller
             "user_id" => Auth::user()->id,
             // "unique_id" => Auth::user()->unique_id,
             "post_id" => $postID,
-            "cover_image" => $coverimagePath,
-            "coverimageId" => $coverimageId,
+            "cover_image" => $coverimagePath ?? 'no image passed',
+            "coverimageId" => $coverimageId ?? 'no public id passed',
             "post_img_path" => json_encode($imagePaths),
             "postimageId" => json_encode($postimageId) ?? 'no public id passed',
             "post_vid_path" => $videoPath,

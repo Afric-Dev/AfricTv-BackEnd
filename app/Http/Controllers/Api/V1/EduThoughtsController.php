@@ -136,7 +136,7 @@ class EduThoughtsController extends Controller
             //Notification
             $type = "THOUGHT";
             $title = "THOUGHT NOTIFICATION";
-            $message = $user->name . " has just replied to you thoughts on a video!";
+            $message = $user->name . " has just replied to your thoughts on a video!";
 
 
             $notification = Notification::create([
