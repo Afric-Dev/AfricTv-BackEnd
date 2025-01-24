@@ -45,10 +45,10 @@ class AIController extends Controller
             try {
                 $userId = auth()->id();
 
-                //$model = "meta/llama-2-7b-chat";
-                $model = "meta/llama-2-13b-chat";
-                //$version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
-                $version = "6b4da803a2382c08868c5af10a523892f38e2de1aafb2ee55b020d9efef2fdb8";
+                $model = "meta/llama-2-7b-chat";
+                //$model = "meta/llama-2-13b-chat";
+                $version = "f1d50bb24186c52daae319ca8366e53debdaa9e0ae7ff976e918df752732ccc4";
+                //$version = "6b4da803a2382c08868c5af10a523892f38e2de1aafb2ee55b020d9efef2fdb8";
 
                 $request->validate([
                     "chat_id" => "nullable", 

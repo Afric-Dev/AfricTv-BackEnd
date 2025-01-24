@@ -25,7 +25,7 @@ use App\Http\Controllers\Api\V1\NotificationsController;
 use App\Http\Controllers\Api\V1\MusicController;
 use App\Http\Controllers\Api\V1\UploadMediaController;
 use App\Http\Controllers\Api\V1\SocketServerController;
-
+use App\Http\Controllers\Api\V1\MovieController;
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
 // })->middleware('auth:api');
@@ -86,7 +86,9 @@ Route::get('getPrediction/{predictionId}', [AIController::class, 'getPredictionR
 Route::post('socket', [SocketServerController::class, 'socket']);
 Route::get('getSocket', [SocketServerController::class, 'getSocket']);
 Route::post('deleteSocket', [SocketServerController::class, 'delete']);
-
+//Movies 
+Route::get('movies/search', [MovieController::class, 'search']);
+Route::get('movies/top', [MovieController::class, 'topMovies']);
 //Protected Route  
 Route::group([
     "middleware" => ["auth:api"]

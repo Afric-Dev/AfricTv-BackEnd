@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\AdsController;
 
+
 Route::get('/', function () {
     return view('welcome');
 });
