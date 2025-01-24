@@ -150,11 +150,11 @@ class CommentsController extends Controller
             $type = "THOUGHT";
             $title = "THOUGHT NOTIFICATION";
             $message = $user->name . " has just replied to your thoughts on a blog post!";
-
+            $comment = Comments::where('id', $request->parent_id)->first();
 
             $notification = Notification::create([
                 'user_id' => Auth::user()->id,
-                'receiver_id' => $post->user_id,
+                'receiver_id' => $comments->user_id,
                 'post_id' => $post->post_id,
                 'type' => $type,
                 'title' => $title,
