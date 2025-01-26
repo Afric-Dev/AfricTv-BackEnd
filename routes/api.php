@@ -89,7 +89,7 @@ Route::post('deleteSocket', [SocketServerController::class, 'delete']);
 //Movies 
 // Route to get top movies
 Route::get('movies/top', [MovieController::class, 'getTopMovieVideos']);
-Route::get('movies/search-movies', [MovieController::class, 'searchMovies']);
+Route::post('movies/search-movies', [MovieController::class, 'searchMovies']);
 Route::get('movies/movie/{id}', [MovieController::class, 'getSingleMovieVideo']);
 //Protected Route  
 Route::group([
