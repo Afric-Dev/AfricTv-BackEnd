@@ -372,8 +372,12 @@ class ApiController extends Controller
             }
 
             // Fetch posts and educational posts using the user's ID
-            $userPosts = Post::where('user_id', $user->id)->get();
-            $eduPosts = Educational::where('user_id', $user->id)->get();
+            $userPosts = Post::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            $eduPosts = Educational::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
             $postCount = $userPosts->count();
             $noofeduposts = $eduPosts->count();

@@ -137,11 +137,11 @@ class EduThoughtsController extends Controller
             $type = "THOUGHT";
             $title = "THOUGHT NOTIFICATION";
             $message = $user->name . " has just replied to your thoughts on a video!";
-            $thoughts = Eduthought::where('id', $request->parent_id)->first();
+            $thought = Eduthought::where('id', $request->parent_id)->first();
 
             $notification = Notification::create([
                 'user_id' => Auth::user()->id,
-                'receiver_id' => $thoughts->user_id,
+                'receiver_id' => $thought->user_id,
                 'edu_id' => $edu->edu_id,
                 'type' => $type,
                 'title' => $title,

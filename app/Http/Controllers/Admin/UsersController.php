@@ -71,16 +71,10 @@ public function updateVerification($id, Request $request)
     // If the status is 'MEDIUM' or 'PREMIUM', add a verification icon to the name
     if ($status == 'MEDIUM') {
         $user->verification_status = 'VERIFIED';
-        // Append verified icon to name
-        $user->name = rtrim($user->name, '✔️ ⭐') . ' ✔️';  // Remove existing icon(s) and append the verified icon
     } elseif ($status == 'PREMIUM') {
         $user->verification_status = 'SUPER VERIFIED';
-        // Append premium icon to name
-        $user->name = rtrim($user->name, '✔️ ⭐') . ' ⭐';  // Remove existing icon(s) and append the premium icon
     } else {
         $user->verification_status = 'NON';
-        // Remove icon if status is 'FREE'
-        $user->name = rtrim($user->name, '✔️ ⭐');  // Remove any icon if the status is 'FREE'
     }
 
     // Save the user with the updated name and status

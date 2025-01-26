@@ -4,31 +4,32 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\justWatchService;
+use App\Services\DailymotionService;
 use Illuminate\Http\JsonResponse;
 
 class MovieController extends Controller
 {
-    protected $justWatchService;
+    protected $dailymotion;
 
-    public function __construct(JustWatchService $justWatchService)
+    public function __construct(DailymotionService $dailymotion)
     {
-        $this->justWatchService = $justWatchService;
+        $this->dailymotion = $dailymotion;
     }
 
-    public function search(Request $request)
+    // Fetch movies
+    public function getMovies()
+    {
+        $movies = $this->dailymotion->getMovies();
+        return response()->json($movies);
+    }
+
+    // Search for movies
+    public function searchMovies(Request $request)
     {
         $query = $request->input('query');
-        $movies = $this->justWatchService->searchMovies($query);
+        $movies = $this->dailymotion->searchMovies($query);
         return response()->json($movies);
     }
-
-    public function topMovies()
-    {
-        $movies = $this->justWatchService->getTopMovies();
-        return response()->json($movies);
-    }
-
     // protected $tmdbService;
 
     // public function __construct(TmdbService $tmdbService)
