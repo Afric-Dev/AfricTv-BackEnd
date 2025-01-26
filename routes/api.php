@@ -88,8 +88,9 @@ Route::get('getSocket', [SocketServerController::class, 'getSocket']);
 Route::post('deleteSocket', [SocketServerController::class, 'delete']);
 //Movies 
 // Route to get top movies
-Route::get('movies', [MovieController::class, 'getMovies']);
-Route::post('movies/search', [MovieController::class, 'searchMovies']);
+Route::get('movies/top', [MovieController::class, 'getTopMovieVideos']);
+Route::get('movies/search-movies', [MovieController::class, 'searchMovies']);
+Route::get('movies/movie/{id}', [MovieController::class, 'getSingleMovieVideo']);
 //Protected Route  
 Route::group([
     "middleware" => ["auth:api"]
