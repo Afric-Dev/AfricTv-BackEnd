@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\AdsController;
+use App\Http\Controllers\Admin\NewsletterController;
 
 
 Route::get('/', function () {
@@ -27,6 +28,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/posts', [PostController::class, 'index'])->name('admin-posts');
  Route::get('/videos', [PostController::class, 'videos'])->name('admin-videos');
  Route::get('/admins', [AdminController::class, 'index'])->name('admin-admin');
+ Route::get('/newsletter', [NewsletterController::class, 'index'])->name('admin-newsletter');
+ Route::post('/newsletter', [NewsletterController::class, 'sendMail'])->name('posts.send-mail');
  Route::get('/ads', [AdsController::class, 'index'])->name('admin-ads');
  Route::get('/admin/{id}', [AdminController::class, 'show'])->name('admin.show');
  Route::get('/add/admin', [AdminController::class, 'add'])->name('admin.add');

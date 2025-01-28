@@ -29,6 +29,10 @@
                     <i class="uil uil-comments"></i>
                     <span class="link-name">Ads</span>
                 </a></li>
+                <li><a href="{{ url('admin/newsletter') }}">
+                    <i class="uil uil-comments"></i>
+                    <span class="link-name">Send Mail</span>
+                </a></li>
                   @if(auth()->user()->role === 'ADMIN' || auth()->user()->role === 'SUPER')
                     <li><a href="{{ url('admin\admins') }}">
                         <i class="uil uil-shield-check"></i>
