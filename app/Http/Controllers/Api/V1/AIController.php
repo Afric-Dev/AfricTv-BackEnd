@@ -11,11 +11,47 @@ use App\Services\GeminiService;
 use Illuminate\Http\JsonResponse;
 use App\Services\ReplicateService;
 use Illuminate\Support\Facades\Auth;
+use App\Services\DeepSeekService;
 
 class AIController extends Controller
 {   
 
         protected $replicateService;
+        protected $deepSeekService;
+
+
+       public function __construct(DeepSeekService $deepSeekService)
+        {
+            $this->deepSeekService = $deepSeekService;
+        }
+
+        /**
+         * Example method to send data to DeepSeek API.
+         *
+         * @param Request $request
+         * @return \Illuminate\Http\JsonResponse
+         */
+        public function analyzeText(Request $request)
+        {
+            // Validate the request data
+            $request->validate([
+                'message' => 'required|string',
+                'language' => 'nullable|string|max:2',
+            ]);
+
+            // Prepare the data for the API request
+            $endpoint = 'analyze-text'; // Replace with the actual DeepSeek API endpoint
+            $data = [
+                'message' => $request->input('message'),
+                'language' => $request->input('language', 'en'), // Default to English if not provided
+            ];
+
+            // Make the API request
+            $response = $this->deepSeekService->makeRequest($endpoint, 'POST', $data);
+
+            // Return the API response
+            return response()->json($response);
+        }
 
         public function __construct(ReplicateService $replicateService)
         {

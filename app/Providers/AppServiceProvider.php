@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use App\Models\User;
+use App\Services\DeepSeekService;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
                 $user instanceof User => 'www.africtv.com.ng/resetpassword' . '?token=' . $token . '&email=' . urlencode($user->email),
                 default => throw new \Exception("Invalid user type"),
             };
+        });
+
+        $this->app->bind(DeepSeekService::class, function ($app) {
+            return new DeepSeekService();
         });
     }
 }

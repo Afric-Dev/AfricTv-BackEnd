@@ -153,7 +153,7 @@ Route::group([
     
     Route::get('aiChats', [AIController::class, 'aiChats']);
     Route::get('aiChat/{id}', [AIController::class, 'aiChat']);
-
+    Route::post('deepseek/analyze', [AIController::class, 'analyzeText']);
     //Notification
     Route::get("notifications", [NotificationsController::class, "index"]);
     Route::post("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);

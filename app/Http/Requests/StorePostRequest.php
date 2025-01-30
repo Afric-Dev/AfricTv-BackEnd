@@ -22,9 +22,9 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'post_img_path' => 'array',
-            'post_img_path.*' => 'nullable|image|max:2048',
+            'post_img_path.*' => 'nullable|image|max:5120',
             'post_vid_path' => 'nullable|mimes:mp4,avi,mov,wmv,flv',
             // "post_pdf_path" => "nullable|mimes:pdf,doc,docx",
             // "post_song_path" => "nullable|mimes:mp3,wav,aac,flac",
@@ -49,12 +49,12 @@ class StorePostRequest extends FormRequest
             'cover_image.required' => 'The cover image is required.',
             'cover_image.image' => 'The cover image must be an image file.',
             'cover_image.mimes' => 'The cover image must be a file of type: jpeg, png, jpg, gif.',
-            'cover_image.max' => 'The cover image must not exceed 2048 kilobytes.',
+            'cover_image.max' => 'The cover image must not exceed 5 MB.',
             
             'post_img_path.array' => 'The post images must be an array.',
             'post_img_path.*.required' => 'Each post image is required.',
             'post_img_path.*.image' => 'Each post image must be an image file.',
-            'post_img_path.*.max' => 'Each post image must not exceed 2048 kilobytes.',
+            'post_img_path.*.max' => 'Each post image must not exceed 5 MB.',
             
             //'post_vid_path.nullable' => 'The video path is optional.',
             'post_vid_path.mimes' => 'The video must be a file of type: mp4, avi, mov, wmv, flv.',
