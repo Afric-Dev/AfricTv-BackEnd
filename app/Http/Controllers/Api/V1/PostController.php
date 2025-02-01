@@ -28,8 +28,11 @@ class PostController extends Controller
         $request->validated($request->all());
         $user_name = Auth::user()->name;
         $firstWord = strtok($user_name, ' ');
+        // Remove emojis and other non-alphanumeric characters
+        $firstWord = preg_replace('/[^\p{L}\p{N}]/u', '', $firstWord);
         // Generate a random four-digit number
         $randomNumber = rand(10000, 99999);
+
 
         $postID = '@' .$firstWord . $randomNumber;
 
