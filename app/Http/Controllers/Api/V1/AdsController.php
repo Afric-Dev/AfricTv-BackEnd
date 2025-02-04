@@ -63,13 +63,13 @@ class AdsController extends Controller
         if($adPayment->ads_type !== 'VID' && !empty($validatedData['vid_path'])) {
             return response()->json([
                 'status' => false,
-                'message' => 'Sorry! You did not pay for this type of ads. The  ads type you paid for  was: ' . $adPayment->ads_type,
+                'message' => 'Sorry! You did not pay for this type of ad. The  ads type you paid for  was: ' . $adPayment->ads_type,
             ], 422);
         } 
         if ($adPayment->ads_type !== 'PIC' && !empty($validatedData['img_path'])) {
             return response()->json([
                 'status' => false,
-                'message' => 'Sorry! You did not pay for this type of ads. The  ads type you paid for  was: ' . $adPayment->ads_type,
+                'message' => 'Sorry! You did not pay for this type of ad. The  ads type you paid for  was: ' . $adPayment->ads_type,
             ], 422);
         }
         if ($adPayment->ads_type == 'PIC' && empty($validatedData['img_path'])) {
@@ -156,14 +156,14 @@ class AdsController extends Controller
                 // Payment exists but is already used
                 return response()->json([
                     'status' => false,
-                    'message' => 'You dont have any ads payment left.',
+                    'message' => 'You dont have any ad payment left.',
                 ]);
             
             } else {
                 // No ad payment record found
                 return response()->json([
                     'status' => false,
-                    'message' => 'You have to pay for ads first.',
+                    'message' => 'You have to pay for ad first.',
                 ]);
             }
         }
@@ -196,7 +196,7 @@ class AdsController extends Controller
 
         return response()->json([
             "status" => true,
-            "message" => "Ads Uploaded Successfully",
+            "message" => "Ad Uploaded Successfully",
             'data' => $ads,
         ]);
 
@@ -351,7 +351,7 @@ class AdsController extends Controller
             ]);
         } else {
             return response()->json([
-                'message' => 'No ads found with zero clicks.'
+                'message' => 'No ad found with zero clicks.'
             ]);
         }
     }

@@ -533,7 +533,7 @@ class PostController extends Controller
                     ->get();
             } else {
                 // For unauthenticated users, randomize posts
-                $query->inRandomOrder()->limit(20);
+                $query->orderByRaw('RAND() * TIMESTAMPDIFF(SECOND, created_at, NOW()) ASC')->limit(20);
             }
 
             $posts = $query->get();

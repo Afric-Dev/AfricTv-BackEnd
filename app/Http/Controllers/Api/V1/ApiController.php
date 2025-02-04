@@ -117,7 +117,7 @@ class ApiController extends Controller
             if ($user->updated_at->gt(Carbon::now()->subMinute())) {
                 return response()->json([
                     "status" => false,
-                    "message" => "You cannot update your profile until 1 minute has passed."
+                    "message" => "You cannot update your profile until one minute has passed."
                 ]);
             }
 

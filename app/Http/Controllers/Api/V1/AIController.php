@@ -20,9 +20,10 @@ class AIController extends Controller
         protected $deepSeekService;
 
 
-       public function __construct(DeepSeekService $deepSeekService)
+        public function __construct(DeepSeekService $deepSeekService, ReplicateService $replicateService)
         {
             $this->deepSeekService = $deepSeekService;
+            $this->replicateService = $replicateService;
         }
 
         /**
@@ -51,11 +52,6 @@ class AIController extends Controller
 
             // Return the API response
             return response()->json($response);
-        }
-
-        public function __construct(ReplicateService $replicateService)
-        {
-            $this->replicateService = $replicateService;
         }
 
         // public function createPrediction(Request $request)
@@ -186,7 +182,7 @@ class AIController extends Controller
             // Corrected query condition
             $chats = AI::where('user_id', $user->id)
                 ->orderBy('created_at', 'desc')
-                ->whereNull('chat_id')
+                // ->whereNull('chat_id')
                 ->whereNotNull('response')
                 ->get();
 

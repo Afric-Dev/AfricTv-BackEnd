@@ -367,7 +367,7 @@ class EducationalController extends Controller
                     ->limit(5)
                     ->get();
             } else {
-                $query->inRandomOrder()->limit(20);
+                $query->orderByRaw('RAND() * TIMESTAMPDIFF(SECOND, created_at, NOW()) ASC')->limit(20);
             }
 
             $edus = $query->get();
