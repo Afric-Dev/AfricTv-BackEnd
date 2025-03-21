@@ -7,11 +7,67 @@ use Illuminate\Http\Request;
 use App\Services\DailymotionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
+use App\Services\TMDbService;
+use App\Services\VidSrcService;
 
 
 class MovieController extends Controller
 {
- 
+
+    protected $tmdbService;
+    protected $vidSrcService;
+
+    public function __construct(TMDbService $tmdbService, VidSrcService $vidSrcService)
+    {
+        $this->tmdbService = $tmdbService;
+        $this->vidSrcService = $vidSrcService;
+    }
+
+    public function search(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+        ]);
+
+        $title = $request->input('title');
+        $searchResults = $this->tmdbService->searchMovies($title);
+
+        if (empty($searchResults['results'])) {
+            return response()->json(['error' => 'Movie not found.'], 404);
+        }
+
+        $movie = $searchResults['results'][0];
+        $movieDetails = $this->tmdbService->getMovieDetails($movie['id']);
+        $vidSrcData = $this->vidSrcService->getMovieEmbedUrlByTmdbId($movie['id']);
+
+        if ($vidSrcData) {
+            $movieDetails['embed_url'] = $vidSrcData['embed_url'];
+            $movieDetails['vidsrc'] = $vidSrcData;
+        } else {
+            $movieDetails['embed_url'] = 'Streaming link not available.';
+        }
+
+        return response()->json($movieDetails);
+    }
+
+    public function topMovies()
+    {
+        $topMovies = $this->tmdbService->getTopMovies();
+
+        if (empty($topMovies['results'])) {
+            return response()->json(['error' => 'No top movies found.'], 404);
+        }
+
+        $moviesWithEmbedUrls = array_map(function ($movie) {
+            $movieDetails = $this->tmdbService->getMovieDetails($movie['id']);
+            $vidSrcData = $this->vidSrcService->getMovieEmbedUrlByTmdbId($movie['id']);
+            $movieDetails['embed_url'] = $vidSrcData['embed_url'] ?? 'Streaming link not available.';
+            $movieDetails['vidsrc'] = $vidSrcData;
+            return $movieDetails;
+        }, $topMovies['results']);
+
+        return response()->json($moviesWithEmbedUrls);
+    }
      // Get Top Movie Videos
     public function getTopMovieVideos()
     {

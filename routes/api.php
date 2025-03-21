@@ -26,9 +26,11 @@ use App\Http\Controllers\Api\V1\MusicController;
 use App\Http\Controllers\Api\V1\UploadMediaController;
 use App\Http\Controllers\Api\V1\SocketServerController;
 use App\Http\Controllers\Api\V1\MovieController;
+use App\Http\Controllers\Api\V1\ReelsController;
+use App\Http\Controllers\Api\V1\JobController;
 // Route::get('/user', function (Request $request) {
 //     return $request->user(); 
-// })->middleware('auth:api');
+// })->middleware('auth:api'); 
 
 //Open Route
 //Auth
@@ -65,11 +67,9 @@ Route::get('readeduthoughts/{eduID}', [EduThoughtsController::class, 'readedutho
 Route::get("ads", [AdsController::class, "ads"]);
 Route::post("AdsPerClicks", [AdsController::class, "AdsPerClicks"]);
 //Music
-// Route::get('/search/artist', [MusicController::class, 'searchArtist']);
-// Route::get('music/searchArtist', [MusicController::class, 'searchArtist']);
-// Route::get('music/searchSongsByArtistId/{artistId}', [MusicController::class, 'searchSongsByArtistId']);
-// Route::get('music/getSongById/{songId}', [MusicController::class, 'getSongById']);
-//Route::get('music/search', [MusicController::class, 'searchMusicByTitle']);
+Route::post('spotify/search', [MusicController::class, 'searchSportify']);
+Route::get('spotify/top-songs', [MusicController::class, 'getTopSongs']);
+Route::get('spotify/top-artists', [MusicController::class, 'getTopArtists']);
 Route::get('music-search', [MusicController::class, 'search']);
 //Trending
 Route::get("trending", [TrendingController::class, "trending"]);
@@ -91,6 +91,15 @@ Route::post('deleteSocket', [SocketServerController::class, 'delete']);
 Route::get('movies/top', [MovieController::class, 'getTopMovieVideos']);
 Route::post('movies/search-movies', [MovieController::class, 'searchMovies']);
 Route::get('movies/movie/{id}', [MovieController::class, 'getSingleMovieVideo']);
+Route::get('/rv', [MovieController::class, 'index']);
+Route::get('/movies/top/new', [MovieController::class, 'topMovies']);
+Route::post('/movies/search', [MovieController::class, 'search']);
+//Reels
+Route::get('/reels', [ReelsController::class, 'getReels']);
+//Jobs 
+Route::get('/jobs/top', [JobController::class, 'getTopJobs']);
+Route::post('/jobs/search', [JobController::class, 'searchJobs']);
+Route::get('/jobs/{id}', [JobController::class, 'getJobDetails']);
 //Protected Route  
 Route::group([
     "middleware" => ["auth:api"]
@@ -150,7 +159,6 @@ Route::group([
     //AI 
     Route::post("imagePrediction", [AIController::class, "imagePrediction"]);
     Route::post('prediction', [AIController::class, 'createPrediction']);
-    
     Route::get('aiChats', [AIController::class, 'aiChats']);
     Route::get('aiChat/{id}', [AIController::class, 'aiChat']);
     Route::post('deepseek/analyze', [AIController::class, 'analyzeText']);
@@ -158,6 +166,7 @@ Route::group([
     Route::get("notifications", [NotificationsController::class, "index"]);
     Route::post("markAsRead/{id}", [NotificationsController::class, "markAsRead"]);
     Route::post("markAsUnRead/{id}", [NotificationsController::class, "markAsUnRead"]);
+    Route::post("markAllAsRead", [NotificationsController::class, "markAllAsRead"]);
     Route::post("notificationDelete/{id}", [NotificationsController::class, "destroy"]);
     //Media's (Blogs and Educational)
     Route::post("uploadImage", [UploadMediaController::class, "uploadImages"]);

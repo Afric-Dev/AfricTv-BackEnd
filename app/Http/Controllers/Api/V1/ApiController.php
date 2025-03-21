@@ -206,17 +206,17 @@ class ApiController extends Controller
                 Mail::to($user->email)->send(new LoginMail($user));
 
                 //Notification
-                $type = "LOGIN";
-                $title = "LOGIN NOTIFICATION";
-                $message = "We noticed a new login to your account. If this was you, no further action is needed. However, if you did not authorize this login, please secure your account immediately by resetting your password and reviewing your account activity.";
+                // $type = "LOGIN";
+                // $title = "LOGIN NOTIFICATION";
+                // $message = "We noticed a new login to your account. If this was you, no further action is needed. However, if you did not authorize this login, please secure your account immediately by resetting your password and reviewing your account activity.";
 
-                $notification = Notification::create([
-                    'receiver_id' => $user->id,
-                    'type' => $type,
-                    'title' => $title,
-                    'message' => $message,
-                    'is_read' => false,
-                ]);
+                // $notification = Notification::create([
+                //     'receiver_id' => $user->id,
+                //     'type' => $type,
+                //     'title' => $title,
+                //     'message' => $message,
+                //     'is_read' => false,
+                // ]);
              
                 return response()->json([
                     "status" => true,

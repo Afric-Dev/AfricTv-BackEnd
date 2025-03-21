@@ -100,6 +100,37 @@ class NotificationsController extends Controller
         ]);
     }
 
+    public function markAllAsRead(): JsonResponse
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
+        // Retrieve all unread notifications for the authenticated user.
+        $notifications = Notification::where('receiver_id', $user->id)
+                                     ->where('is_read', false)
+                                     ->get();
+
+                                     
+        
+        // Mark each notification as read using the existing markAsRead() method.
+        foreach ($notifications as $notification) {
+            $notification->markAsRead();
+        }
+
+        return response()->json([
+            'status'        => true,
+            'message'       => 'All notifications marked as read',
+            'notifications' => $notifications
+        ]);
+    }
+
+
     public function destroy($id): JsonResponse
     {
         $notification = Notification::where('id', $id)->first();

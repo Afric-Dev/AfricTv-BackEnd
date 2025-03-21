@@ -2,44 +2,69 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
 
-class TmdbService
+class TMDbService
 {
-    protected $baseUrl;
+    protected $client;
     protected $apiKey;
+    protected $baseUrl;
 
     public function __construct()
     {
-        $this->baseUrl = config('tmdb.base_url');
-        $this->apiKey = config('tmdb.api_key');
+        $this->client = new Client();
+        $this->apiKey = env('TMDB_API_KEY');
+        $this->baseUrl = 'https://api.themoviedb.org/3/';
     }
 
     public function searchMovies($query)
     {
-        $response = Http::get("{$this->baseUrl}/search/movie", [
-            'api_key' => $this->apiKey,
-            'query' => $query,
-        ]);
+        try {
+            $response = $this->client->get("{$this->baseUrl}search/movie", [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                    'query' => $query,
+                ],
+            ]);
 
-        return $response->json();
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            Log::error('Error searching movies in TMDb API: ' . $e->getMessage());
+            return null;
+        }
     }
 
-    public function getPopularMovies()
+    public function getMovieDetails($tmdbId)
     {
-        $response = Http::get("{$this->baseUrl}/movie/popular", [
-            'api_key' => $this->apiKey,
-        ]);
+        try {
+            // Fix the syntax error here
+            $response = $this->client->get("{$this->baseUrl}movie/{$tmdbId}", [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                ],
+            ]);
 
-        return $response->json();
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            Log::error('Error fetching movie details from TMDb API: ' . $e->getMessage());
+            return null;
+        }
     }
 
-    public function getMovieDetails($movieId)
+    public function getTopMovies()
     {
-        $response = Http::get("{$this->baseUrl}/movie/{$movieId}", [
-            'api_key' => $this->apiKey,
-        ]);
+        try {
+            $response = $this->client->get("{$this->baseUrl}movie/top_rated", [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                ],
+            ]);
 
-        return $response->json();
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            Log::error('Error fetching top movies from TMDb API: ' . $e->getMessage());
+            return null;
+        }
     }
 }

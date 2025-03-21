@@ -501,92 +501,157 @@ class PostController extends Controller
             // 'post' => $post,
         ]);
     }
+    //not in use
+    // public function readpost(): JsonResponse
+    // {
+    //     $user = auth()->user();
+    //     $cacheKey = $user ? "user_posts_{$user->id}" : "guest_posts";
+
+    //     if (session()->has($cacheKey)) {
+    //         $posts = session($cacheKey);
+    //     } else {
+    //         $query = Post::with('user')
+    //             ->where('is_status', 'ACTIVE')
+    //             ->withCount(['likes', 'comments']);
+
+    //         $otherPosts = collect();
+
+    //         if ($user) {
+    //             // Get IDs of users the authenticated user is subscribed to
+    //             $subscriptions = Subscribtion::where('subscriber_id', $user->id)
+    //                 ->pluck('user_id');
+
+    //             // Add subscription condition to the query
+    //             $query->whereIn('user_id', $subscriptions);
+
+    //             // Fetch posts from non-subscribed users
+    //             $otherPosts = Post::whereNotIn('user_id', $subscriptions)
+    //                 ->where('is_status', 'ACTIVE')
+    //                 ->withCount(['likes', 'comments'])
+    //                 ->inRandomOrder()
+    //                 ->limit(5)
+    //                 ->get();
+    //         } else {
+    //             // For unauthenticated users, randomize posts
+    //             $query->orderByRaw('RAND() * TIMESTAMPDIFF(SECOND, created_at, NOW()) ASC')->limit(20);
+    //         }
+
+    //         $posts = $query->get();
+
+    //         $posts->map(function ($post) {
+    //             $post->post_score = ($post->likes_count * 1.5) +
+    //                                 ($post->post_views * 1) +
+    //                                 ($post->bookmark_count * 0.3);
+    //             return $post;
+    //         });
+
+    //         if ($user) {
+    //             $posts = $posts->shuffle()->sortByDesc(function ($post) {
+    //                 return $post->post_score + (strtotime($post->created_at) / 1000000);
+    //             });
+    //         } else {
+    //             $posts = $posts->shuffle()->sortByDesc(function ($post) {
+    //                 return rand(0, 100) + (strtotime($post->created_at) / 1000000);
+    //             });
+    //         }
+
+    //         if ($otherPosts->isNotEmpty()) {
+    //             $posts = $posts->merge($otherPosts);
+    //         }
+
+    //         $posts = $posts->shuffle();
+    //         session([$cacheKey => $posts]);
+    //     }
+
+    //  $ads = Ads::where(function($query) {
+    //                   $query->where('ads_type', 'PIC')
+    //                         ->orWhere('ads_type', 'LINK');
+    //               })
+    //               ->where('status', 'ACTIVE')
+    //               ->inRandomOrder()
+    //               ->limit(5)
+    //               ->get();
+
+    //     $finalPosts = collect();
+    //     $posts->values()->each(function ($post, $index) use ($ads, &$finalPosts) {
+    //         $finalPosts->push($post);
+    //         if (($index + 1) % 5 === 0 && $ads->isNotEmpty()) {
+    //             $finalPosts->push($ads->shift());
+    //         }
+    //     });
+
+    //     $postCount = $finalPosts->count();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Post data with ads',
+    //         'data' => $finalPosts->values()->all(),
+    //         'count' => $postCount,
+    //     ]);
+    // }
 
     public function readpost(): JsonResponse
     {
         $user = auth()->user();
-        $cacheKey = $user ? "user_posts_{$user->id}" : "guest_posts";
 
-        if (session()->has($cacheKey)) {
-            $posts = session($cacheKey);
-        } else {
-            $query = Post::with('user')
+        if ($user) {
+            // Get IDs of users the authenticated user is subscribed to
+            $subscriptions = Subscribtion::where('user_id', $user->id)
+                                ->pluck('subscriber_id');
+
+            // Fetch posts from subscribed users
+            $subscribedPosts = Post::with('user')
+                ->whereIn('user_id', $subscriptions)
                 ->where('is_status', 'ACTIVE')
-                ->withCount(['likes', 'comments']);
+                ->withCount(['likes', 'comments'])
+                ->get();
 
-            $otherPosts = collect();
+            // Fetch posts from non-subscribed users (limited to 5)
+            $otherPosts = Post::with('user')
+                ->whereNotIn('user_id', $subscriptions)
+                ->where('is_status', 'ACTIVE')
+                ->withCount(['likes', 'comments'])
+                ->inRandomOrder()
+                ->limit(5)
+                ->get();
 
-            if ($user) {
-                // Get IDs of users the authenticated user is subscribed to
-                $subscriptions = Subscribtion::where('subscriber_id', $user->id)
-                    ->pluck('user_id');
-
-                // Add subscription condition to the query
-                $query->whereIn('user_id', $subscriptions);
-
-                // Fetch posts from non-subscribed users
-                $otherPosts = Post::whereNotIn('user_id', $subscriptions)
-                    ->where('is_status', 'ACTIVE')
-                    ->withCount(['likes', 'comments'])
-                    ->inRandomOrder()
-                    ->limit(5)
-                    ->get();
-            } else {
-                // For unauthenticated users, randomize posts
-                $query->orderByRaw('RAND() * TIMESTAMPDIFF(SECOND, created_at, NOW()) ASC')->limit(20);
-            }
-
-            $posts = $query->get();
-
-            $posts->map(function ($post) {
-                $post->post_score = ($post->likes_count * 1.5) +
-                                    ($post->post_views * 1) +
-                                    ($post->bookmark_count * 0.3);
-                return $post;
-            });
-
-            if ($user) {
-                $posts = $posts->shuffle()->sortByDesc(function ($post) {
-                    return $post->post_score + (strtotime($post->created_at) / 1000000);
-                });
-            } else {
-                $posts = $posts->shuffle()->sortByDesc(function ($post) {
-                    return rand(0, 100) + (strtotime($post->created_at) / 1000000);
-                });
-            }
-
-            if ($otherPosts->isNotEmpty()) {
-                $posts = $posts->merge($otherPosts);
-            }
-
-            $posts = $posts->shuffle();
-            session([$cacheKey => $posts]);
+            // Merge both sets of posts
+            $posts = $subscribedPosts->merge($otherPosts);
+        } else {
+            // For guests, simply fetch all active posts
+            $posts = Post::with('user')
+                ->where('is_status', 'ACTIVE')
+                ->withCount(['likes', 'comments'])
+                ->get();
         }
 
-     $ads = Ads::where(function($query) {
-                      $query->where('ads_type', 'PIC')
-                            ->orWhere('ads_type', 'LINK');
-                  })
-                  ->where('status', 'ACTIVE')
-                  ->inRandomOrder()
-                  ->limit(5)
-                  ->get();
-
-        $finalPosts = collect();
-        $posts->values()->each(function ($post, $index) use ($ads, &$finalPosts) {
-            $finalPosts->push($post);
-            if (($index + 1) % 5 === 0 && $ads->isNotEmpty()) {
-                $finalPosts->push($ads->shift());
-            }
+        // Score each post to favor newly created posts
+        // Newer posts will have a higher timestamp value plus a small random factor
+        $posts->each(function ($post) {
+            $post->score = $post->created_at->timestamp + rand(0, 100);
         });
 
-        $postCount = $finalPosts->count();
+        // Sort posts descending by score so newer posts appear more prominently
+        $posts = $posts->sortByDesc('score')->values();
+
+        // Retrieve ads in random order (mixing both PIC and LINK types)
+        $ads = Ads::where(function ($query) {
+                    $query->where('ads_type', 'PIC')
+                          ->orWhere('ads_type', 'LINK');
+                })
+                ->where('status', 'ACTIVE')
+                ->inRandomOrder()
+                ->limit(5)
+                ->get();
+
+        // Merge posts and ads, then shuffle to mix them together
+        $finalItems = $posts->merge($ads)->shuffle()->values();
 
         return response()->json([
-            'status' => true,
-            'message' => 'Post data with ads',
-            'data' => $finalPosts->values()->all(),
-            'count' => $postCount,
+            'status'  => true,
+            'message' => 'Post data with ads mixed',
+            'data'    => $finalItems->all(),
+            'count'   => $finalItems->count(),
         ]);
     }
 

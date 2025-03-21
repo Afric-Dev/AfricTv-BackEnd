@@ -5,12 +5,40 @@ namespace App\Http\Controllers\API\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ListenBrainzService;
+use App\Services\SpotifyService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\JsonResponse; 
 
 class MusicController extends Controller
 {
 
+
+    protected $spotifyService;
+
+    public function __construct(SpotifyService $spotifyService)
+    {
+        $this->spotifyService = $spotifyService;
+    }
+
+    // Search for music, artists, or albums
+    public function searchSportify(Request $request)
+    {
+        $query = $request->input('query');
+        $type = $request->input('type', 'multi'); // Can be: multi, track, artist, album
+        return response()->json($this->spotifyService->search($query, $type));
+    }
+
+    // Get top songs
+    public function getTopSongs()
+    {
+        return response()->json($this->spotifyService->getTopSongs());
+    }
+
+    // Get top artists
+    public function getTopArtists()
+    {
+        return response()->json($this->spotifyService->getTopArtists());
+    }
     /**
      * Search for music on YouTube Music.
      *

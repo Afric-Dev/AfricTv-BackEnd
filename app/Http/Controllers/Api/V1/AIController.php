@@ -34,26 +34,34 @@ class AIController extends Controller
          */
         public function analyzeText(Request $request)
         {
-            // Validate the request data
-            $request->validate([
-                'message' => 'required|string',
-                'language' => 'nullable|string|max:2',
-            ]);
+                // Validate the request data
+                $request->validate([
+                    'message' => 'required|string',
+                ]);
 
-            // Prepare the data for the API request
-            $endpoint = 'analyze-text'; // Replace with the actual DeepSeek API endpoint
-            $data = [
-                'message' => $request->input('message'),
-                'language' => $request->input('language', 'en'), // Default to English if not provided
-            ];
+                // Prepare the data for the API request
+                $endpoint = 'chat/completions'; // DeepSeek API endpoint
+                $data = [
+                    'model' => 'deepseek-chat', // Model to use
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are a helpful assistant.',
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $request->input('message'), // User's message
+                        ],
+                    ],
+                    'stream' => false, // Disable streaming for simplicity
+                ];
 
-            // Make the API request
-            $response = $this->deepSeekService->makeRequest($endpoint, 'POST', $data);
+                // Make the API request
+                $response = $this->deepSeekService->makeRequest($endpoint, 'POST', $data);
 
-            // Return the API response
-            return response()->json($response);
-        }
-
+                // Return the API response
+                return response()->json($response);
+            }
         // public function createPrediction(Request $request)
         // {
         //     $model = "meta/llama-2-7b-chat";

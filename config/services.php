@@ -55,4 +55,13 @@ return [
         'api_token' => env('LISTENBRAINZ_API_TOKEN'),
     ],
     
+    'justwatch' => [
+        'api_url' => env('JUSTWATCH_API_URL'),
+        'partner_token' => env('JUSTWATCH_PARTNER_TOKEN'),
+    ],
+
+    'rapidapi' => [
+        'host_job' => env('RAPIDAPI_JOB'),
+        'key' => env('RAPIDAPI_KEY'),
+    ],  
 ];
